@@ -17,8 +17,8 @@
       "destination": "backend/server.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/client/$1"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
