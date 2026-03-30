@@ -14,6 +14,12 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Taxi House Backend Service is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Conditionally start the server if not running in a serverless environment (like Vercel)
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export the app for Vercel functions
+export default app;
