@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@config "../tailwind.config.js";
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    color: var(--color-secondary);
+    background-color: white;
+  }
+}
+
+/* Custom styles for hover rule on mobile vs desktop */
+@media (hover: none) {
+  .hover-desktop-only:hover {
+    pointer-events: none;
+    transform: none !important;
+    background-color: inherit !important;
+    color: inherit !important;
+    box-shadow: none !important;
+  }
+}
