@@ -21,9 +21,9 @@ const Testimonials = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-24 bg-background overflow-hidden relative">
-      <div className="absolute top-0 right-0 p-32 opacity-5 pointer-events-none">
-        <Quote size={400} />
+    <section className="py-16 sm:py-24 bg-background overflow-hidden relative px-4">
+      <div className="absolute top-0 right-0 p-16 sm:p-32 opacity-5 pointer-events-none">
+        <Quote size={300} />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -32,10 +32,10 @@ const Testimonials = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <span className="text-primary font-bold tracking-wider uppercase text-sm">Customer Stories</span>
-          <h2 className="text-4xl font-extrabold text-secondary mt-2 mb-4">What Our Clients Say</h2>
+          <span className="text-primary font-bold tracking-wider uppercase text-xs sm:text-sm">Customer Stories</span>
+          <h2 className="text-3xl sm:text-4xl font-black text-secondary mt-2 mb-4">What Our Clients Say</h2>
         </motion.div>
 
         <motion.div 

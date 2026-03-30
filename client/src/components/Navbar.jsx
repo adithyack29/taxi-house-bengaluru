@@ -111,57 +111,68 @@ const Navbar = () => {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
-              className="fixed inset-y-0 right-0 w-72 bg-white shadow-2xl z-40 flex flex-col lg:hidden overflow-y-auto"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white shadow-2xl z-40 flex flex-col lg:hidden overflow-y-auto"
             >
-              <div className="px-6 pt-24 pb-6 flex flex-col space-y-4">
+              <div className="px-6 pt-24 pb-8 flex flex-col h-full">
                 
                 {/* Auth section top */}
                 {isLoggedIn ? (
-                  <div className="flex flex-col space-y-3 mb-6 border-b border-gray-100 pb-6">
+                  <div className="flex flex-col space-y-3 mb-8 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                     <motion.button 
                       onClick={() => { toggleMenu(); navigate('/profile'); }}
-                      className="flex items-center space-x-3 text-secondary font-semibold p-2 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                      className="flex items-center space-x-3 text-secondary font-bold p-1 rounded-xl transition-colors text-left"
                     >
-                      <div className="bg-primary/20 p-2 rounded-full text-primary shrink-0">
+                      <div className="bg-primary/20 p-2.5 rounded-full text-primary shrink-0">
                         <User size={24} />
                       </div>
-                      <span className="truncate text-lg">{currentUser.displayName || currentUser.email?.split('@')[0]}</span>
+                      <div className="flex flex-col truncate">
+                        <span className="text-secondary text-sm font-black uppercase tracking-wider opacity-60">Account</span>
+                        <span className="truncate text-lg">{currentUser.displayName || currentUser.email?.split('@')[0]}</span>
+                      </div>
                     </motion.button>
                   </div>
                 ) : (
-                  <div className="mb-6 border-b border-gray-100 pb-6">
+                  <div className="mb-8 border-b border-gray-100 pb-8">
                     <motion.button 
                       onClick={() => { toggleMenu(); navigate('/login'); }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-3 rounded-xl font-bold shadow-md"
+                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-4 rounded-2xl font-bold shadow-md"
                     >
                       <LogIn size={20} />
-                      <span>Log In / Sign Up</span>
+                      <span className="text-lg">Log In / Sign Up</span>
                     </motion.button>
                   </div>
                 )}
 
-                <Link to="/" onClick={toggleMenu} className="block py-3 text-xl font-medium text-secondary">
-                  Home
-                </Link>
-                <Link to="/services" onClick={toggleMenu} className="block py-3 text-xl font-medium text-secondary">
-                  Services
-                </Link>
-                <Link to="/fleet" onClick={toggleMenu} className="block py-3 text-xl font-medium text-secondary">
-                  Fleet
-                </Link>
-                <Link to="/contact" onClick={toggleMenu} className="block py-3 text-xl font-medium text-secondary">
-                  Contact
-                </Link>
-                <motion.a 
-                  href="tel:+919876543210" 
-                  whileTap={{ scale: 0.95 }}
-                  className="mt-6 flex items-center justify-center space-x-2 w-full bg-secondary text-white px-5 py-3 rounded-xl font-semibold shadow-md"
-                >
-                  <PhoneCall size={20} />
-                  <span>Call Us Now</span>
-                </motion.a>
+                <div className="flex flex-col space-y-1 mb-auto">
+                  <Link to="/" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                    Home
+                  </Link>
+                  <Link to="/services" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/services') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                    Services
+                  </Link>
+                  <Link to="/fleet" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/fleet') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                    Fleet
+                  </Link>
+                  <Link to="/contact" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/contact') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                    Contact
+                  </Link>
+                </div>
+
+                <div className="mt-8 space-y-4">
+                  <motion.a 
+                    href="tel:+919876543210" 
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center justify-center space-x-3 w-full bg-secondary text-white px-5 py-4 rounded-2xl font-bold shadow-lg"
+                  >
+                    <PhoneCall size={22} className="text-primary" />
+                    <span className="text-lg">Call Us Now</span>
+                  </motion.a>
+                  <p className="text-center text-xs text-gray-400 font-medium pb-4">
+                    © 2026 Taxi House Bengaluru. All rights reserved.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </>

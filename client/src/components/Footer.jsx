@@ -4,35 +4,35 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-secondary text-gray-300 py-12">
+    <footer className="bg-secondary text-gray-300 py-16 px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 sm:gap-8">
           
           {/* Brand */}
-          <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white tracking-tight">
+          <div className="space-y-4 text-center sm:text-left">
+            <h3 className="text-2xl font-black text-white tracking-tight">
               Taxi<span className="text-primary">House</span>
             </h3>
-            <p className="text-sm">
+            <p className="text-sm leading-relaxed max-w-xs mx-auto sm:mx-0">
               Your trusted partner for safe, reliable, and comfortable rides in Bengaluru. Available 24/7 for local and outstation travel.
             </p>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link to="/" className="hover-desktop-only:text-primary transition">Home</Link></li>
-              <li><Link to="/services" className="hover-desktop-only:text-primary transition">Services</Link></li>
-              <li><Link to="/fleet" className="hover-desktop-only:text-primary transition">Our Fleet</Link></li>
-              <li><Link to="/contact" className="hover-desktop-only:text-primary transition">Contact Us</Link></li>
+          <div className="text-center sm:text-left">
+            <h4 className="text-lg font-bold text-white mb-6 uppercase tracking-widest text-xs">Quick Links</h4>
+            <ul className="space-y-3">
+              <li><Link to="/" className="hover-desktop-only:text-primary transition-colors">Home</Link></li>
+              <li><Link to="/services" className="hover-desktop-only:text-primary transition-colors">Services</Link></li>
+              <li><Link to="/fleet" className="hover-desktop-only:text-primary transition-colors">Our Fleet</Link></li>
+              <li><Link to="/contact" className="hover-desktop-only:text-primary transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
           {/* Services */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Services</h4>
-            <ul className="space-y-2">
+          <div className="text-center sm:text-left">
+            <h4 className="text-lg font-bold text-white mb-6 uppercase tracking-widest text-xs">Services</h4>
+            <ul className="space-y-3">
               <li className="text-sm">Local City Rides</li>
               <li className="text-sm">Airport Transfers</li>
               <li className="text-sm">Outstation Trips</li>
@@ -41,24 +41,24 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Contact Info</h4>
+          <div className="text-center sm:text-left">
+            <h4 className="text-lg font-bold text-white mb-6 uppercase tracking-widest text-xs">Contact Info</h4>
             <ul className="space-y-4">
-              <li className="flex items-start">
-                <MapPin className="text-primary mr-3 flex-shrink-0" size={20} />
-                <span className="text-sm">123, MG Road, Shivaji Nagar, Bengaluru, Karnataka 560001</span>
+              <li className="flex flex-col sm:flex-row items-center sm:items-start group">
+                <MapPin className="text-primary mb-2 sm:mb-0 sm:mr-3 flex-shrink-0" size={20} />
+                <span className="text-sm leading-relaxed">123, MG Road, Shivaji Nagar, Bengaluru, Karnataka 560001</span>
               </li>
-              <li className="flex items-center">
-                <Phone className="text-primary mr-3 flex-shrink-0" size={20} />
-                <a href="tel:+919876543210" className="text-sm hover-desktop-only:text-primary transition">+91 98765 43210</a>
+              <li className="flex flex-col sm:flex-row items-center sm:items-start group">
+                <Phone className="text-primary mb-2 sm:mb-0 sm:mr-3 flex-shrink-0" size={20} />
+                <a href="tel:+919876543210" className="text-sm hover-desktop-only:text-primary transition-colors">+91 98765 43210</a>
               </li>
-              <li className="flex items-center">
-                <Mail className="text-primary mr-3 flex-shrink-0" size={20} />
-                <a href="mailto:info@taxihousebengaluru.in" className="text-sm hover-desktop-only:text-primary transition">info@taxihousebengaluru.in</a>
+              <li className="flex flex-col sm:flex-row items-center sm:items-start group">
+                <Mail className="text-primary mb-2 sm:mb-0 sm:mr-3 flex-shrink-0" size={20} />
+                <a href="mailto:info@taxihousebengaluru.in" className="text-sm hover-desktop-only:text-primary transition-colors">info@taxihousebengaluru.in</a>
               </li>
-              <li className="flex items-center">
-                <Clock className="text-primary mr-3 flex-shrink-0" size={20} />
-                <span className="text-sm">24/7 Support</span>
+              <li className="flex flex-col sm:flex-row items-center sm:items-start group">
+                <Clock className="text-primary mb-2 sm:mb-0 sm:mr-3 flex-shrink-0" size={20} />
+                <span className="text-sm">24/7 Support Available</span>
               </li>
             </ul>
           </div>

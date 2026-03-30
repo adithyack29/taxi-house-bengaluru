@@ -43,7 +43,7 @@ const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-16 sm:py-24 bg-white overflow-hidden px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <motion.div 
@@ -51,10 +51,10 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-4xl font-extrabold text-secondary mb-4">Why Choose Taxi House?</h2>
-          <p className="text-gray-500 max-w-2xl mx-auto text-lg">
+          <h2 className="text-3xl sm:text-4xl font-black text-secondary mb-4">Why Choose Taxi House?</h2>
+          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             We prioritize your safety, comfort, and time. Here's why thousands of customers in Bengaluru trust us.
           </p>
         </motion.div>

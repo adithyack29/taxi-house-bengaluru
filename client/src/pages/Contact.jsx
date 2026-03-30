@@ -17,12 +17,12 @@ const Contact = () => {
     >
       
       {/* Hero Banner for Contact */}
-      <div className="bg-secondary text-white py-24 relative overflow-hidden text-center">
+      <div className="bg-secondary text-white py-16 sm:py-24 relative overflow-hidden text-center px-4">
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl font-extrabold mb-6"
+          className="text-4xl sm:text-5xl md:text-6xl font-black mb-6"
         >
           Contact Us
         </motion.h1>
@@ -30,7 +30,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
         >
           Need help with your booking? Have special requirements? Get in touch with our support team available 24/7.
         </motion.p>

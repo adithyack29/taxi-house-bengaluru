@@ -115,7 +115,7 @@ const BookingForm = () => {
   };
 
   return (
-    <div id="booking-section" className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden">
+    <div id="booking-section" className="bg-white p-5 sm:p-8 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden">
       {/* Decorative top strip */}
       <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
       
@@ -134,7 +134,7 @@ const BookingForm = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex items-center space-x-6 mb-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
           <label className="flex items-center space-x-2 cursor-pointer group">
             <input 
               type="checkbox" 
@@ -159,7 +159,7 @@ const BookingForm = () => {
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
@@ -197,7 +197,7 @@ const BookingForm = () => {
           showCurrentLocation={false}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 

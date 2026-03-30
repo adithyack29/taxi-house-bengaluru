@@ -20,7 +20,7 @@ const Services = () => {
       className="flex flex-col min-h-screen bg-background"
     >
       {/* Hero Banner for Services */}
-      <div className="bg-secondary text-white py-24 relative overflow-hidden">
+      <div className="bg-secondary text-white py-16 sm:py-24 relative overflow-hidden text-center px-4">
         <div className="absolute inset-0 z-0 opacity-20">
           <img 
             src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?q=80&w=2070&auto=format&fit=crop" 
@@ -34,8 +34,8 @@ const Services = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
         >
-          <h1 className="text-5xl font-extrabold mb-6">Our Premium Services</h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6">Our Premium Services</h1>
+          <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             From quick local airport drops to luxurious outstation road trips, Taxi House Bengaluru is your ultimate travel partner in Karnataka.
           </p>
         </motion.div>
