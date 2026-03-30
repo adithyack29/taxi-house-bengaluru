@@ -32,9 +32,7 @@ const Navbar = () => {
           
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold tracking-tight text-secondary">
-              Taxi<span className="text-primary">House</span>
-            </span>
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-14 w-auto object-contain" />
             <span className="ml-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:block">Bengaluru</span>
           </Link>
 

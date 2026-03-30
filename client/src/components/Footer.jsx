@@ -8,9 +8,9 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Brand - Always centered on mobile, left on desktop */}
         <div className="text-center sm:text-left mb-8 sm:mb-12">
-          <h3 className="text-xl font-black text-white tracking-tight">
-            Taxi<span className="text-primary">House</span>
-          </h3>
+          <Link to="/" className="inline-block p-1 bg-white rounded-full">
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-12 w-auto object-contain" />
+          </Link>
           <p className="text-[10px] sm:text-sm opacity-60 mt-1">Reliable 24/7 Bengaluru Cab Service</p>
         </div>
 

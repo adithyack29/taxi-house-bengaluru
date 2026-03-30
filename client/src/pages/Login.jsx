@@ -69,10 +69,8 @@ const Login = () => {
         className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 relative z-10"
       >
         <div className="text-center mb-10">
-          <Link to="/" className="inline-block mb-6">
-            <span className="text-3xl font-bold tracking-tight text-secondary">
-              Taxi<span className="text-primary">House</span>
-            </span>
+          <Link to="/" className="inline-block mb-4">
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-24 w-auto mx-auto object-contain" />
           </Link>
           <h2 className="text-3xl font-extrabold text-secondary mb-2">Welcome Back</h2>
           <p className="text-gray-500 text-lg">Login to continue booking</p>
