@@ -7,7 +7,7 @@ const features = [
   {
     icon: Clock,
     title: '24/7 Service',
-    desc: 'We are available round-the-clock to ensure you never miss a flight or an important meeting.'
+    desc: 'Available round-the-clock for all your travel needs.'
   },
   {
     icon: Users,
@@ -43,7 +43,7 @@ const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-16 sm:py-24 bg-white overflow-hidden px-4">
+    <section className="py-10 sm:py-24 bg-white overflow-hidden px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <motion.div 
@@ -51,10 +51,10 @@ const WhyChooseUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-8 sm:mb-16"
         >
-          <h2 className="text-xl sm:text-4xl font-black text-secondary mb-4">Why Choose Taxi House?</h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <h2 className="text-2xl sm:text-4xl font-black text-secondary mb-3">Why Choose Taxi House?</h2>
+          <p className="text-sm sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             We prioritize your safety, comfort, and time. Here's why thousands of customers in Bengaluru trust us.
           </p>
         </motion.div>
@@ -77,12 +77,12 @@ const WhyChooseUs = () => {
               >
                 <motion.div 
                   whileHover={isHoverable ? { scale: 1.1 } : {}}
-                  className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 text-primary mb-6"
+                  className="inline-flex items-center justify-center w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-primary/10 text-primary mb-4 sm:mb-6"
                 >
-                  <Icon size={36} />
+                  <Icon size={20} sm:size={36} />
                 </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-3">{feature.title}</h3>
-                <p className="text-gray-500">{feature.desc}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-gray-500">{feature.desc}</p>
               </motion.div>
             );
           })}

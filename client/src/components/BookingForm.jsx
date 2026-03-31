@@ -201,8 +201,14 @@ const BookingForm = () => {
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
-              type="date" name="date" required 
-              value={formData.date} onChange={handleChange}
+              type={formData.date ? "date" : "text"}
+              name="date" 
+              placeholder="Date"
+              required 
+              value={formData.date} 
+              onChange={handleChange}
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
               className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
             />
           </div>
@@ -211,7 +217,7 @@ const BookingForm = () => {
             <input 
               type={formData.time ? "time" : "text"}
               name="time" 
-              placeholder="hh/mm"
+              placeholder="Time"
               required 
               value={formData.time} 
               onChange={handleChange}
