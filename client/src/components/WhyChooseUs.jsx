@@ -53,7 +53,7 @@ const WhyChooseUs = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-black text-secondary mb-4">Why Choose Taxi House?</h2>
+          <h2 className="text-xl sm:text-4xl font-black text-secondary mb-4">Why Choose Taxi House?</h2>
           <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             We prioritize your safety, comfort, and time. Here's why thousands of customers in Bengaluru trust us.
           </p>
@@ -81,7 +81,7 @@ const WhyChooseUs = () => {
                 >
                   <Icon size={36} />
                 </motion.div>
-                <h3 className="text-xl font-bold text-secondary mb-3">{feature.title}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-3">{feature.title}</h3>
                 <p className="text-gray-500">{feature.desc}</p>
               </motion.div>
             );

@@ -22,7 +22,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-4xl sm:text-5xl md:text-6xl font-black mb-6"
+          className="text-3xl sm:text-5xl md:text-6xl font-black mb-6"
         >
           Contact Us
         </motion.h1>
@@ -30,7 +30,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed"
         >
           Need help with your booking? Have special requirements? Get in touch with our support team available 24/7.
         </motion.p>
@@ -47,7 +47,7 @@ const Contact = () => {
             className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl flex flex-col justify-between"
           >
             <div>
-              <h2 className="text-3xl font-extrabold text-secondary mb-8">Get In Touch</h2>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-secondary mb-8">Get In Touch</h2>
               
               <ul className="space-y-8">
                 <li className="flex items-start">
@@ -55,7 +55,7 @@ const Contact = () => {
                     <MapPin size={24} />
                   </div>
                   <div className="ml-4 sm:ml-6">
-                    <h4 className="text-xl font-bold text-secondary mb-1">Our Office</h4>
+                    <h4 className="text-lg sm:text-xl font-bold text-secondary mb-1">Our Office</h4>
                     <p className="text-gray-600 leading-relaxed">
                       Shop No. 1, 2nd Floor, Survey No. 2,<br />
                       Near VNR Fuelling Station (Indian Oil Dealers),<br />
@@ -71,7 +71,7 @@ const Contact = () => {
                     <Phone size={24} />
                   </div>
                   <div className="ml-4 sm:ml-6">
-                    <h4 className="text-xl font-bold text-secondary mb-1">Call Us</h4>
+                    <h4 className="text-lg sm:text-xl font-bold text-secondary mb-1">Call Us</h4>
                     <div className="flex flex-col space-y-1">
                       <a href="tel:+917795965640" className="text-gray-600 text-lg hover-desktop-only:text-primary transition">
                         +91 77959 65640
@@ -88,7 +88,7 @@ const Contact = () => {
                     <Mail size={24} />
                   </div>
                   <div className="ml-4 sm:ml-6">
-                    <h4 className="text-xl font-bold text-secondary mb-1">Email Support</h4>
+                    <h4 className="text-lg sm:text-xl font-bold text-secondary mb-1">Email Support</h4>
                     <a href="mailto:taxihousebengaluru@gmail.com" className="text-gray-600 text-lg hover-desktop-only:text-primary transition">
                       taxihousebengaluru@gmail.com
                     </a>
@@ -100,7 +100,7 @@ const Contact = () => {
                     <Clock size={24} />
                   </div>
                   <div className="ml-4 sm:ml-6">
-                    <h4 className="text-xl font-bold text-secondary mb-1">Working Hours</h4>
+                    <h4 className="text-lg sm:text-xl font-bold text-secondary mb-1">Working Hours</h4>
                     <p className="text-gray-600 text-lg">24 Hours, 7 Days a Week</p>
                   </div>
                 </li>

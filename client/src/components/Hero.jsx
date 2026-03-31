@@ -22,17 +22,17 @@ const Hero = () => {
             <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary font-bold text-xs sm:text-sm tracking-wide border border-primary/30 uppercase">
               #1 Taxi Service in Namma Bengaluru
             </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
               Reliable <span className="text-primary italic">Taxi Service</span> 24/7
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 font-light flex flex-wrap items-center lg:items-start justify-center lg:justify-start gap-x-3 gap-y-1">
+            <p className="text-sm sm:text-lg md:text-2xl text-gray-300 font-light flex flex-wrap items-center lg:items-start justify-center lg:justify-start gap-x-3 gap-y-1">
               <span className="whitespace-nowrap font-medium text-white/90">Local</span> 
               <span className="hidden sm:inline text-primary">•</span> 
               <span className="whitespace-nowrap font-medium text-white/90">Outstation</span> 
               <span className="hidden sm:inline text-primary">•</span> 
               <span className="whitespace-nowrap font-medium text-white/90">Airport Transfers</span>
             </p>
-            <p className="text-base sm:text-lg text-gray-400 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-400 max-w-lg mx-auto lg:mx-0 leading-relaxed">
               Experience safe, comfortable, and affordable rides across Karnataka with verified, professional drivers.
             </p>
           </div>

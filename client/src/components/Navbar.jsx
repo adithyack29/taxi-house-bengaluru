@@ -121,12 +121,12 @@ const Navbar = () => {
                       onClick={() => { toggleMenu(); navigate('/profile'); }}
                       className="flex items-center space-x-3 text-secondary font-bold p-1 rounded-xl transition-colors text-left"
                     >
-                      <div className="bg-primary/20 p-2.5 rounded-full text-primary shrink-0">
-                        <User size={24} />
+                      <div className="bg-primary/20 p-2 rounded-full text-primary shrink-0">
+                        <User size={20} />
                       </div>
                       <div className="flex flex-col truncate">
-                        <span className="text-secondary text-sm font-black uppercase tracking-wider opacity-60">Account</span>
-                        <span className="truncate text-lg">{currentUser.displayName || currentUser.phoneNumber || 'User'}</span>
+                        <span className="text-secondary text-[10px] font-black uppercase tracking-wider opacity-60 leading-none mb-1">Account</span>
+                        <span className="truncate text-base">{currentUser.displayName || currentUser.phoneNumber || 'User'}</span>
                       </div>
                     </motion.button>
                   </div>
@@ -135,25 +135,25 @@ const Navbar = () => {
                     <motion.button 
                       onClick={() => { toggleMenu(); navigate('/login'); }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-4 rounded-2xl font-bold shadow-md"
+                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-3.5 rounded-xl font-bold shadow-md"
                     >
-                      <LogIn size={20} />
-                      <span className="text-lg">Log In / Sign Up</span>
+                      <LogIn size={18} />
+                      <span className="text-base">Log In / Sign Up</span>
                     </motion.button>
                   </div>
                 )}
 
                 <div className="flex flex-col space-y-1 mb-auto">
-                  <Link to="/" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Home
                   </Link>
-                  <Link to="/services" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/services') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/services" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/services') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Services
                   </Link>
-                  <Link to="/fleet" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/fleet') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/fleet" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/fleet') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Fleet
                   </Link>
-                  <Link to="/contact" onClick={toggleMenu} className={`block py-4 px-4 rounded-xl text-xl font-bold transition-colors ${isActive('/contact') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/contact" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/contact') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Contact
                   </Link>
                 </div>
@@ -162,10 +162,10 @@ const Navbar = () => {
                   <motion.a 
                     href="tel:+917795965640" 
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center justify-center space-x-3 w-full bg-secondary text-white px-5 py-4 rounded-2xl font-bold shadow-lg"
+                    className="flex items-center justify-center space-x-3 w-full bg-secondary text-white px-5 py-3.5 rounded-xl font-bold shadow-lg"
                   >
-                    <PhoneCall size={22} className="text-primary" />
-                    <span className="text-lg">Call Us Now</span>
+                    <PhoneCall size={20} className="text-primary" />
+                    <span className="text-base">Call Us Now</span>
                   </motion.a>
                   <p className="text-center text-xs text-gray-400 font-medium pb-4">
                     © 2026 Taxi House Bengaluru. All rights reserved.
