@@ -197,7 +197,7 @@ const BookingForm = () => {
           showCurrentLocation={false}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
