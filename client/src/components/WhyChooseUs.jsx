@@ -43,7 +43,7 @@ const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-10 sm:py-24 bg-white overflow-hidden px-4">
+    <section className="py-8 lg:py-24 bg-white overflow-hidden px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <motion.div 
@@ -64,7 +64,7 @@ const WhyChooseUs = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8"
         >
           {features.map((feature, idx) => {
             const Icon = feature.icon;
@@ -73,16 +73,16 @@ const WhyChooseUs = () => {
                 key={idx} 
                 variants={itemVariants}
                 whileHover={isHoverable ? { y: -5, backgroundColor: 'var(--color-bg-gray-50)' } : {}}
-                className="text-center p-6 rounded-2xl transition-colors"
+                className="text-center p-3 sm:p-6 rounded-2xl transition-colors"
               >
                 <motion.div 
                   whileHover={isHoverable ? { scale: 1.1 } : {}}
-                  className="inline-flex items-center justify-center w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-primary/10 text-primary mb-4 sm:mb-6"
+                  className="inline-flex items-center justify-center w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-primary/10 text-primary mb-3 sm:mb-6"
                 >
-                  <Icon size={20} sm:size={36} />
+                  <Icon size={18} sm:size={36} />
                 </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3">{feature.title}</h3>
-                <p className="text-sm sm:text-base text-gray-500">{feature.desc}</p>
+                <h3 className="text-base sm:text-xl font-bold text-secondary mb-1.5 sm:mb-3">{feature.title}</h3>
+                <p className="text-xs sm:text-base text-gray-500">{feature.desc}</p>
               </motion.div>
             );
           })}

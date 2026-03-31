@@ -165,7 +165,7 @@ const BookingForm = () => {
             <input 
               type="text" name="name" placeholder="Full Name" required 
               value={formData.name} onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
             />
           </div>
           <div className="relative">
@@ -173,7 +173,7 @@ const BookingForm = () => {
             <input 
               type="tel" name="phone" placeholder="Phone No." required 
               value={formData.phone} onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
             />
           </div>
         </div>
@@ -209,7 +209,7 @@ const BookingForm = () => {
               onChange={handleChange}
               onFocus={(e) => (e.target.type = "date")}
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
             />
           </div>
           <div className="relative">
@@ -223,7 +223,7 @@ const BookingForm = () => {
               onChange={handleChange}
               onFocus={(e) => (e.target.type = "time")}
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
             />
           </div>
           <div className="relative col-span-2">

@@ -17,7 +17,7 @@ const CarCard = ({ car }) => {
       whileHover={isHoverable ? { scale: 1.05, y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" } : {}}
       className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 flex flex-col transition-shadow"
     >
-      <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative h-32 sm:h-48 w-full overflow-hidden">
         <img 
           src={car.image} 
           alt={car.name} 
@@ -28,8 +28,8 @@ const CarCard = ({ car }) => {
         </div>
       </div>
       
-      <div className="p-6 flex-grow flex flex-col">
-        <h3 className="text-xl font-bold text-secondary mb-2">{car.name}</h3>
+      <div className="p-3 sm:p-6 flex-grow flex flex-col">
+        <h3 className="text-base sm:text-xl font-bold text-secondary mb-1 sm:mb-2">{car.name}</h3>
         
         <div className="flex items-center text-gray-500 mb-4">
           <Users size={18} className="mr-2" />
@@ -48,7 +48,7 @@ const CarCard = ({ car }) => {
         <motion.button 
           whileHover={isHoverable ? { scale: 1.05 } : {}}
           whileTap={{ scale: 0.95 }}
-          className="w-full py-3 rounded-xl bg-secondary text-white font-semibold flex justify-center items-center group"
+          className="w-full py-2 sm:py-3 rounded-xl bg-secondary text-white font-semibold flex justify-center items-center group text-xs sm:text-base"
           onClick={() => {
             const el = document.getElementById('booking-section');
             if (el) el.scrollIntoView({ behavior: 'smooth' });

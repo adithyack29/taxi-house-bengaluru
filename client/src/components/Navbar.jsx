@@ -28,11 +28,11 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16 lg:h-20">
           
           {/* Logo */}
           <a href="/" className="flex items-center">
-            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-14 w-auto object-contain" />
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-10 lg:h-14 w-auto object-contain" />
             <span className="ml-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:block">Bengaluru</span>
           </a>
 
@@ -110,9 +110,9 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white shadow-2xl z-40 flex flex-col lg:hidden overflow-y-auto"
+              className="fixed inset-y-0 right-0 w-[48%] max-w-sm bg-white shadow-2xl z-40 flex flex-col lg:hidden overflow-y-auto"
             >
-              <div className="px-6 pt-24 pb-8 flex flex-col h-full">
+              <div className="px-6 pt-16 pb-6 flex flex-col h-full">
                 
                 {/* Auth section top */}
                 {isLoggedIn ? (
@@ -135,40 +135,41 @@ const Navbar = () => {
                     <motion.button 
                       onClick={() => { toggleMenu(); navigate('/login'); }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-3.5 rounded-xl font-bold shadow-md"
+                      className="flex items-center justify-center space-x-2 w-full bg-primary text-secondary px-5 py-3 rounded-xl font-bold shadow-md"
                     >
                       <LogIn size={18} />
-                      <span className="text-base">Log In / Sign Up</span>
+                      <span className="text-sm">Log In / Sign Up</span>
                     </motion.button>
                   </div>
                 )}
 
-                <div className="flex flex-col space-y-1 mb-auto">
-                  <Link to="/" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                <div className="flex flex-col space-y-0.5 mb-auto">
+                  <Link to="/" onClick={toggleMenu} className={`block py-2.5 px-4 rounded-xl text-base font-bold transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Home
                   </Link>
-                  <Link to="/services" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/services') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/services" onClick={toggleMenu} className={`block py-2.5 px-4 rounded-xl text-base font-bold transition-colors ${isActive('/services') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Services
                   </Link>
-                  <Link to="/fleet" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/fleet') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/fleet" onClick={toggleMenu} className={`block py-2.5 px-4 rounded-xl text-base font-bold transition-colors ${isActive('/fleet') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Fleet
                   </Link>
-                  <Link to="/contact" onClick={toggleMenu} className={`block py-3.5 px-4 rounded-xl text-lg font-bold transition-colors ${isActive('/contact') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
+                  <Link to="/contact" onClick={toggleMenu} className={`block py-2.5 px-4 rounded-xl text-base font-bold transition-colors ${isActive('/contact') ? 'bg-primary/10 text-primary' : 'text-secondary'}`}>
                     Contact
                   </Link>
-                </div>
-
-                <div className="mt-8 space-y-4">
+                  
                   <motion.a 
                     href="tel:+917795965640" 
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center justify-center space-x-3 w-full bg-secondary text-white px-5 py-3.5 rounded-xl font-bold shadow-lg"
+                    className="flex lg:hidden items-center justify-center space-x-2 mt-4 w-full bg-secondary text-white px-2 py-3 rounded-xl font-bold shadow-lg"
                   >
-                    <PhoneCall size={20} className="text-primary" />
-                    <span className="text-base">Call Us Now</span>
+                    <PhoneCall size={16} className="text-primary" />
+                    <span className="text-sm">Call Now</span>
                   </motion.a>
-                  <p className="text-center text-xs text-gray-400 font-medium pb-4">
-                    © 2026 Taxi House Bengaluru. All rights reserved.
+                </div>
+
+                <div className="mt-8 border-t border-gray-100 pt-4">
+                  <p className="text-center text-[10px] text-gray-400 font-medium">
+                    © 2026 Taxi House Bengaluru.
                   </p>
                 </div>
               </div>

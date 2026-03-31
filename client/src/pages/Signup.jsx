@@ -123,13 +123,13 @@ const Signup = () => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6 }}
-        className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 relative z-10"
+        className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10 relative z-10"
       >
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-block mb-4">
-            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-24 w-auto mx-auto object-contain" />
+        <div className="text-center mb-6 sm:mb-10">
+          <Link to="/" className="inline-block mb-3 sm:mb-4">
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-16 sm:h-24 w-auto mx-auto object-contain" />
           </Link>
-          <h2 className="text-3xl font-extrabold text-secondary mb-2">Create Account</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-secondary mb-2">Create Account</h2>
           <p className="text-gray-500 text-lg">Join us for premium rides</p>
         </div>
 
@@ -165,7 +165,7 @@ const Signup = () => {
                       placeholder="Enter your name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary"
+                      className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary text-sm sm:text-base"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ const Signup = () => {
                       placeholder="Phone number"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                      className="w-full pl-20 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary text-lg tracking-wider"
+                      className="w-full pl-20 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary text-base sm:text-lg tracking-wider"
                     />
                   </div>
                 </div>
@@ -194,7 +194,7 @@ const Signup = () => {
                 whileHover={isHoverable && !isLoading ? { scale: 1.02 } : {}}
                 whileTap={!isLoading ? { scale: 0.98 } : {}}
                 disabled={isLoading || phoneNumber.length < 10 || !name.trim()}
-                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-2xl text-secondary bg-primary hover:shadow-lg transition-all disabled:opacity-50"
+                className="group relative w-full flex justify-center py-3 sm:py-4 px-4 border border-transparent text-base sm:text-lg font-bold rounded-2xl text-secondary bg-primary hover:shadow-lg transition-all disabled:opacity-50"
               >
                 {isLoading ? "Sending OTP..." : "Get OTP Verification"}
               </motion.button>
@@ -228,7 +228,7 @@ const Signup = () => {
                     placeholder="6-digit OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary text-xl tracking-[0.5em] font-bold"
+                    className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all text-secondary text-lg sm:text-xl tracking-[0.5em] font-bold"
                   />
                 </div>
               </div>
@@ -238,7 +238,7 @@ const Signup = () => {
                 whileHover={isHoverable && !isLoading ? { scale: 1.02 } : {}}
                 whileTap={!isLoading ? { scale: 0.98 } : {}}
                 disabled={isLoading || otp.length < 6}
-                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-2xl text-secondary bg-primary hover:shadow-lg transition-all disabled:opacity-50"
+                className="group relative w-full flex justify-center py-3 sm:py-4 px-4 border border-transparent text-base sm:text-lg font-bold rounded-2xl text-secondary bg-primary hover:shadow-lg transition-all disabled:opacity-50"
               >
                 {isLoading ? "Authenticating..." : "Finish Registration"}
               </motion.button>
@@ -254,7 +254,7 @@ const Signup = () => {
           )}
         </AnimatePresence>
 
-        <div className="mt-10 text-center border-t border-gray-100 pt-8">
+        <div className="mt-6 sm:mt-10 text-center border-t border-gray-100 pt-6 sm:pt-8">
           <p className="text-gray-500 font-medium">
             Already have an account?{' '}
             <Link to="/login" className="text-secondary font-bold hover:text-primary transition-colors underline decoration-primary/30 decoration-2 underline-offset-4">

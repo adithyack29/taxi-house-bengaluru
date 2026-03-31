@@ -7,7 +7,7 @@ const CTASection = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="bg-primary text-secondary py-20 relative overflow-hidden">
+    <section className="bg-primary text-secondary py-10 lg:py-20 relative overflow-hidden">
       
       {/* Decorative shapes */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
@@ -27,12 +27,12 @@ const CTASection = () => {
           Get transparent pricing, professional drivers, and 24/7 support throughout Bengaluru.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
           <motion.a 
             href="tel:+917795965640" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-secondary text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg ring-2 ring-transparent hover-desktop-only:ring-white/20"
+            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-secondary text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg ring-2 ring-transparent hover-desktop-only:ring-white/20"
           >
             <PhoneCall size={20} className="text-primary" />
             <span>Call Now: +91 77959 65640</span>
@@ -44,7 +44,7 @@ const CTASection = () => {
             rel="noopener noreferrer" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-green-500 text-white px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg"
+            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-green-500 text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg"
           >
             <MessageCircle size={20} />
             <span>Book via WhatsApp</span>

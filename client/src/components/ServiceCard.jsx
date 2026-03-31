@@ -22,13 +22,13 @@ const ServiceCard = ({ service }) => {
     <motion.div 
       variants={itemVariants}
       whileHover={isHoverable ? { scale: 1.05, y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" } : {}}
-      className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-colors group"
+      className="bg-white p-4 sm:p-8 rounded-2xl shadow-md border border-gray-100 transition-colors group"
     >
-      <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-primary group-hover-desktop-only:bg-primary group-hover-desktop-only:text-white transition-colors">
-        {IconComponent && <IconComponent size={32} />}
+      <div className="bg-primary/10 w-10 h-10 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mb-2 sm:mb-6 text-primary group-hover-desktop-only:bg-primary group-hover-desktop-only:text-white transition-colors">
+        {IconComponent && <IconComponent size={24} sm:size={32} />}
       </div>
-      <h3 className="text-xl font-bold text-secondary mb-3">{service.title}</h3>
-      <p className="text-gray-600 leading-relaxed">
+      <h3 className="text-base sm:text-xl font-bold text-secondary mb-1 sm:mb-3">{service.title}</h3>
+      <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
         {service.description}
       </p>
     </motion.div>

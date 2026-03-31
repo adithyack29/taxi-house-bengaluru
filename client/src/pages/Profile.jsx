@@ -101,18 +101,18 @@ const Profile = () => {
   const displayHeaderName = currentUser.displayName || 'User';
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 min-h-[70vh]">
+    <div className="max-w-4xl mx-auto py-6 sm:py-12 px-4 sm:px-6 lg:px-8 min-h-[70vh]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10"
       >
-        <div className="flex items-center space-x-4 mb-8 pb-8 border-b border-gray-100">
-          <div className="bg-primary/20 p-4 rounded-full text-primary">
-            <User size={40} />
+        <div className="flex items-center space-x-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100">
+          <div className="bg-primary/20 p-3 sm:p-4 rounded-full text-primary">
+            <User size={32} sm:size={40} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-secondary">{displayHeaderName}</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-secondary">{displayHeaderName}</h1>
             <p className="text-gray-500 flex items-center mt-1">
               <Phone size={16} className="mr-2" />
               {currentUser.phoneNumber || 'No phone number linked'}
@@ -137,7 +137,7 @@ const Profile = () => {
                   onChange={handleChange}
                   placeholder="John Doe" 
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -153,7 +153,7 @@ const Profile = () => {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   placeholder="+91 98765 43210" 
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -168,7 +168,7 @@ const Profile = () => {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -184,7 +184,7 @@ const Profile = () => {
                   value={formData.emergencyContact}
                   onChange={handleChange}
                   placeholder="Emergency Phone Number" 
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -200,20 +200,20 @@ const Profile = () => {
                   onChange={handleChange}
                   placeholder="Enter your full address for quick taxi pickups..." 
                   rows={3}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all resize-none"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-secondary transition-all resize-none text-sm sm:text-base"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-6 mt-8">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 sm:pt-6 mt-4 sm:mt-8">
             <motion.button 
               type="submit"
               whileTap={{ scale: 0.97 }}
               disabled={loading}
-              className="flex-1 flex justify-center items-center space-x-2 bg-primary text-secondary py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-70"
+              className="flex-1 flex justify-center items-center space-x-2 bg-primary text-secondary py-3 sm:py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-70 text-sm sm:text-base"
             >
-              <Save size={20} />
+              <Save size={18} sm:size={20} />
               <span>{loading ? 'Saving...' : 'Save Profile Changes'}</span>
             </motion.button>
             
@@ -221,9 +221,9 @@ const Profile = () => {
               type="button"
               onClick={handleLogout}
               whileTap={{ scale: 0.97 }}
-              className="flex-1 sm:flex-none flex justify-center items-center space-x-2 border-2 border-red-100 text-red-600 px-8 py-4 rounded-xl font-bold hover:bg-red-50 transition-colors"
+              className="flex-1 sm:flex-none flex justify-center items-center space-x-2 border-2 border-red-100 text-red-600 px-8 py-3 sm:py-4 rounded-xl font-bold hover:bg-red-50 transition-colors text-sm sm:text-base"
             >
-              <LogOut size={20} />
+              <LogOut size={18} sm:size={20} />
               <span>Log Out</span>
             </motion.button>
           </div>
