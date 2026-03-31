@@ -29,17 +29,17 @@ const CTASection = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <motion.a 
-            href="tel:+919876543210" 
+            href="tel:+917795965640" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-secondary text-white px-8 py-4 rounded-xl font-bold text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg ring-2 ring-transparent hover-desktop-only:ring-white/20"
           >
             <PhoneCall size={24} className="text-primary" />
-            <span>Call Now: +91 98765 43210</span>
+            <span>Call Now: +91 77959 65640</span>
           </motion.a>
 
           <motion.a 
-            href="https://wa.me/919876543210"
+            href="https://wa.me/917795965640"
             target="_blank"
             rel="noopener noreferrer" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}

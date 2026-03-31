@@ -28,12 +28,19 @@ const Profile = () => {
       // Basic Firebase Auth data
       const baseData = {
         displayName: currentUser.displayName || '',
+        phoneNumber: currentUser.phoneNumber || '',
       };
       
-      // Load extended data from localStorage (acting as our mock database for extended user profile details)
+      // Load extended data from localStorage
       const storedData = localStorage.getItem(`user_profile_${currentUser.uid}`);
       if (storedData) {
-        setFormData({ ...baseData, ...JSON.parse(storedData) });
+        const parsedData = JSON.parse(storedData);
+        setFormData({ 
+          ...baseData, 
+          ...parsedData,
+          // Prioritize the phone number from Firebase Auth if it exists
+          phoneNumber: baseData.phoneNumber || parsedData.phoneNumber || ''
+        });
       } else {
         setFormData(prev => ({ ...prev, ...baseData }));
       }
@@ -62,8 +69,6 @@ const Profile = () => {
       localStorage.setItem(`user_profile_${currentUser.uid}`, JSON.stringify(extendedData));
       
       setMessage('Profile updated successfully!');
-      
-      // Dispatch event to optionally update Navbar if we wanted
       window.dispatchEvent(new Event('authChange'));
     } catch (err) {
       setError('Failed to update profile: ' + err.message);
@@ -109,8 +114,8 @@ const Profile = () => {
           <div>
             <h1 className="text-3xl font-bold text-secondary">{displayHeaderName}</h1>
             <p className="text-gray-500 flex items-center mt-1">
-              <Mail size={16} className="mr-2" />
-              {currentUser.email}
+              <Phone size={16} className="mr-2" />
+              {currentUser.phoneNumber || 'No phone number linked'}
             </p>
           </div>
         </div>

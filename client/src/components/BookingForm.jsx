@@ -115,7 +115,7 @@ const BookingForm = () => {
   };
 
   return (
-    <div id="booking-section" className="bg-white p-5 sm:p-8 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden">
+    <div id="booking-section" className="bg-white p-4 sm:p-8 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden">
       {/* Decorative top strip */}
       <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
       
@@ -134,7 +134,7 @@ const BookingForm = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
           <label className="flex items-center space-x-2 cursor-pointer group">
             <input 
               type="checkbox" 

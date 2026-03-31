@@ -6,53 +6,62 @@ const Footer = () => {
   return (
     <footer className="bg-secondary text-gray-300 py-6 px-4 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Brand - Always centered on mobile, left on desktop */}
-        <div className="text-center sm:text-left mb-8 sm:mb-12">
-          <Link to="/" className="inline-block p-1 bg-white rounded-full">
-            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-12 w-auto object-contain" />
-          </Link>
-          <p className="text-[10px] sm:text-sm opacity-60 mt-1">Reliable 24/7 Bengaluru Cab Service</p>
+        {/* Brand - Left Aligned on Desktop */}
+        <div className="flex flex-col items-center sm:items-start mb-12 sm:mb-16">
+          <a href="/" className="inline-block p-1 bg-white rounded-full shadow-lg hover:scale-105 transition-transform duration-300">
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-16 w-auto object-contain" />
+          </a>
+          <p className="text-xs sm:text-base font-medium text-white/60 mt-3 tracking-wide">Reliable 24/7 Bengaluru Cab Service</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 sm:gap-12">
           
-          {/* Quick Links - Side by Side on Mobile */}
+          {/* Quick Links */}
           <div className="col-span-1 text-center sm:text-left">
-            <h4 className="text-[10px] font-bold text-white mb-4 uppercase tracking-widest opacity-40">Quick Links</h4>
-            <ul className="space-y-2 text-[11px] sm:text-sm">
-              <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
-              <li><Link to="/services" className="hover:text-primary transition-colors">Services</Link></li>
-              <li><Link to="/fleet" className="hover:text-primary transition-colors">Fleet</Link></li>
-              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+            <h4 className="text-xs sm:text-sm font-black text-white/40 mb-6 uppercase tracking-[0.2em]">Quick Links</h4>
+            <ul className="space-y-4 text-sm sm:text-lg">
+              <li><Link to="/" className="text-white/80 hover:text-primary font-medium transition-all duration-300">Home</Link></li>
+              <li><Link to="/services" className="text-white/80 hover:text-primary font-medium transition-all duration-300">Services</Link></li>
+              <li><Link to="/fleet" className="text-white/80 hover:text-primary font-medium transition-all duration-300">Fleet</Link></li>
+              <li><Link to="/contact" className="text-white/80 hover:text-primary font-medium transition-all duration-300">Contact</Link></li>
             </ul>
           </div>
 
-          {/* Services - Side by Side on Mobile */}
+          {/* Services */}
           <div className="col-span-1 text-center sm:text-left">
-            <h4 className="text-[10px] font-bold text-white mb-4 uppercase tracking-widest opacity-40">Services</h4>
-            <ul className="space-y-2 text-[11px] sm:text-sm">
-              <li>Local</li>
-              <li>Airport</li>
-              <li>Outstation</li>
-              <li>Corporate</li>
+            <h4 className="text-xs sm:text-sm font-black text-white/40 mb-6 uppercase tracking-[0.2em]">Services</h4>
+            <ul className="space-y-4 text-sm sm:text-lg font-medium text-white/80">
+              <li className="hover:text-primary transition-colors cursor-default">Local</li>
+              <li className="hover:text-primary transition-colors cursor-default">Airport</li>
+              <li className="hover:text-primary transition-colors cursor-default">Outstation</li>
+              <li className="hover:text-primary transition-colors cursor-default">Corporate</li>
             </ul>
           </div>
 
-          {/* Contact Details - Refined and Compact */}
+          {/* Contact Details - Vertical Stack */}
           <div className="col-span-2 md:col-span-2 mt-2 sm:mt-0 border-t border-gray-800 pt-8 sm:pt-0 sm:border-0">
-            <h4 className="text-[10px] font-bold text-white mb-4 uppercase tracking-widest opacity-40 text-center sm:text-left">Get in Touch</h4>
-            <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-4 sm:space-y-0 items-center sm:items-start justify-center sm:justify-start">
-              <div className="flex items-center space-x-2">
-                <Phone className="text-primary" size={14} />
-                <a href="tel:+919876543210" className="text-[11px] font-bold">+91 98765 43210</a>
+            <h4 className="text-xs sm:text-sm font-black text-white/40 mb-6 uppercase tracking-[0.2em] text-center sm:text-left">Get in Touch</h4>
+            <div className="flex flex-col space-y-6 items-center sm:items-start justify-center sm:justify-start">
+              <div className="flex items-center space-x-4 group">
+                <Phone className="text-primary group-hover:scale-110 transition-transform" size={20} />
+                <div className="flex flex-col">
+                  <a href="tel:+917795965640" className="text-base sm:text-xl font-bold text-white/90 hover:text-primary transition-all duration-300">+91 77959 65640</a>
+                  <a href="tel:+918660484650" className="text-base sm:text-xl font-bold text-white/90 hover:text-primary transition-all duration-300">+91 86604 84650</a>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="text-primary" size={14} />
-                <a href="mailto:info@taxihouse.in" className="text-[11px]">info@taxihouse.in</a>
+              <div className="flex items-center space-x-4 group">
+                <Mail className="text-primary group-hover:scale-110 transition-transform" size={20} />
+                <a href="mailto:taxihousebengaluru@gmail.com" className="text-base sm:text-xl font-medium text-white/80 hover:text-primary transition-all duration-300">taxihousebengaluru@gmail.com</a>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="text-primary" size={14} />
-                <span className="text-[11px]">MG Road, Bengaluru</span>
+              <div className="flex items-start space-x-4 group">
+                <MapPin className="text-primary group-hover:scale-110 transition-transform mt-1" size={20} />
+                <span className="text-sm sm:text-base font-medium text-white/80 text-center sm:text-left leading-relaxed">
+                  Shop No. 1, 2nd Floor, Survey No. 2,<br />
+                  Near VNR Fuelling Station (Indian Oil Dealers),<br />
+                  Krishnanagar, Yadavanahalli,<br />
+                  Attibele Hobli, Anekal Taluk,<br />
+                  Bengaluru - 562107
+                </span>
               </div>
             </div>
           </div>

@@ -27,14 +27,14 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <a href="/" className="flex items-center">
             <img src="/logo.png" alt="Taxi House Bengaluru" className="h-14 w-auto object-contain" />
             <span className="ml-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:block">Bengaluru</span>
-          </Link>
+          </a>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex space-x-8 items-center">
@@ -45,7 +45,7 @@ const Navbar = () => {
             
             <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-gray-200">
               <motion.a 
-                href="tel:+919876543210" 
+                href="tel:+917795965640" 
                 whileHover={isHoverable ? { scale: 1.05 } : {}}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center space-x-2 bg-secondary text-primary px-5 py-2.5 rounded-full font-semibold shadow-sm"
@@ -62,7 +62,7 @@ const Navbar = () => {
                   className="flex items-center space-x-2 bg-gray-100 text-secondary px-5 py-2.5 rounded-full font-semibold cursor-pointer border border-transparent hover-desktop-only:border-gray-200 transition-colors"
                 >
                   <User size={18} />
-                  <span className="max-w-[150px] truncate">{currentUser.displayName || currentUser.email?.split('@')[0]}</span>
+                  <span className="max-w-[150px] truncate">{currentUser.displayName || currentUser.phoneNumber || 'User'}</span>
                 </motion.button>
               ) : (
                 <motion.button 
@@ -126,7 +126,7 @@ const Navbar = () => {
                       </div>
                       <div className="flex flex-col truncate">
                         <span className="text-secondary text-sm font-black uppercase tracking-wider opacity-60">Account</span>
-                        <span className="truncate text-lg">{currentUser.displayName || currentUser.email?.split('@')[0]}</span>
+                        <span className="truncate text-lg">{currentUser.displayName || currentUser.phoneNumber || 'User'}</span>
                       </div>
                     </motion.button>
                   </div>
@@ -160,7 +160,7 @@ const Navbar = () => {
 
                 <div className="mt-8 space-y-4">
                   <motion.a 
-                    href="tel:+919876543210" 
+                    href="tel:+917795965640" 
                     whileTap={{ scale: 0.95 }}
                     className="flex items-center justify-center space-x-3 w-full bg-secondary text-white px-5 py-4 rounded-2xl font-bold shadow-lg"
                   >
