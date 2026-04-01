@@ -2,6 +2,7 @@ import React from 'react';
 import { Users, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHoverQuery } from '../hooks/useHoverQuery';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -10,6 +11,25 @@ const itemVariants = {
 
 const CarCard = ({ car }) => {
   const isHoverable = useHoverQuery();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBooking = () => {
+    const bookingSection = document.getElementById('booking-section');
+    
+    if (bookingSection) {
+      // If we're on the same page, scroll and set state manually if possible
+      // (Simplified: we'll just scroll, and the form will likely be static on home)
+      bookingSection.scrollIntoView({ behavior: 'smooth' });
+      
+      // Trigger a custom event that BookingForm can listen to
+      const event = new CustomEvent('selectCar', { detail: car.name });
+      window.dispatchEvent(event);
+    } else {
+      // Navigate to contact page with car param
+      navigate(`/contact?car=${encodeURIComponent(car.name)}`);
+    }
+  };
 
   return (
     <motion.div 
@@ -49,10 +69,7 @@ const CarCard = ({ car }) => {
           whileHover={isHoverable ? { scale: 1.05 } : {}}
           whileTap={{ scale: 0.95 }}
           className="w-full py-2 sm:py-3 rounded-xl bg-secondary text-white font-semibold flex justify-center items-center group text-xs sm:text-base"
-          onClick={() => {
-            const el = document.getElementById('booking-section');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
+          onClick={handleBooking}
         >
           Book Now
         </motion.button>

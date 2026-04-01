@@ -16,7 +16,7 @@ const FleetPage = () => {
       className="flex flex-col min-h-screen"
     >
       {/* Hero Banner for Fleet */}
-      <div className="bg-secondary text-white py-10 sm:py-24 relative overflow-hidden text-center px-4">
+      <div className="bg-secondary text-white py-10 sm:py-16 relative overflow-hidden text-center px-4">
          <div className="absolute inset-0 z-0 opacity-20 bg-primary mix-blend-multiply"></div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -24,8 +24,8 @@ const FleetPage = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
         >
-          <h1 className="text-lg sm:text-4xl md:text-6xl font-black mb-4 sm:mb-6 text-white uppercase tracking-tight">Explore Our Fleet</h1>
-          <p className="text-[10px] sm:text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <h1 className="text-lg sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4 text-white uppercase tracking-tight">Explore Our Fleet</h1>
+          <p className="text-[10px] sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
             A diverse range of well-maintained vehicles for all your travel needs. Budget-friendly hatchbacks, comfortable sedans, and spacious SUVs.
           </p>
         </motion.div>

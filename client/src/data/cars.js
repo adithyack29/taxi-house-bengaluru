@@ -30,37 +30,5 @@ export const cars = [
     seats: 4,
     features: ["Premium", "Chauffeur", "Business"],
     pricePerKm: 45
-  },
-  {
-    id: 5,
-    name: "",
-    image: "",
-    seats: 0,
-    features: [],
-    pricePerKm: 0
-  },
-  {
-    id: 6,
-    name: "",
-    image: "",
-    seats: 0,
-    features: [],
-    pricePerKm: 0
-  },
-  {
-    id: 7,
-    name: "",
-    image: "",
-    seats: 0,
-    features: [],
-    pricePerKm: 0
-  },
-  {
-    id: 8,
-    name: "",
-    image: "",
-    seats: 0,
-    features: [],
-    pricePerKm: 0
-  },
+  }
 ];

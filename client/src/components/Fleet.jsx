@@ -17,7 +17,7 @@ const Fleet = ({ limit }) => {
   const displayCars = limit ? cars.slice(0, limit) : cars;
 
   return (
-    <section className="py-10 sm:py-20 bg-background overflow-hidden">
+    <section className="py-8 sm:py-12 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <motion.div 
@@ -25,11 +25,11 @@ const Fleet = ({ limit }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
-          <span className="text-primary font-bold tracking-wider uppercase text-sm">Our Vehicles</span>
-          <h2 className="text-4xl font-extrabold text-secondary mt-2 mb-4">Choose Your Ride</h2>
-          <p className="text-gray-500 max-w-2xl mx-auto text-lg">
+          <span className="text-primary font-bold tracking-wider uppercase text-xs">Our Vehicles</span>
+          <h2 className="text-3xl font-extrabold text-secondary mt-1 mb-3">Choose Your Ride</h2>
+          <p className="text-gray-500 max-w-2xl mx-auto text-base">
             From compact hatchbacks for quick city runs to luxury sedans for business travel, we have the perfect car for every journey.
           </p>
         </motion.div>

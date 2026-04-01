@@ -16,23 +16,5 @@ export const services = [
     title: "Outstation Trips",
     description: "Comfortable sedans and SUVs for weekend getaways from Bengaluru to Mysore, Coorg, Ooty & more.",
     icon: "Mountain"
-  },
-  {
-    id: 4,
-    title: "",
-    description: "",
-    icon: ""
-  },
-  {
-    id: 5,
-    title: "",
-    description: "",
-    icon: ""
-  },
-  {
-    id: 6,
-    title: "",
-    description: "",
-    icon: ""
   }
 ];

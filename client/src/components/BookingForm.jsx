@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { submitBooking } from '../api/bookingApi';
 import { Calendar, Clock, MapPin, Navigation, Car, User, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -24,6 +25,28 @@ const BookingForm = () => {
   const [calculating, setCalculating] = useState(false);
   const [isCarModalOpen, setIsCarModalOpen] = useState(false);
   const isHoverable = useHoverQuery();
+  const [searchParams] = useSearchParams();
+
+  // Listen for car selection from URL or event
+  useEffect(() => {
+    const carParam = searchParams.get('car');
+    if (carParam) {
+      const decodedCar = decodeURIComponent(carParam);
+      // Check if it's a valid car name
+      if (cars.some(c => c.name === decodedCar)) {
+        setFormData(prev => ({ ...prev, carType: decodedCar }));
+      }
+    }
+
+    // Listen for same-page event
+    const handleSelectCar = (e) => {
+      if (e.detail && cars.some(c => c.name === e.detail)) {
+        setFormData(prev => ({ ...prev, carType: e.detail }));
+      }
+    };
+    window.addEventListener('selectCar', handleSelectCar);
+    return () => window.removeEventListener('selectCar', handleSelectCar);
+  }, [searchParams]);
 
   const selectedCar = cars.find(c => c.name === formData.carType) || cars[1];
 
@@ -115,11 +138,11 @@ const BookingForm = () => {
   };
 
   return (
-    <div id="booking-section" className="bg-white p-4 sm:p-8 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden">
+    <div id="booking-section" className="bg-white p-4 sm:p-6 rounded-3xl shadow-xl w-full max-w-lg mx-auto relative overflow-hidden border border-gray-100">
       {/* Decorative top strip */}
       <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
       
-      <h2 className="text-3xl font-extrabold text-secondary mb-6 text-center">
+      <h2 className="text-2xl font-extrabold text-secondary mb-4 text-center">
         Book Your <span className="text-primary">Ride</span>
       </h2>
 
@@ -133,8 +156,8 @@ const BookingForm = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-3 bg-gray-50 p-3 rounded-2xl border border-gray-100">
           <label className="flex items-center space-x-2 cursor-pointer group">
             <input 
               type="checkbox" 
@@ -161,19 +184,19 @@ const BookingForm = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
             <input 
               type="text" name="name" placeholder="Full Name" required 
               value={formData.name} onChange={handleChange}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm"
             />
           </div>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
             <input 
               type="tel" name="phone" placeholder="Phone No." required 
               value={formData.phone} onChange={handleChange}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm"
             />
           </div>
         </div>
@@ -209,7 +232,7 @@ const BookingForm = () => {
               onChange={handleChange}
               onFocus={(e) => (e.target.type = "date")}
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm"
             />
           </div>
           <div className="relative">
@@ -223,7 +246,7 @@ const BookingForm = () => {
               onChange={handleChange}
               onFocus={(e) => (e.target.type = "time")}
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base"
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm"
             />
           </div>
           <div className="relative col-span-2">
