@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-secondary text-gray-300 py-6 px-4 sm:py-16">
+    <footer className="bg-secondary text-gray-300 py-8 px-4 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Brand - Left Aligned on Desktop */}
-        <div className="flex flex-col items-center sm:items-start mb-8 sm:mb-16">
+        <div className="flex flex-col items-center sm:items-start mb-6 sm:mb-8">
           <a href="/" className="inline-block p-1 bg-white rounded-full shadow-lg hover:scale-105 transition-transform duration-300">
-            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-12 sm:h-16 w-auto object-contain" />
+            <img src="/logo.png" alt="Taxi House Bengaluru" className="h-10 sm:h-12 w-auto object-contain" />
           </a>
-          <p className="text-[10px] sm:text-base font-medium text-white/60 mt-2 sm:mt-3 tracking-wide">Reliable 24/7 Bengaluru Cab Service</p>
+          <p className="text-[10px] sm:text-sm font-medium text-white/50 mt-1 sm:mt-2 tracking-wide">Reliable 24/7 Bengaluru Cab Service</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 sm:gap-12">
@@ -67,7 +67,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm">
+        <div className="mt-8 pt-6 border-t border-gray-800 text-center text-xs">
           <p>© {new Date().getFullYear()} Taxi House Bengaluru. All Rights Reserved.</p>
         </div>
       </div>
