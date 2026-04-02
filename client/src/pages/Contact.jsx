@@ -22,7 +22,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-lg sm:text-5xl md:text-6xl font-black mb-3 sm:mb-6 uppercase tracking-tight"
+          className="text-lg sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-3 sm:mb-6 tracking-tight"
         >
           Contact Us
         </motion.h1>

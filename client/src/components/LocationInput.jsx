@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { MapPin, Map, Home, Crosshair } from 'lucide-react';
+import { MapPin, Map, Crosshair } from 'lucide-react';
 import MapModal from './MapModal';
 
-const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconColorClass = "text-gray-400", showCurrentLocation = true }) => {
-  const { currentUser } = useAuth();
+const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconColorClass = "text-gray-400", showCurrentLocation = true, disabled = false, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,17 +53,6 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
     setIsOpen(false);
   };
 
-  const getUserHomeAddress = () => {
-    if (!currentUser) return null;
-    const profileDataStr = localStorage.getItem(`user_profile_${currentUser.uid}`);
-    if (profileDataStr) {
-      try {
-        const profileData = JSON.parse(profileDataStr);
-        return profileData.homeAddress;
-      } catch(e) {}
-    }
-    return null;
-  };
 
   const handleCurrentLocation = () => {
     setIsOpen(false);
@@ -88,7 +75,6 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
     }
   };
 
-  const homeAddress = getUserHomeAddress();
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -102,7 +88,8 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
         onChange={onChange}
         onFocus={() => setIsOpen(true)}
         autoComplete="off"
-        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+        className={`w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-base ${className}`}
+        disabled={disabled}
       />
 
       {isOpen && (
@@ -122,21 +109,6 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
               </li>
             )}
 
-            {/* Action Item: Home Address */}
-            {homeAddress && (
-              <li 
-                className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50"
-                onClick={() => handleSelect(homeAddress)}
-              >
-                <div className="bg-orange-100 p-2 rounded-full text-orange-600 shrink-0">
-                  <Home size={16} />
-                </div>
-                <div className="flex flex-col flex-1 overflow-hidden">
-                  <span>Home Address</span>
-                  <span className="text-xs text-gray-500 truncate w-full">{homeAddress}</span>
-                </div>
-              </li>
-            )}
 
             {/* Action Item: Choose on Map */}
             <li 

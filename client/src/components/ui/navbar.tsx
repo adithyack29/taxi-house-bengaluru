@@ -1,155 +1,185 @@
 'use client'
-import { Link } from 'react-router-dom'
-import { Equal, X } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Equal, X, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/liquid-glass-button'
 import React from 'react'
 import { cn } from '@/lib/utils' 
-import { useAuth } from '@/contexts/AuthContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const menuItems = [
     { name: 'Home', href: '/' },
+    { name: 'About', href: '/#about' },
     { name: 'Services', href: '/services' },
-    { name: 'Fleet', href: '/fleet' },
     { name: 'Contact', href: '/contact' },
 ]
 
 export const Header = () => {
     const [menuState, setMenuState] = React.useState(false)
     const [isScrolled, setIsScrolled] = React.useState(false)
-    const [isVisible, setIsVisible] = React.useState(true)
-    const [lastScrollY, setLastScrollY] = React.useState(0)
-    const { currentUser } = useAuth()
-    const isLoggedIn = !!currentUser
+    const location = useLocation()
 
     React.useEffect(() => {
         const handleScroll = () => {
-            const currentScrollY = window.scrollY
-            
-            // Check for scroll direction
-            if (currentScrollY > lastScrollY && currentScrollY > 150) {
-                // Scrolling Down -> Hide
-                setIsVisible(false)
-            } else if (currentScrollY < lastScrollY && currentScrollY > 50) {
-                // Scrolling Up -> Show
-                setIsVisible(true)
-            } else if (currentScrollY <= 50) {
-                // At the very top -> Always Show
-                setIsVisible(true)
-            }
-            
-            setIsScrolled(currentScrollY > 50)
-            setLastScrollY(currentScrollY)
+            setIsScrolled(window.scrollY > 40)
         }
-        
         window.addEventListener('scroll', handleScroll, { passive: true })
         return () => window.removeEventListener('scroll', handleScroll)
-    }, [lastScrollY])
+    }, [])
+
+    const isActive = (href: string) => {
+        if (href === '/') return location.pathname === '/'
+        return location.pathname.startsWith(href)
+    }
 
     return (
-        <header>
-            <nav
-                data-state={menuState ? 'active' : 'inactive'}
-                className={cn(
-                    "fixed left-0 w-full z-50 top-0 transition-transform duration-500 ease-in-out",
-                    !isVisible ? "-translate-y-[120%]" : "translate-y-0"
-                )}>
-                <div className={cn(
-                    'w-full transition-all duration-500 px-6 lg:px-12 border-b', 
-                    isScrolled 
-                        ? 'bg-black/95 backdrop-blur-lg shadow-lg border-white/10 py-1' 
-                        : 'bg-black border-white/10 py-1.5'
-                )}>
-                    <div className="mx-auto max-w-7xl relative flex flex-wrap items-center justify-between gap-6 lg:gap-0">
-                        <div className="flex w-full justify-between lg:w-auto text-white">
-                            <Link
-                                to="/"
-                                aria-label="home"
-                                className="flex gap-2.5 items-center group">
-                                <img src="/logo.png" alt="Taxi House" className="h-10 lg:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
-                                <p className="font-black text-xl lg:text-2xl tracking-tighter"> Taxi House</p>  
-                            </Link>
-
-                            <button
-                                onClick={() => setMenuState(!menuState)}
-                                aria-label={menuState ? 'Close Menu' : 'Open Menu'}
-                                className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
-                                <Equal className={cn("m-auto size-7 duration-200 transition-all", menuState && "rotate-180 scale-0 opacity-0")} />
-                                <X className={cn("absolute inset-0 m-auto size-7 -rotate-180 scale-0 opacity-0 duration-200 transition-all", menuState && "rotate-0 scale-100 opacity-100")} />
-                            </button>
+        <header className="fixed top-0 left-0 w-full z-[1000] font-sans">
+            {/* Top Info Bar */}
+            <div className="hidden lg:block bg-secondary py-2 border-b border-white/5 overflow-hidden">
+                <div className="max-w-7xl mx-auto px-6 lg:px-12 flex justify-between items-center text-[11px] font-semibold text-gray-400 tracking-tight">
+                    <div className="flex items-center space-x-6">
+                        <a href="tel:+917795965640" className="flex items-center gap-2 hover:text-primary transition-colors">
+                            <Phone size={12} className="text-primary fill-primary/10" />
+                            <span>+91 7795965640</span>
+                        </a>
+                        <a href="mailto:taxihousebengaluru@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+                            <Mail size={12} className="text-primary fill-primary/10" />
+                            <span>taxihousebengaluru@gmail.com</span>
+                        </a>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 text-primary">
+                            <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                            <span>Reliable Taxi • 24/7 Support</span>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <div className="absolute inset-0 m-auto hidden size-fit lg:block">
-                            <ul className="flex gap-10 text-base">
-                                {menuItems.map((item, index) => (
-                                    <li key={index}>
-                                        <Link
+            {/* Main Navbar */}
+            <nav className={cn(
+                "w-full transition-all duration-300 ease-in-out border-b",
+                isScrolled 
+                    ? "bg-white/95 backdrop-blur-md shadow-lg py-2 border-gray-100" 
+                    : "bg-white py-3 border-transparent"
+            )}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
+                    {/* Logo Area */}
+                    <div className="flex items-center">
+                        <Link to="/" className="flex items-center group">
+                            <img src="/logo.png" alt="Taxi House" className="h-10 lg:h-12 w-auto object-contain transition-transform" />
+                            <div className="ml-3">
+                                <span className="text-xl lg:text-2xl font-bold tracking-tight text-secondary">Taxi <span className="text-primary">House</span></span>
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* Nav Links - Desktop */}
+                    <div className="hidden lg:block absolute left-1/2 -translate-x-1/2">
+                        <ul className="flex items-center space-x-1">
+                            {menuItems.map((item) => (
+                                <li key={item.name}>
+                                    <Link 
+                                        to={item.href}
+                                        className={cn(
+                                            "px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200",
+                                            isActive(item.href) 
+                                                ? "bg-primary/10 text-primary" 
+                                                : "text-secondary hover:text-primary hover:bg-gray-50"
+                                        )}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* CTA Area */}
+                    <div className="flex items-center space-x-3">
+                        <div className="hidden sm:flex items-center space-x-2 mr-1">
+                        </div>
+                        
+                        <Button
+                            asChild
+                            variant="cool"
+                            size="default"
+                            className="font-bold text-sm px-6 py-2.5 bg-primary text-secondary transition-none shadow-none border-none pointer-events-auto"
+                        >
+                            <Link to="/#booking">
+                                <span>Book Now</span>
+                            </Link>
+                        </Button>
+
+                        {/* Mobile Toggle */}
+                        <button
+                            onClick={() => setMenuState(!menuState)}
+                            className="lg:hidden p-2 text-secondary bg-gray-50 rounded-lg hover:bg-primary transition-all relative z-[100]"
+                        >
+                            {menuState ? <X size={24} /> : <Equal size={24} />}
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile Sidebar */}
+            <AnimatePresence>
+                {menuState && (
+                    <>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setMenuState(false)} 
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1050] lg:hidden" 
+                        />
+                        <motion.div 
+                            initial={{ y: '-100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '-100%' }}
+                            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+                            className="fixed top-0 left-0 right-0 z-[1100] bg-white lg:hidden flex flex-col p-6 rounded-b-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden"
+                        >
+                            {/* Menu Header with Logo & Close */}
+                            <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50">
+                                <div className="flex items-center">
+                                    <img src="/logo.png" alt="Taxi House" className="h-8 w-auto object-contain" />
+                                    <span className="ml-2 ttext-base font-bold text-secondary">Taxi <span className="text-primary">House</span></span>
+                                </div>
+                                <button
+                                    onClick={() => setMenuState(false)}
+                                    className="p-2 text-secondary bg-gray-50 rounded-xl hover:bg-primary transition-all"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <ul className="space-y-2">
+                                {menuItems.map((item) => (
+                                    <li key={item.name}>
+                                        <Link 
                                             to={item.href}
-                                            className="transition-colors block duration-150 font-bold tracking-tight py-2 text-white/90 hover:text-white lg:text-lg">
-                                            <span>{item.name}</span>
+                                            onClick={() => setMenuState(false)}
+                                            className={cn(
+                                                "block p-4 rounded-xl text-lg font-bold transition-all",
+                                                isActive(item.href) ? "bg-primary/10 text-primary" : "text-secondary active:bg-gray-50"
+                                            )}
+                                        >
+                                            {item.name}
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
-                        </div>
-
-                        <div className={cn(
-                            "bg-black lg:bg-transparent hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border border-white/10 lg:border-none p-6 shadow-2xl lg:shadow-none lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0",
-                            menuState && "block animate-in fade-in slide-in-from-top-4 duration-300"
-                        )}>
-                            <div className="lg:hidden">
-                                <ul className="space-y-6 text-lg">
-                                    {menuItems.map((item, index) => (
-                                        <li key={index}>
-                                            <Link
-                                                to={item.href}
-                                                onClick={() => setMenuState(false)}
-                                                className="text-white/90 hover:text-white block duration-150 font-bold tracking-tight">
-                                                <span>{item.name}</span>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
+                            
+                            <div className="mt-8">
+                                <a href="tel:+917795965640" className="flex items-center justify-center gap-3 p-4 bg-secondary text-primary rounded-xl font-bold text-sm shadow-lg">
+                                    <Phone size={18} />
+                                    Call Now
+                                </a>
                             </div>
-                            <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                {isLoggedIn ? (
-                                    <Button
-                                        asChild
-                                        variant="cool"
-                                        size="default"
-                                        className="font-bold text-base px-6"
-                                        onClick={() => setMenuState(false)}>
-                                        <Link to="/profile">
-                                            <span>{currentUser.displayName || 'Account'}</span>
-                                        </Link>
-                                    </Button>
-                                ) : (
-                                    <>
-                                        <Button
-                                            asChild
-                                            variant="outline"
-                                            size="default"
-                                            className="font-bold px-8 text-base bg-white/5 text-white border-white/20 hover:bg-white/10"
-                                            onClick={() => setMenuState(false)}>
-                                            <Link to="/login">
-                                                <span>Login</span>
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            asChild
-                                            size="default"
-                                            className="font-bold px-8 text-base"
-                                            onClick={() => setMenuState(false)}>
-                                            <Link to="/signup">
-                                                <span>Sign Up</span>
-                                            </Link>
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </header>
     )
 }

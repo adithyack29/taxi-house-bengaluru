@@ -34,7 +34,7 @@ const Services = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
         >
-          <h1 className="text-lg sm:text-4xl md:text-6xl font-black mb-4 sm:mb-6 uppercase tracking-tight">Our Premium Services</h1>
+          <h1 className="text-lg sm:text-4xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 tracking-tight">Our Premium Services</h1>
           <p className="text-[10px] sm:text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
             From quick local airport drops to luxurious outstation road trips, Taxi House Bengaluru is your ultimate travel partner in Karnataka.
           </p>

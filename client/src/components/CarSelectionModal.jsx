@@ -1,109 +1,134 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Users, CheckCircle, Car } from 'lucide-react';
+import { X, Users, CheckCircle2, ChevronRight, Info, Award } from 'lucide-react';
 import { cars } from '../data/cars';
 
 const CarSelectionModal = ({ isOpen, onClose, selectedCarName, onSelect }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  // Filter out any empty car objects if they exist in the data
   const validCars = cars.filter(car => car.name && car.image);
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-6 lg:p-8">
-        {/* Backdrop click to close */}
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+        {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 cursor-pointer"
+          className="absolute inset-0 bg-secondary/80 backdrop-blur-sm"
         />
-
+        
+        {/* Modal Content */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl w-full max-w-5xl h-fit max-h-[90vh] flex flex-col relative z-10"
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          className="relative bg-white w-full max-w-4xl max-h-[85vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-gray-100"
         >
           {/* Header */}
-          <div className="flex justify-between items-center px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+          <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
             <div>
-              <div className="flex items-center space-x-2 text-primary font-bold tracking-wider uppercase text-xs mb-1">
-                <Car size={14} />
-                <span>Premium Fleet</span>
+              <div className="flex items-center space-x-2 text-primary font-bold tracking-tight text-xs mb-1">
+                <Award size={14} />
+                <span>Premium Fleet Selection</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-secondary">Choose Your Vehicle</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-secondary tracking-tight">
+                Select Your <span className="text-primary italic">Vehicle</span>
+              </h3>
             </div>
             <button 
-              onClick={onClose} 
-              className="p-3 text-gray-400 hover:text-secondary rounded-2xl hover:bg-gray-100 transition-all"
+              onClick={onClose}
+              className="p-2 hover:bg-gray-200 rounded-2xl transition-colors text-gray-400"
             >
-              <X size={28} />
+              <X size={20} />
             </button>
           </div>
 
-          {/* List Area */}
-          <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 pb-4">
+          {/* Grid Area */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {validCars.map((car) => {
                 const isSelected = car.name === selectedCarName;
-                
                 return (
                   <motion.div
                     key={car.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ y: -2 }}
                     onClick={() => {
                       onSelect(car);
                       onClose();
                     }}
-                    className={`relative flex flex-col sm:flex-row group cursor-pointer rounded-3xl overflow-hidden border-2 transition-all p-4 sm:p-5 ${
+                    className={`relative group cursor-pointer rounded-2xl border-2 transition-all p-3 flex gap-4 ${
                       isSelected 
-                        ? 'border-primary bg-primary/5 shadow-lg' 
-                        : 'border-gray-100 bg-white hover:border-primary/30 hover:shadow-md'
+                        ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' 
+                        : 'border-gray-100 bg-white hover:border-primary/30 hover:bg-gray-50'
                     }`}
                   >
-                    {/* Thumbnail */}
-                    <div className="w-full sm:w-40 h-32 sm:h-auto rounded-2xl overflow-hidden mb-4 sm:mb-0 sm:mr-6 shrink-0 relative bg-gray-200">
+                    {/* Vehicle Image */}
+                    <div className="w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-white border border-gray-100 relative">
                       <img 
                         src={car.image} 
                         alt={car.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
                       />
-                      <div className="absolute top-2 right-2 bg-secondary/80 backdrop-blur-md text-primary font-bold text-xs px-2 py-1 rounded-lg">
-                        ₹{car.pricePerKm}/km
+                      <div className="absolute top-1 left-1 flex flex-col gap-0.5">
+                        <div className="bg-white/90 backdrop-blur-sm text-[8px] font-bold px-1.5 py-0.5 rounded border border-gray-100 shadow-sm">Verified</div>
                       </div>
                     </div>
 
-                    {/* Details */}
-                    <div className="flex-1 flex flex-col justify-center">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-lg font-bold text-secondary">{car.name}</h4>
-                        {isSelected && (
-                          <div className="bg-primary text-secondary p-1 rounded-full">
-                            <CheckCircle size={16} />
+                    {/* Vehicle Details */}
+                    <div className="flex-1 flex flex-col justify-between py-0.5">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-secondary text-sm sm:text-base leading-tight truncate mr-2">
+                            {car.name}
+                          </h4>
+                          {isSelected && <CheckCircle2 size={16} className="text-primary flex-shrink-0" />}
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 mt-2">
+                          <div className="flex items-center text-[9px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded tracking-tighter">
+                            <Users size={10} className="mr-1" />
+                            {car.seats} Pax
                           </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center text-gray-500 text-sm mb-3">
-                        <Users size={16} className="mr-1.5" />
-                        <span className="font-medium">{car.seats} Passenger Seats</span>
+                          <div className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-100 shadow-sm text-center">
+                            Ac
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-1.5">
-                        {car.features.map((feature, fIdx) => (
-                          <span 
-                            key={fIdx} 
-                            className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 border border-gray-200"
-                          >
-                            {feature}
-                          </span>
-                        ))}
+                      <div className="flex items-end justify-between mt-2">
+                        <div>
+                          <p className="text-[8px] font-bold text-gray-400 leading-none mb-1 opacity-70">Fare Starts At</p>
+                          <p className="text-xl font-black text-secondary leading-none tracking-tighter">
+                            ₹{car.pricePerKm}<span className="text-[10px] font-bold text-gray-400">/KM</span>
+                          </p>
+                        </div>
+                        <div className={`p-1.5 rounded-lg transition-all ${
+                          isSelected 
+                            ? 'bg-primary text-secondary shadow-sm ring-1 ring-primary/20' 
+                            : 'bg-gray-100 text-gray-400 group-hover:bg-primary/20 group-hover:text-secondary group-hover:scale-110'
+                        }`}>
+                          <ChevronRight size={16} />
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Quick Info Indicator */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Info size={12} className="text-gray-300" />
                     </div>
                   </motion.div>
                 );
@@ -111,10 +136,10 @@ const CarSelectionModal = ({ isOpen, onClose, selectedCarName, onSelect }) => {
             </div>
           </div>
 
-          {/* Footer - info only */}
-          <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
-            <p className="text-xs text-gray-400 font-medium italic text-center">
-              All our vehicles are sanitized and serviced regularly for your safety.
+          {/* Footer Info */}
+          <div className="p-4 bg-gray-50/80 border-t border-gray-100 text-center">
+            <p className="text-[9px] font-bold text-gray-400 italic">
+              *All vehicle types are subject to city-level availability and distance constraints
             </p>
           </div>
         </motion.div>
@@ -124,3 +149,4 @@ const CarSelectionModal = ({ isOpen, onClose, selectedCarName, onSelect }) => {
 };
 
 export default CarSelectionModal;
+

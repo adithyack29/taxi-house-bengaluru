@@ -1,28 +1,28 @@
 import React from 'react';
-import { Clock, Users, ShieldCheck, ThumbsUp } from 'lucide-react';
+import { Clock, Users, ShieldCheck, ThumbsUp, Star, Award, HeartHandshake, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHoverQuery } from '../hooks/useHoverQuery';
 
 const features = [
   {
-    icon: Clock,
-    title: '24/7 Service',
-    desc: 'Available round-the-clock for all your travel needs.'
-  },
-  {
-    icon: Users,
-    title: 'Professional Drivers',
-    desc: 'All our drivers are background-verified, courteous, and trained for safe driving.'
+    icon: Award,
+    title: 'Top Rated Service',
+    desc: 'Consistently rated 4.8+ by thousands of happy commuters across Bengaluru.'
   },
   {
     icon: ShieldCheck,
-    title: 'On-Time Pickup',
-    desc: 'Punctuality is our priority. We guarantee timely pickups and drops across Bengaluru.'
+    title: 'Safety First',
+    desc: 'Background-verified professional drivers and real-time GPS tracking for every ride.'
   },
   {
-    icon: ThumbsUp,
-    title: 'Clean Vehicles',
-    desc: 'Well-maintained and sanitized cars for a comfortable and hygienic travel experience.'
+    icon: Clock,
+    title: 'Zero Wait Time',
+    desc: 'Our optimized dispatch system ensures we are always at your doorstep on time.'
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Transparent Pricing',
+    desc: 'No hidden charges. What you see on the estimate is exactly what you pay.'
   }
 ];
 
@@ -30,41 +30,55 @@ const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.15 }
+    transition: { staggerChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
 };
 
 const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-8 lg:py-24 bg-white overflow-hidden px-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 lg:py-24 bg-white overflow-hidden px-6 sm:px-8 lg:px-12">
+      <div className="max-w-7xl mx-auto">
         
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-16"
-        >
-          <h2 className="text-2xl sm:text-4xl font-black text-secondary mb-3">Why Choose Taxi House?</h2>
-          <p className="text-sm sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            We prioritize your safety, comfort, and time. Here's why thousands of customers in Bengaluru trust us.
-          </p>
-        </motion.div>
+        <div className="flex flex-col lg:flex-row items-start justify-between mb-16 gap-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="text-left lg:max-w-2xl"
+          >
+            <div className="inline-flex items-center space-x-2 text-primary font-bold tracking-tight text-xs mb-4">
+              <Zap size={14} className="fill-primary" />
+              <span>The Taxi House Advantage</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight">
+              Why Choose Us For <br />
+              <span className="text-primary">Your Commute?</span>
+            </h2>
+          </motion.div>
+          
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-gray-500 font-medium max-w-md text-sm sm:text-base leading-relaxed"
+          >
+            We provide a premium travel experience that combines local expertise with professional standards across Karnataka.
+          </motion.p>
+        </div>
 
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {features.map((feature, idx) => {
             const Icon = feature.icon;
@@ -72,17 +86,13 @@ const WhyChooseUs = () => {
               <motion.div 
                 key={idx} 
                 variants={itemVariants}
-                whileHover={isHoverable ? { y: -5, backgroundColor: 'var(--color-bg-gray-50)' } : {}}
-                className="text-center p-3 sm:p-6 rounded-2xl transition-colors"
+                className="group p-8 rounded-3xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
               >
-                <motion.div 
-                  whileHover={isHoverable ? { scale: 1.1 } : {}}
-                  className="inline-flex items-center justify-center w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-primary/10 text-primary mb-3 sm:mb-6"
-                >
-                  <Icon size={18} sm:size={36} />
-                </motion.div>
-                <h3 className="text-base sm:text-xl font-bold text-secondary mb-1.5 sm:mb-3">{feature.title}</h3>
-                <p className="text-xs sm:text-base text-gray-500">{feature.desc}</p>
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-secondary text-primary mb-6 transition-transform">
+                  <Icon size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-secondary mb-3 tracking-tight">{feature.title}</h3>
+                <p className="text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
             );
           })}
@@ -94,3 +104,4 @@ const WhyChooseUs = () => {
 };
 
 export default WhyChooseUs;
+

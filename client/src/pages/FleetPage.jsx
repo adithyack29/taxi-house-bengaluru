@@ -24,7 +24,7 @@ const FleetPage = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
         >
-          <h1 className="text-lg sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4 text-white uppercase tracking-tight">Explore Our Fleet</h1>
+          <h1 className="text-lg sm:text-4xl md:text-7xl lg:text-8xl font-bold mb-3 sm:mb-4 text-white tracking-tight">Explore Our Fleet</h1>
           <p className="text-[10px] sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
             A diverse range of well-maintained vehicles for all your travel needs. Budget-friendly hatchbacks, comfortable sedans, and spacious SUVs.
           </p>

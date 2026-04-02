@@ -7,7 +7,7 @@ const CTASection = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="bg-primary text-secondary py-8 lg:py-12 relative overflow-hidden">
+    <section className="bg-primary text-secondary py-4 sm:py-8 lg:py-12 relative overflow-hidden">
       
       {/* Decorative shapes */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
@@ -20,10 +20,10 @@ const CTASection = () => {
         transition={{ duration: 0.6 }}
         className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"
       >
-        <h2 className="text-xl sm:text-3xl font-extrabold mb-3 sm:mb-4 leading-tight">
+        <h2 className="text-lg sm:text-3xl font-extrabold mb-1 sm:mb-4 leading-tight">
           Ready to book your next ride?
         </h2>
-        <p className="text-base sm:text-lg mb-6 sm:mb-8 font-medium opacity-90 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-[10px] sm:text-lg mb-3 sm:mb-8 font-medium opacity-90 max-w-2xl mx-auto leading-relaxed">
           Get transparent pricing, professional drivers, and 24/7 support throughout Bengaluru.
         </p>
 
@@ -32,9 +32,9 @@ const CTASection = () => {
             href="tel:+917795965640" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-secondary text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg ring-2 ring-transparent hover-desktop-only:ring-white/20"
+            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-secondary text-white px-6 py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg transition-all shadow-lg"
           >
-            <PhoneCall size={20} className="text-primary" />
+            <PhoneCall size={16} className="text-primary" />
             <span>Call Now: +91 77959 65640</span>
           </motion.a>
 
@@ -44,9 +44,9 @@ const CTASection = () => {
             rel="noopener noreferrer" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-green-500 text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-shadow duration-300 hover-desktop-only:shadow-2xl shadow-lg"
+            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-green-500 text-white px-6 py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg transition-all shadow-lg"
           >
-            <MessageCircle size={20} />
+            <MessageCircle size={16} />
             <span>Book via WhatsApp</span>
           </motion.a>
         </div>

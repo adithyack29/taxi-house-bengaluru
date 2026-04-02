@@ -27,7 +27,7 @@ const Fleet = ({ limit }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <span className="text-primary font-bold tracking-wider uppercase text-xs">Our Vehicles</span>
+          <span className="text-primary font-bold text-xs">Our Vehicles</span>
           <h2 className="text-3xl font-extrabold text-secondary mt-1 mb-3">Choose Your Ride</h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-base">
             From compact hatchbacks for quick city runs to luxury sedans for business travel, we have the perfect car for every journey.
