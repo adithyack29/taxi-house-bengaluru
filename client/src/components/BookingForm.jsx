@@ -93,10 +93,25 @@ const BookingForm = () => {
   useEffect(() => {
     if (activeTab === 'airport') {
       if (formData.airportType === 'to-airport') {
-        setFormData(prev => ({ ...prev, drop: AIRPORT_NAME, pickup: '' }));
+        setFormData(prev => ({ 
+          ...prev, 
+          drop: AIRPORT_NAME, 
+          pickup: prev.pickup === AIRPORT_NAME ? '' : prev.pickup 
+        }));
       } else {
-        setFormData(prev => ({ ...prev, pickup: AIRPORT_NAME, drop: '' }));
+        setFormData(prev => ({ 
+          ...prev, 
+          pickup: AIRPORT_NAME, 
+          drop: prev.drop === AIRPORT_NAME ? '' : prev.drop 
+        }));
       }
+    } else {
+      // Clear airport name when moving away from airport tab
+      setFormData(prev => ({
+        ...prev,
+        pickup: prev.pickup === AIRPORT_NAME ? '' : prev.pickup,
+        drop: prev.drop === AIRPORT_NAME ? '' : prev.drop
+      }));
     }
   }, [activeTab, formData.airportType]);
 
