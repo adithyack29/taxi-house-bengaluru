@@ -1,126 +1,182 @@
-import React, { useEffect } from 'react';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
-import BookingForm from '../components/BookingForm';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { MapPin, Phone, Mail, Send } from 'lucide-react';
 
 const Contact = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Simple message handler could be added here
+    alert('Thank you for contacting Taxi House! We will get back to you shortly.');
+  };
+
+  const contactInfo = [
+    {
+      title: 'Phone',
+      description: '24/7 Support',
+      detail: '+91 77959 65640',
+      href: 'tel:+917795965640',
+      icon: Phone,
+      bgColor: 'bg-primary/10',
+      textColor: 'text-primary'
+    },
+    {
+      title: 'Email',
+      description: 'Our team is here to help.',
+      detail: 'taxihousebengaluru@gmail.com',
+      href: 'mailto:taxihousebengaluru@gmail.com',
+      icon: Mail,
+      bgColor: 'bg-primary/10',
+      textColor: 'text-primary'
+    },
+    {
+      title: 'Office',
+      description: '',
+      detail: 'Shop No. 1, 2nd Floor, Survey No. 2, Near VNR Fuelling Station, Yadavanahalli, Bengaluru - 562107',
+      icon: MapPin,
+      bgColor: 'bg-primary/10',
+      textColor: 'text-primary'
+    }
+  ];
+
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="flex flex-col min-h-screen bg-background pb-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-gray-50 min-h-screen py-16 lg:py-24 px-6"
     >
-      
-      {/* Hero Banner for Contact */}
-      <div className="bg-secondary text-white py-10 sm:py-16 relative overflow-hidden text-center px-4">
-        <motion.h1 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-lg sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-3 sm:mb-6 tracking-tight"
-        >
-          Contact Us
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-[10px] sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed"
-        >
-          Need help with your booking? Have special requirements? Get in touch with our support team available 24/7.
-        </motion.p>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 w-full relative z-20">
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-[1fr_1.8fr] gap-10 items-start">
           
-          {/* Contact Info Sheet */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-white p-5 sm:p-8 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-100"
-          >
-            <div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-secondary mb-5 sm:mb-6">Get In Touch</h2>
-              
-              <ul className="space-y-5 sm:space-y-6">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 bg-primary/20 p-2.5 sm:p-3 rounded-xl text-primary inline-flex">
-                    <MapPin size={20} sm:size={22} />
+          {/* Left Column: Info Cards */}
+          <div className="space-y-6">
+            {contactInfo.map((info, idx) => {
+              const Icon = info.icon;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-5 hover:shadow-md transition-shadow"
+                >
+                  <div className={`flex-shrink-0 w-14 h-14 rounded-full ${info.bgColor} flex items-center justify-center ${info.textColor}`}>
+                    <Icon size={26} />
                   </div>
-                  <div className="ml-3 sm:ml-5">
-                    <h4 className="text-lg sm:text-lg font-bold text-secondary mb-0.5">Our Office</h4>
-                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                      Shop No. 1, 2nd Floor, Survey No. 2,<br />
-                      Near VNR Fuelling Station (Indian Oil Dealers),<br />
-                      Krishnanagar, Yadavanahalli,<br />
-                      Attibele Hobli, Anekal Taluk,<br />
-                      Bengaluru - 562107
-                    </p>
-                  </div>
-                </li>
-
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 bg-green-500/20 p-2.5 sm:p-3 rounded-xl text-green-600 inline-flex">
-                    <Phone size={20} sm:size={22} />
-                  </div>
-                  <div className="ml-3 sm:ml-5">
-                    <h4 className="text-lg sm:text-lg font-bold text-secondary mb-0.5">Call Us</h4>
-                    <div className="flex flex-col space-y-1">
-                      <a href="tel:+917795965640" className="text-gray-600 text-base sm:text-lg hover-desktop-only:text-primary transition">
-                        +91 77959 65640
+                  <div>
+                    <h3 className="text-xl font-bold text-secondary mb-1">{info.title}</h3>
+                    <p className="text-sm text-gray-400 font-medium mb-3">{info.description}</p>
+                    {info.href ? (
+                      <a href={info.href} className="text-lg font-bold text-primary hover:underline transition-all">
+                        {info.detail}
                       </a>
-                      <a href="tel:+918660484650" className="text-gray-600 text-base sm:text-lg hover-desktop-only:text-primary transition">
-                        +91 86604 84650
-                      </a>
-                    </div>
+                    ) : (
+                      <p className="text-sm font-semibold text-secondary leading-relaxed">
+                        {info.detail}
+                      </p>
+                    )}
                   </div>
-                </li>
+                </motion.div>
+              );
+            })}
+          </div>
 
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 bg-blue-500/20 p-2.5 sm:p-3 rounded-xl text-blue-600 inline-flex">
-                    <Mail size={20} sm:size={22} />
-                  </div>
-                  <div className="ml-3 sm:ml-5">
-                    <h4 className="text-lg sm:text-lg font-bold text-secondary mb-0.5">Email Support</h4>
-                    <a href="mailto:taxihousebengaluru@gmail.com" className="text-gray-600 text-lg hover-desktop-only:text-primary transition">
-                      taxihousebengaluru@gmail.com
-                    </a>
-                  </div>
-                </li>
-
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 bg-yellow-500/20 p-2.5 sm:p-3 rounded-xl text-yellow-600 inline-flex">
-                    <Clock size={20} sm:size={22} />
-                  </div>
-                  <div className="ml-3 sm:ml-5">
-                    <h4 className="text-lg sm:text-lg font-bold text-secondary mb-0.5">Working Hours</h4>
-                    <p className="text-gray-600 text-lg">24 Hours, 7 Days a Week</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </motion.div>
-
-          {/* Quick Booking Form placed as side by side */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="lg:mt-0 mt-8"
+          {/* Right Column: Contact Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl border border-gray-50 h-full"
           >
-            <BookingForm />
+            <h2 className="text-3xl font-extrabold text-secondary mb-8 leading-tight">
+              Get in Touch With Our <br />
+              <span className="text-primary">Cab Service in Bangalore</span>
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-bold text-secondary">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Your full name"
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="text-sm font-bold text-secondary">Phone</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Your phone number"
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-bold text-secondary">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Your email address"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="message" className="text-sm font-bold text-secondary">Message</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={5}
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Write your message here..."
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-5 bg-primary text-secondary font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 mt-4 group"
+              >
+                <Send size={20} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                Send Message
+              </button>
+            </form>
           </motion.div>
 
         </div>
       </div>
-      
     </motion.div>
   );
 };

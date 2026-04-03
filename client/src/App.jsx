@@ -4,6 +4,7 @@ import { Header as Navbar } from './components/ui/navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import Home from './pages/Home';
+import About from './pages/About';
 import Services from './pages/Services';
 import FleetPage from './pages/FleetPage';
 import Contact from './pages/Contact';
@@ -15,6 +16,7 @@ function App() {
         <main className="flex-grow pt-16 lg:pt-20">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/fleet" element={<FleetPage />} />
             <Route path="/contact" element={<Contact />} />
