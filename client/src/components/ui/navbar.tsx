@@ -59,16 +59,16 @@ export const Header = () => {
             <nav className={cn(
                 "w-full transition-all duration-300 ease-in-out border-b",
                 isScrolled 
-                    ? "bg-white/95 backdrop-blur-md shadow-lg py-2 border-gray-100" 
-                    : "bg-white py-3 border-transparent"
+                    ? "bg-white/95 backdrop-blur-md shadow-lg py-1.5 sm:py-2 border-gray-100" 
+                    : "bg-white py-2 sm:py-3 border-transparent"
             )}>
                 <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
                     {/* Logo Area */}
                     <div className="flex items-center">
                         <Link to="/" className="flex items-center group">
-                            <img src="/logo.png" alt="Taxi House" className="h-10 lg:h-12 w-auto object-contain transition-transform" />
-                            <div className="ml-3">
-                                <span className="text-xl lg:text-2xl font-bold tracking-tight text-secondary">Taxi <span className="text-primary">House</span></span>
+                            <img src="/logo.png" alt="Taxi House" className="h-8 lg:h-12 w-auto object-contain transition-transform" />
+                            <div className="ml-2 lg:ml-3">
+                                <span className="text-lg lg:text-2xl font-bold tracking-tight text-secondary">Taxi <span className="text-primary">House</span></span>
                             </div>
                         </Link>
                     </div>
@@ -142,8 +142,8 @@ export const Header = () => {
                             {/* Menu Header with Logo & Close */}
                             <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50">
                                 <div className="flex items-center">
-                                    <img src="/logo.png" alt="Taxi House" className="h-8 w-auto object-contain" />
-                                    <span className="ml-2 ttext-base font-bold text-secondary">Taxi <span className="text-primary">House</span></span>
+                                    <img src="/logo.png" alt="Taxi House" className="h-7 w-auto object-contain" />
+                                    <span className="ml-2 text-sm font-bold text-secondary">Taxi <span className="text-primary">House</span></span>
                                 </div>
                                 <button
                                     onClick={() => setMenuState(false)}
@@ -153,14 +153,14 @@ export const Header = () => {
                                 </button>
                             </div>
 
-                            <ul className="space-y-2">
+                            <ul className="space-y-1">
                                 {menuItems.map((item) => (
                                     <li key={item.name}>
                                         <Link 
                                             to={item.href}
                                             onClick={() => setMenuState(false)}
                                             className={cn(
-                                                "block p-4 rounded-xl text-lg font-bold transition-all",
+                                                "block p-3 rounded-xl text-base font-bold transition-all",
                                                 isActive(item.href) ? "bg-primary/10 text-primary" : "text-secondary active:bg-gray-50"
                                             )}
                                         >

@@ -5,23 +5,23 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <div className="relative min-h-[70vh] lg:min-h-[85vh] flex items-center bg-secondary pb-12 sm:pb-20 overflow-hidden">
+    <div className="relative min-h-[60vh] lg:min-h-[85vh] flex items-center bg-secondary pb-8 sm:pb-20 overflow-hidden">
       {/* Background Pattern - Subtle */}
       <div className="absolute inset-0 z-0 overflow-hidden opacity-[0.03]">
         <div className="absolute inset-x-0 top-0 h-full w-full bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:40px_40px]"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full relative z-[10] pt-12 lg:pt-16">
-        <div className="flex flex-col items-center text-center space-y-8 sm:space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full relative z-[10] pt-8 lg:pt-16">
+        <div className="flex flex-col items-center text-center space-y-6 sm:space-y-10">
           
           {/* Text Content */}
-          <div className="text-white space-y-5 max-w-4xl mx-auto">
+          <div className="text-white space-y-4 max-w-4xl mx-auto">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs tracking-widest border border-primary/20 backdrop-blur-sm"
+              className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] tracking-widest border border-primary/20 backdrop-blur-sm"
             >
-              <Award size={14} />
+              <Award size={12} />
               <span>Most Trusted Taxi Service</span>
             </motion.div>
 
@@ -29,7 +29,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight block"
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight block px-2"
             >
               Book Your Ride & <br />
               <span className="text-primary">Ride across Karnataka</span>
@@ -39,18 +39,18 @@ const Hero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-wrap items-center justify-center gap-6 pt-4"
+              className="flex flex-wrap items-center justify-center gap-4 pt-2"
             >
               <div className="flex items-center space-x-2">
                 <div className="flex -space-x-1">
-                  {[1,2,3,4,5].map(i => <Star key={i} size={14} className="fill-primary text-primary" />)}
+                  {[1,2,3,4,5].map(i => <Star key={i} size={12} className="fill-primary text-primary" />)}
                 </div>
-                <span className="text-xs font-bold text-gray-300">4.9/5 Rating</span>
+                <span className="text-[10px] font-bold text-gray-300">4.9/5 Rating</span>
               </div>
-              <div className="h-4 w-px bg-gray-700 hidden sm:block" />
+              <div className="h-3 w-px bg-gray-700 hidden sm:block" />
               <div className="flex items-center space-x-2">
-                <ShieldCheck size={16} className="text-primary" />
-                <span className="text-xs font-bold text-gray-300">Verified Professional Drivers</span>
+                <ShieldCheck size={14} className="text-primary" />
+                <span className="text-[10px] font-bold text-gray-300">Verified Drivers</span>
               </div>
             </motion.div>
 
@@ -58,9 +58,9 @@ const Hero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto leading-relaxed font-medium"
+              className="text-xs sm:text-base text-gray-400 max-w-lg mx-auto leading-relaxed font-medium px-4"
             >
-              Experience the gold standard of travel across Karnataka. Whether it's a quick airport transfer or a long outstation trip, we ensure safety, comfort, and punctuality—every single time.
+              Experience the gold standard of travel across Karnataka. Safe, comfortable, and punctual—every single time.
             </motion.p>
           </div>
 

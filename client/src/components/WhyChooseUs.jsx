@@ -43,21 +43,21 @@ const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-16 lg:py-24 bg-white overflow-hidden px-6 sm:px-8 lg:px-12">
+    <section className="py-10 sm:py-16 lg:py-24 bg-white overflow-hidden px-6 sm:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
         
-        <div className="flex flex-col lg:flex-row items-start justify-between mb-16 gap-8">
+        <div className="flex flex-col lg:flex-row items-start justify-between mb-10 sm:mb-16 gap-6 sm:gap-8">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="text-left lg:max-w-2xl"
           >
-            <div className="inline-flex items-center space-x-2 text-primary font-bold tracking-tight text-xs mb-4">
-              <Zap size={14} className="fill-primary" />
+            <div className="inline-flex items-center space-x-2 text-primary font-bold tracking-tight text-[10px] sm:text-xs mb-3 sm:mb-4">
+              <Zap size={12} sm:size={14} className="fill-primary" />
               <span>The Taxi House Advantage</span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight">
               Why Choose Us For <br />
               <span className="text-primary">Your Commute?</span>
             </h2>
@@ -78,7 +78,7 @@ const WhyChooseUs = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8"
         >
           {features.map((feature, idx) => {
             const Icon = feature.icon;
@@ -86,13 +86,13 @@ const WhyChooseUs = () => {
               <motion.div 
                 key={idx} 
                 variants={itemVariants}
-                className="group p-8 rounded-3xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
+                className="group p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-secondary text-primary mb-6 transition-transform">
-                  <Icon size={24} />
+                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-secondary text-primary mb-4 sm:mb-6 transition-transform">
+                  <Icon size={20} sm:size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-secondary mb-3 tracking-tight">{feature.title}</h3>
-                <p className="text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3 tracking-tight">{feature.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
             );
           })}

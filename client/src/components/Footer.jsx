@@ -18,8 +18,8 @@ const Footer = () => {
           
           {/* Quick Links */}
           <div className="col-span-1 text-center sm:text-left">
-            <h4 className="text-[10px] font-bold text-white/40 mb-2 sm:mb-6">Quick Links</h4>
-            <ul className="space-y-2 sm:space-y-4 text-xs sm:text-lg font-medium">
+            <h4 className="text-[10px] font-bold text-white/40 mb-1.5 sm:mb-6 uppercase tracking-wider">Quick Links</h4>
+            <ul className="space-y-1 sm:space-y-4 text-xs sm:text-lg font-medium">
               <li><Link to="/" className="text-white/80 hover:text-primary transition-all duration-300">Home</Link></li>
               <li><Link to="/services" className="text-white/80 hover:text-primary transition-all duration-300">Services</Link></li>
               <li><Link to="/fleet" className="text-white/80 hover:text-primary transition-all duration-300">Fleet</Link></li>
@@ -29,12 +29,12 @@ const Footer = () => {
 
           {/* Services */}
           <div className="col-span-1 text-center sm:text-left">
-            <h4 className="text-[10px] font-bold text-white/40 mb-2 sm:mb-6">Services</h4>
-            <ul className="space-y-2 sm:space-y-4 text-xs sm:text-lg font-medium text-white/80">
-              <li className="hover:text-primary transition-colors cursor-default text-xs sm:text-lg">Local</li>
-              <li className="hover:text-primary transition-colors cursor-default text-xs sm:text-lg">Airport</li>
-              <li className="hover:text-primary transition-colors cursor-default text-xs sm:text-lg">Outstation</li>
-              <li className="hover:text-primary transition-colors cursor-default text-xs sm:text-lg">Corporate</li>
+            <h4 className="text-[10px] font-bold text-white/40 mb-1.5 sm:mb-6 uppercase tracking-wider">Services</h4>
+            <ul className="space-y-1 sm:space-y-4 text-xs sm:text-lg font-medium text-white/80">
+              <li className="hover:text-primary transition-colors cursor-default">Local</li>
+              <li className="hover:text-primary transition-colors cursor-default">Airport</li>
+              <li className="hover:text-primary transition-colors cursor-default">Outstation</li>
+              <li className="hover:text-primary transition-colors cursor-default">Corporate</li>
             </ul>
           </div>
 

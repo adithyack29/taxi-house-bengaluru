@@ -34,7 +34,7 @@ const About = () => {
       className="bg-background min-h-screen pt-10"
     >
       {/* Hero Section */}
-      <section className="relative h-[45vh] flex items-center justify-center overflow-hidden bg-secondary text-white">
+      <section className="relative h-[35vh] sm:h-[45vh] flex items-center justify-center overflow-hidden bg-secondary text-white">
         <div className="absolute inset-0 z-0 scale-110">
           <img 
             src="/about-1.png" 
@@ -50,14 +50,14 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6">
+            <span className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-4 sm:mb-6">
               Our Story
             </span>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
+            <h1 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 sm:mb-8 leading-tight">
               Reliability is our <br />
               <span className="text-primary">Second Name</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xs sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed px-4">
               Serving Bengaluru and beyond since 2024, Taxi House is the gold standard in premium, safe, and professional transportation.
             </p>
           </motion.div>
@@ -66,20 +66,20 @@ const About = () => {
 
 
       {/* Story & Image Section */}
-      <section className="py-16 px-6">
+      <section className="py-10 sm:py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-8"
+              className="space-y-4 sm:space-y-8"
             >
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary tracking-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-secondary tracking-tight leading-tight">
                 Deep Roots in the <br />
                 <span className="text-primary">Silicon Valley of India</span>
               </h2>
-              <div className="space-y-6 text-gray-600 leading-relaxed text-base sm:text-lg">
+              <div className="space-y-4 sm:space-y-6 text-gray-600 leading-relaxed text-sm sm:text-lg">
                 <p>
                   Established in 2024, Taxi House grew from a single-car operation to one of Bengaluru's most trusted name in travel. We understand the unique pulse of this city—the fast-paced professional life, the vibrant tourism, and the need for reliable transport at any hour.
                 </p>
@@ -101,14 +101,14 @@ const About = () => {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-12"
+              className="space-y-8 sm:space-y-12"
             >
-              <div className="bg-secondary p-10 md:p-12 rounded-[2.5rem] text-white shadow-2xl">
-                <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                   <div className="w-2 h-8 bg-primary rounded-full" />
+              <div className="bg-secondary p-6 sm:p-10 md:p-12 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-2xl">
+                <h3 className="text-xl sm:text-2xl font-bold mb-5 sm:mb-8 flex items-center gap-3">
+                   <div className="w-1.5 h-6 bg-primary rounded-full" />
                    Our Mission
                 </h3>
-                <p className="text-lg text-gray-300 leading-relaxed italic mb-8">
+                <p className="text-sm sm:text-lg text-gray-300 leading-relaxed italic mb-6 sm:mb-8">
                   "To provide safe, reliable, and premium transportation solutions that allow our customers to navigate Bengaluru with complete peace of mind."
                 </p>
                 
@@ -135,11 +135,11 @@ const About = () => {
       </section>
 
       {/* CTA section (Simple) */}
-      <section className="bg-primary py-20 px-6 overflow-hidden relative">
+      <section className="bg-primary py-12 sm:py-20 px-6 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-bold text-secondary mb-8">
-            Experience the difference <br /> with Taxi House today.
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-secondary mb-6 sm:mb-8 leading-tight">
+            Experience the difference <br className="hidden sm:block" /> with Taxi House today.
           </h2>
           <button className="px-8 py-4 bg-secondary text-primary font-bold rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl group">
             <Link to="/#booking" className="flex items-center gap-2">

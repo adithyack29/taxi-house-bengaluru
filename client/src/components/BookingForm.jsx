@@ -243,11 +243,11 @@ const BookingForm = () => {
                 setActiveTab(tab.id);
                 setFareEstimate(null);
               }}
-              className={`flex-1 flex items-center justify-center space-x-2 py-4 text-xs sm:text-sm font-bold transition-all relative ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-3 sm:py-4 text-[10px] sm:text-sm font-bold transition-all relative ${
                 isActive ? 'text-secondary' : 'text-gray-400 hover:text-secondary/70'
               }`}
             >
-              <Icon size={16} className={isActive ? 'text-primary' : 'text-gray-400'} />
+              <Icon size={14} className={isActive ? 'text-primary' : 'text-gray-400'} />
               <span>{tab.label}</span>
               {isActive && (
                 <motion.div 
@@ -260,9 +260,9 @@ const BookingForm = () => {
         })}
       </div>
 
-      <div className="p-6 sm:p-8">
-        <h2 className="text-2xl font-black text-secondary mb-5 flex items-center space-x-3">
-          <div className="w-2 h-8 bg-primary rounded-full" />
+      <div className="p-4 sm:p-8">
+        <h2 className="text-lg sm:text-2xl font-black text-secondary mb-4 flex items-center space-x-3">
+          <div className="w-1.5 h-6 bg-primary rounded-full" />
           <span>Book Your <span className="text-primary italic">Perfect Ride</span></span>
         </h2>
 
@@ -279,7 +279,7 @@ const BookingForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Specific Selectors based on Tab */}
           {activeTab === 'outstation' && (
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4 sm:mb-6">
               <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
                 {[
                   { id: 'two-way', label: 'Round Trip', icon: RefreshCw },
@@ -292,13 +292,13 @@ const BookingForm = () => {
                       key={type.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, tripType: type.id })}
-                      className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex items-center space-x-2 px-4 sm:px-6 py-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
                         isSelected 
                           ? 'bg-white text-orange-600 shadow-sm ring-1 ring-gray-100' 
                           : 'text-gray-500 hover:text-gray-700'
                       }`}
                     >
-                      <Icon size={14} className={isSelected ? 'text-orange-500' : 'text-gray-400'} />
+                      <Icon size={12} className={isSelected ? 'text-orange-500' : 'text-gray-400'} />
                       <span>{type.label}</span>
                     </button>
                   );
@@ -308,9 +308,9 @@ const BookingForm = () => {
           )}
 
           {activeTab === 'outstation' ? (
-            <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-300">
               {/* Row 1: From/To */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 relative">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">From</label>
                   <LocationInput
@@ -378,7 +378,7 @@ const BookingForm = () => {
               )}
 
               {/* Row 2: Date/Time/Return */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Date</label>
                   <CustomDatePicker 
@@ -424,9 +424,9 @@ const BookingForm = () => {
               </button>
             </div>
           ) : activeTab === 'local' ? (
-            <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300">
               {/* Row 1: City & Package */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">City</label>
                   <div className="relative group">
@@ -527,7 +527,7 @@ const BookingForm = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-300">
               {/* Airport Tab Content */}
               <div className="flex justify-center mb-4">
                 <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
