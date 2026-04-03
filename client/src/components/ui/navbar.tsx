@@ -95,7 +95,7 @@ export const Header = () => {
                     </div>
 
                     {/* CTA Area */}
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                         <div className="hidden sm:flex items-center space-x-2 mr-1">
                         </div>
                         
@@ -103,7 +103,7 @@ export const Header = () => {
                             asChild
                             variant="cool"
                             size="default"
-                            className="font-bold text-sm px-6 py-2.5 bg-primary text-secondary transition-none shadow-none border-none pointer-events-auto"
+                            className="font-bold text-[11px] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-secondary transition-none shadow-none border-none pointer-events-auto"
                         >
                             <Link to="/#booking">
                                 <span>Book Now</span>

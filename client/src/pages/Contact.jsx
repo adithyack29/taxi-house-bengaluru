@@ -57,13 +57,13 @@ const Contact = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-gray-50 min-h-screen py-16 lg:py-24 px-6"
+      className="bg-gray-50 min-h-screen py-8 sm:py-16 lg:py-24 px-4 sm:px-6"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-[1fr_1.8fr] gap-10 items-start">
+        <div className="grid lg:grid-cols-[1fr_1.8fr] gap-6 sm:gap-10 items-start">
           
           {/* Left Column: Info Cards */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {contactInfo.map((info, idx) => {
               const Icon = info.icon;
               return (
@@ -72,20 +72,20 @@ const Contact = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-5 hover:shadow-md transition-shadow"
+                  className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-4 sm:gap-5 hover:shadow-md transition-shadow"
                 >
-                  <div className={`flex-shrink-0 w-14 h-14 rounded-full ${info.bgColor} flex items-center justify-center ${info.textColor}`}>
-                    <Icon size={26} />
+                  <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full ${info.bgColor} flex items-center justify-center ${info.textColor}`}>
+                    <Icon size={22} sm:size={26} />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-secondary mb-1">{info.title}</h3>
-                    <p className="text-sm text-gray-400 font-medium mb-3">{info.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-secondary mb-0.5 sm:mb-1">{info.title}</h3>
+                    <p className="text-xs sm:text-sm text-gray-400 font-medium mb-2 sm:mb-3">{info.description}</p>
                     {info.href ? (
-                      <a href={info.href} className="text-lg font-bold text-primary hover:underline transition-all">
+                      <a href={info.href} className="text-base sm:text-lg font-extrabold text-primary hover:underline transition-all block break-all">
                         {info.detail}
                       </a>
                     ) : (
-                      <p className="text-sm font-semibold text-secondary leading-relaxed">
+                      <p className="text-sm sm:text-base font-semibold text-secondary leading-relaxed break-words">
                         {info.detail}
                       </p>
                     )}
@@ -100,17 +100,17 @@ const Contact = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl border border-gray-50 h-full"
+            className="bg-white p-6 sm:p-10 md:p-12 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl border border-gray-50 h-full"
           >
-            <h2 className="text-3xl font-extrabold text-secondary mb-8 leading-tight">
-              Get in Touch With Our <br />
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-secondary mb-6 sm:mb-8 leading-tight">
+              Get in Touch With Our <br className="hidden sm:block" />
               <span className="text-primary">Cab Service in Bangalore</span>
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-bold text-secondary">Name</label>
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <label htmlFor="name" className="text-xs sm:text-sm font-bold text-secondary uppercase tracking-wide">Name</label>
                   <input
                     type="text"
                     id="name"
@@ -119,11 +119,11 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Your full name"
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="phone" className="text-sm font-bold text-secondary">Phone</label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <label htmlFor="phone" className="text-xs sm:text-sm font-bold text-secondary uppercase tracking-wide">Phone</label>
                   <input
                     type="tel"
                     id="phone"
@@ -132,13 +132,13 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Your phone number"
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-bold text-secondary">Email</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="email" className="text-xs sm:text-sm font-bold text-secondary uppercase tracking-wide">Email Address</label>
                 <input
                   type="email"
                   id="email"
@@ -147,29 +147,29 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Your email address"
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium transition-all"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="message" className="text-sm font-bold text-secondary">Message</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="message" className="text-xs sm:text-sm font-bold text-secondary uppercase tracking-wide">Message</label>
                 <textarea
                   id="message"
                   name="message"
                   required
-                  rows={5}
+                  rows={4}
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Write your message here..."
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none shadow-inner"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-5 bg-primary text-secondary font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 mt-4 group"
+                className="w-full py-4 sm:py-5 bg-primary text-secondary font-bold text-base sm:text-lg rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-primary/20 mt-2 sm:mt-4 group"
               >
-                <Send size={20} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                <Send size={18} sm:size={20} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
                 Send Message
               </button>
             </form>
