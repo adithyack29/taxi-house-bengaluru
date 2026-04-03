@@ -21,9 +21,9 @@ const Footer = () => {
             <h4 className="text-[10px] font-bold text-white/40 mb-1.5 sm:mb-6 uppercase tracking-wider">Quick Links</h4>
             <ul className="space-y-1 sm:space-y-4 text-xs sm:text-lg font-medium">
               <li><Link to="/" className="text-white/80 hover:text-primary transition-all duration-300">Home</Link></li>
-              <li><Link to="/services" className="text-white/80 hover:text-primary transition-all duration-300">Services</Link></li>
-              <li><Link to="/fleet" className="text-white/80 hover:text-primary transition-all duration-300">Fleet</Link></li>
-              <li><Link to="/contact" className="text-white/80 hover:text-primary transition-all duration-300">Contact</Link></li>
+              <li><Link to="/about" className="text-white/80 hover:text-primary transition-all duration-300">About Us</Link></li>
+              <li><Link to="/services" className="text-white/80 hover:text-primary transition-all duration-300">Our Services</Link></li>
+              <li><Link to="/contact" className="text-white/80 hover:text-primary transition-all duration-300">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -31,10 +31,11 @@ const Footer = () => {
           <div className="col-span-1 text-center sm:text-left">
             <h4 className="text-[10px] font-bold text-white/40 mb-1.5 sm:mb-6 uppercase tracking-wider">Services</h4>
             <ul className="space-y-1 sm:space-y-4 text-xs sm:text-lg font-medium text-white/80">
-              <li className="hover:text-primary transition-colors cursor-default">Local</li>
-              <li className="hover:text-primary transition-colors cursor-default">Airport</li>
-              <li className="hover:text-primary transition-colors cursor-default">Outstation</li>
-              <li className="hover:text-primary transition-colors cursor-default">Corporate</li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Outstation Cabs</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Airport Transfers</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Local Packages</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">One Way Drops</Link></li>
+              <li><Link to="/services" className="hover:text-primary transition-colors">Corporate Rentals</Link></li>
             </ul>
           </div>
 
@@ -43,18 +44,18 @@ const Footer = () => {
             <h4 className="text-[10px] sm:text-sm font-bold text-white/40 mb-3 text-center sm:text-left">Get in Touch</h4>
             <div className="flex flex-col space-y-4 items-center sm:items-start justify-center sm:justify-start">
               <div className="flex items-center space-x-3 sm:space-x-4 group">
-                <Phone className="text-primary group-hover:scale-110 transition-transform" size={16} sm:size={20} />
+                <Phone className="text-primary group-hover:scale-110 transition-transform" size={18} />
                 <div className="flex flex-col">
-                  <a href="tel:+917795965640" className="text-base sm:text-xl font-bold text-white/90 hover:text-primary transition-all duration-300">+91 77959 65640</a>
-                  <a href="tel:+918660484650" className="text-base sm:text-xl font-bold text-white/90 hover:text-primary transition-all duration-300">+91 86604 84650</a>
+                  <a href="tel:+917795965640" className="text-base sm:text-lg font-bold text-white/90 hover:text-primary transition-all duration-300 tracking-tight">+91 77959 65640</a>
+                  <a href="tel:+918660484650" className="text-base sm:text-lg font-bold text-white/90 hover:text-primary transition-all duration-300 tracking-tight">+91 86604 84650</a>
                 </div>
               </div>
               <div className="flex items-center space-x-3 sm:space-x-4 group">
-                <Mail className="text-primary group-hover:scale-110 transition-transform" size={16} sm:size={20} />
-                <a href="mailto:taxihousebengaluru@gmail.com" className="text-xs sm:text-xl font-medium text-white/80 hover:text-primary transition-all duration-300">taxihousebengaluru@gmail.com</a>
+                <Mail className="text-primary group-hover:scale-110 transition-transform" size={18} />
+                <a href="mailto:taxihousebengaluru@gmail.com" className="text-xs sm:text-base font-medium text-white/80 hover:text-primary transition-all duration-300">taxihousebengaluru@gmail.com</a>
               </div>
               <div className="flex items-start space-x-4 group">
-                <MapPin className="text-primary group-hover:scale-110 transition-transform mt-1" size={20} />
+                <MapPin className="text-primary group-hover:scale-110 transition-transform mt-1" size={18} />
                 <span className="text-[10px] sm:text-sm font-medium text-white/80 text-center sm:text-left leading-tight">
                   Shop No. 1, 2nd Floor, Survey No. 2,<br />
                   Near VNR Fuelling Station (Indian Oil Dealers),<br />

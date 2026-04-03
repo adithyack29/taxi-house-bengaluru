@@ -15,6 +15,7 @@ const VEHICLE_OPTIONS = [
 ];
 
 const BookingForm = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('outstation'); // 'outstation', 'local', 'airport'
   const [formData, setFormData] = useState({
     name: '',
@@ -151,74 +152,30 @@ const BookingForm = () => {
     setFormData(prev => ({ ...prev, stops: newStops }));
   };
 
-  const calculateFare = async () => {
-    if (!formData.pickup || (activeTab !== 'local' && !formData.drop)) {
-      setStatus({ type: 'error', msg: 'Please enter required locations first.' });
-      return;
-    }
-
-    setCalculating(true);
-    setFareEstimate(null);
-    try {
-      // Simulate/Calculate logic
-      const pickupRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.pickup)}&countrycodes=in&limit=1`);
-      const pickupData = await pickupRes.json();
-      
-      let distanceKm = 15; // default/fallback
-      if (pickupData.length > 0 && formData.drop) {
-        const dropRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.drop)}&countrycodes=in&limit=1`);
-        const dropData = await dropRes.json();
-        
-        if (dropData.length > 0) {
-          const pLat = pickupData[0].lat;
-          const pLon = pickupData[0].lon;
-          const dLat = dropData[0].lat;
-          const dLon = dropData[0].lon;
-          const osrmRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${pLon},${pLat};${dLon},${dLat}?overview=false`);
-          const osrmData = await osrmRes.json();
-          if (osrmData.routes && osrmData.routes.length > 0) {
-            distanceKm = osrmData.routes[0].distance / 1000;
-          }
-        }
-      }
-
-      const pricePerKm = selectedCar ? selectedCar.pricePerKm : 14;
-      let total = distanceKm * pricePerKm;
-      
-      if (activeTab === 'outstation' && formData.tripType === 'two-way') {
-        total = total * 2;
-      } else if (activeTab === 'local') {
-        // Mock local pricing
-        total = formData.localPackage.includes('8hr') ? 2500 : 1500;
-      } else if (activeTab === 'airport') {
-        total = 800; // Flat airport rate mock
-      }
-
-      setFareEstimate({
-        distance: distanceKm.toFixed(1),
-        total: Math.ceil(total)
-      });
-    } catch (err) {
-      console.error(err);
-      setStatus({ type: 'error', msg: 'Error calculating fare.' });
-    } finally {
-      setCalculating(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setStatus({ type: 'loading', msg: 'Processing your request...' });
     
-    // Simulate a brief delay for a "native app" feel
-    setTimeout(() => {
-      setStatus({ 
-        type: 'success', 
-        msg: 'Booking request sent successfully! Our team will contact you shortly to confirm.' 
-      });
-      // Clear form or status after delay
-      setTimeout(() => setStatus(null), 6000);
-    }, 1500);
+    // Redirect to car selection page with query params
+    const params = new URLSearchParams({
+      pickup: formData.pickup,
+      drop: formData.drop,
+      date: formData.date,
+      time: formData.time,
+      type: activeTab,
+      stops: JSON.stringify(formData.stops)
+    });
+
+    // Add trip-specific params only if they belong to the active tab
+    if (activeTab === 'outstation') {
+      params.set('trip', formData.tripType);
+      params.set('returnDate', formData.returnDate || '');
+    } else if (activeTab === 'local') {
+      params.set('package', formData.localPackage);
+    } else if (activeTab === 'airport') {
+      params.set('airport', formData.airportType);
+    }
+    
+    navigate(`/select-vehicle?${params.toString()}`);
   };
 
   const tabs = [
@@ -610,34 +567,6 @@ const BookingForm = () => {
                 </div>
               </div>
 
-              {/* Vehicle Selection Section */}
-              <div className="space-y-3 mt-6">
-                <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Select Vehicle Type</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {VEHICLE_OPTIONS.map((car) => {
-                    const isSelected = formData.carType === car.name;
-                    return (
-                      <button
-                        key={car.id}
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, carType: car.name });
-                          setFareEstimate(null);
-                        }}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${
-                          isSelected 
-                            ? 'border-primary bg-primary/5 text-primary shadow-sm' 
-                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
-                        }`}
-                      >
-                        <Car size={20} className={isSelected ? 'text-primary' : 'text-gray-400'} />
-                        <span className="text-[10px] sm:text-xs font-bold mt-1 tracking-tight">{car.name}</span>
-                        <span className="text-[9px] opacity-70 italic">{car.seats} Seats</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
               <button 
                 type="submit" 

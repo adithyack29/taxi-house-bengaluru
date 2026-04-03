@@ -1,28 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Send, CheckCircle, XCircle } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppButton';
+import { supabase } from '../lib/supabase';
 
 const Contact = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     message: ''
   });
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simple message handler could be added here
-    alert('Thank you for contacting Taxi House! We will get back to you shortly.');
+    setStatus('loading');
+    
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert([
+          {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            message: formData.message
+          }
+        ]);
+
+      if (error) throw error;
+
+      setStatus('success');
+      setFormData({ name: '', phone: '', email: '', message: '' });
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 5000);
+    }
   };
 
   const contactInfo = [
@@ -177,10 +201,31 @@ const Contact = () => {
 
               <button
                 type="submit"
-                className="w-full py-4 sm:py-5 bg-primary text-secondary font-bold text-base sm:text-lg rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-primary/20 mt-2 sm:mt-4 group"
+                disabled={status === 'loading'}
+                className={`w-full py-4 sm:py-5 font-bold text-base sm:text-lg rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 transition-all shadow-lg mt-2 sm:mt-4 group ${
+                  status === 'success' ? 'bg-green-500 text-white shadow-green-200' :
+                  status === 'error' ? 'bg-red-500 text-white shadow-red-200' :
+                  'bg-primary text-secondary shadow-primary/20'
+                }`}
               >
-                <Send size={16} sm:size={20} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
-                Send Message
+                {status === 'loading' ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-secondary border-t-transparent" />
+                ) : status === 'success' ? (
+                  <>
+                    <CheckCircle size={20} />
+                    Message Sent!
+                  </>
+                ) : status === 'error' ? (
+                  <>
+                    <XCircle size={20} />
+                    Error. Try Again.
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} sm:size={20} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                    Send Message
+                  </>
+                )}
               </button>
             </form>
           </motion.div>
