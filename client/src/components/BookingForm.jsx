@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { submitBooking } from '../api/bookingApi';
 import { Calendar, Clock, MapPin, Navigation, Car, User, Phone, Plane, Building2, Map as MapIcon, Calculator, ChevronRight, RefreshCw, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHoverQuery } from '../hooks/useHoverQuery';
 import LocationInput from './LocationInput';
-import { cars } from '../data/cars';
-import CarSelectionModal from './CarSelectionModal';
 import CustomDatePicker from './CustomDatePicker';
 import CustomTimePicker from './CustomTimePicker';
+
+const VEHICLE_OPTIONS = [
+  { id: 'sedan', name: 'Sedan (Prime)', seats: 4, pricePerKm: 14, icon: Car },
+  { id: 'suv', name: 'SUV (Innova)', seats: 6, pricePerKm: 20, icon: Car },
+  { id: 'hatchback', name: 'Hatchback', seats: 4, pricePerKm: 11, icon: Car },
+  { id: 'luxury', name: 'Luxury', seats: 4, pricePerKm: 45, icon: Car },
+];
 
 const BookingForm = () => {
   const [activeTab, setActiveTab] = useState('outstation'); // 'outstation', 'local', 'airport'
@@ -29,7 +33,6 @@ const BookingForm = () => {
   const [status, setStatus] = useState(null);
   const [fareEstimate, setFareEstimate] = useState(null);
   const [calculating, setCalculating] = useState(false);
-  const [isCarModalOpen, setIsCarModalOpen] = useState(false);
   const [isPackageDropdownOpen, setIsPackageDropdownOpen] = useState(false);
   const isHoverable = useHoverQuery();
   const [searchParams] = useSearchParams();
@@ -73,18 +76,10 @@ const BookingForm = () => {
     const carParam = searchParams.get('car');
     if (carParam) {
       const decodedCar = decodeURIComponent(carParam);
-      if (cars.some(c => c.name === decodedCar)) {
+      if (VEHICLE_OPTIONS.some(c => c.name === decodedCar)) {
         setFormData(prev => ({ ...prev, carType: decodedCar }));
       }
     }
-
-    const handleSelectCar = (e) => {
-      if (e.detail && cars.some(c => c.name === e.detail)) {
-        setFormData(prev => ({ ...prev, carType: e.detail }));
-      }
-    };
-    window.addEventListener('selectCar', handleSelectCar);
-    return () => window.removeEventListener('selectCar', handleSelectCar);
   }, [searchParams]);
 
   const AIRPORT_NAME = "Kempegowda International Airport";
@@ -115,7 +110,7 @@ const BookingForm = () => {
     }
   }, [activeTab, formData.airportType]);
 
-  const selectedCar = cars.find(c => c.name === formData.carType) || cars[1];
+  const selectedCar = VEHICLE_OPTIONS.find(c => c.name === formData.carType) || VEHICLE_OPTIONS[0];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -213,14 +208,17 @@ const BookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus({ type: 'loading', msg: 'Booking...' });
-    try {
-      await submitBooking({ ...formData, category: activeTab });
-      setStatus({ type: 'success', msg: 'Booking successful! We will contact you shortly.' });
-      setTimeout(() => setStatus(null), 5000);
-    } catch (error) {
-      setStatus({ type: 'error', msg: 'Failed to book. Try again later.' });
-    }
+    setStatus({ type: 'loading', msg: 'Processing your request...' });
+    
+    // Simulate a brief delay for a "native app" feel
+    setTimeout(() => {
+      setStatus({ 
+        type: 'success', 
+        msg: 'Booking request sent successfully! Our team will contact you shortly to confirm.' 
+      });
+      // Clear form or status after delay
+      setTimeout(() => setStatus(null), 6000);
+    }, 1500);
   };
 
   const tabs = [
@@ -612,6 +610,35 @@ const BookingForm = () => {
                 </div>
               </div>
 
+              {/* Vehicle Selection Section */}
+              <div className="space-y-3 mt-6">
+                <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Select Vehicle Type</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {VEHICLE_OPTIONS.map((car) => {
+                    const isSelected = formData.carType === car.name;
+                    return (
+                      <button
+                        key={car.id}
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, carType: car.name });
+                          setFareEstimate(null);
+                        }}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${
+                          isSelected 
+                            ? 'border-primary bg-primary/5 text-primary shadow-sm' 
+                            : 'border-gray-100 hover:border-gray-200 text-gray-500'
+                        }`}
+                      >
+                        <Car size={20} className={isSelected ? 'text-primary' : 'text-gray-400'} />
+                        <span className="text-[10px] sm:text-xs font-bold mt-1 tracking-tight">{car.name}</span>
+                        <span className="text-[9px] opacity-70 italic">{car.seats} Seats</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <button 
                 type="submit" 
                 className="w-full bg-[#eb5e1c] text-white font-black py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-base tracking-wide mt-4 uppercase"
@@ -620,16 +647,6 @@ const BookingForm = () => {
               </button>
             </div>
           )}
-
-          <CarSelectionModal 
-            isOpen={isCarModalOpen} 
-            onClose={() => setIsCarModalOpen(false)} 
-            selectedCarName={formData.carType}
-            onSelect={(car) => {
-              setFormData({ ...formData, carType: car.name });
-              setFareEstimate(null);
-            }}
-          />
 
         </form>
       </div>

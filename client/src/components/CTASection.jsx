@@ -2,7 +2,7 @@ import React from 'react';
 import { PhoneCall } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHoverQuery } from '../hooks/useHoverQuery';
-import WhatsAppIcon from './WhatsAppIcon';
+import { WhatsAppIcon } from './WhatsAppButton';
 
 const CTASection = () => {
   const isHoverable = useHoverQuery();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
-import WhatsAppIcon from '../components/WhatsAppIcon';
+import { WhatsAppIcon } from '../components/WhatsAppButton';
 
 const Contact = () => {
   useEffect(() => {

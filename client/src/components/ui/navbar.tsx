@@ -1,7 +1,6 @@
 'use client'
 import { Link, useLocation } from 'react-router-dom'
 import { Equal, X, Phone, Mail } from 'lucide-react'
-import { Button } from '@/components/ui/liquid-glass-button'
 import React from 'react'
 import { cn } from '@/lib/utils' 
 import { motion, AnimatePresence } from 'framer-motion'
@@ -99,16 +98,12 @@ export const Header = () => {
                         <div className="hidden sm:flex items-center space-x-2 mr-1">
                         </div>
                         
-                        <Button
-                            asChild
-                            variant="cool"
-                            size="default"
-                            className="font-bold text-[11px] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-secondary transition-none shadow-none border-none pointer-events-auto"
+                        <Link 
+                            to="/#booking"
+                            className="font-bold text-[11px] sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-secondary rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
                         >
-                            <Link to="/#booking">
-                                <span>Book Now</span>
-                            </Link>
-                        </Button>
+                            <span>Book Now</span>
+                        </Link>
 
                         {/* Mobile Toggle */}
                         <button

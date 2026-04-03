@@ -2,8 +2,6 @@
   "name": "taxihouse-monorepo",
   "private": true,
   "scripts": {
-    "build-client": "npm run build --prefix client",
-    "build-backend": "npm install --prefix backend",
-    "build": "npm run build-client && npm run build-backend"
+    "build": "npm run build --prefix client"
   }
 }
