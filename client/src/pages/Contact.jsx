@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
+import WhatsAppIcon from '../components/WhatsAppIcon';
 
 const Contact = () => {
   useEffect(() => {
@@ -33,6 +34,15 @@ const Contact = () => {
       icon: Phone,
       bgColor: 'bg-primary/10',
       textColor: 'text-primary'
+    },
+    {
+      title: 'WhatsApp',
+      description: 'Quick Response',
+      detail: '+91 77959 65640',
+      href: 'https://wa.me/917795965640',
+      icon: WhatsAppIcon,
+      bgColor: 'bg-[#25D366]/10',
+      textColor: 'text-[#25D366]'
     },
     {
       title: 'Email',

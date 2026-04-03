@@ -1,7 +1,8 @@
 import React from 'react';
-import { PhoneCall, MessageCircle } from 'lucide-react';
+import { PhoneCall } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHoverQuery } from '../hooks/useHoverQuery';
+import WhatsAppIcon from './WhatsAppIcon';
 
 const CTASection = () => {
   const isHoverable = useHoverQuery();
@@ -44,9 +45,9 @@ const CTASection = () => {
             rel="noopener noreferrer" 
             whileHover={isHoverable ? { scale: 1.05 } : {}}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-green-500 text-white px-6 py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg transition-all shadow-lg"
+            className="flex items-center justify-center space-x-3 w-full sm:w-auto bg-[#25D366] text-white px-6 py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg transition-all shadow-lg"
           >
-            <MessageCircle size={16} />
+            <WhatsAppIcon size={18} />
             <span>Book via WhatsApp</span>
           </motion.a>
         </div>
