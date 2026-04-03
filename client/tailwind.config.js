@@ -12,7 +12,7 @@ export default {
         background: "#F9FAFB"
       },
       fontFamily: {
-        sans: ['-apple-system', 'system-ui', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif']
+        sans: ['Inter', '-apple-system', 'system-ui', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif']
       }
     },
   },
