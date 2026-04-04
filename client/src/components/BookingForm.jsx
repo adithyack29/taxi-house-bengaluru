@@ -8,10 +8,10 @@ import CustomDatePicker from './CustomDatePicker';
 import CustomTimePicker from './CustomTimePicker';
 
 const VEHICLE_OPTIONS = [
-  { id: 'sedan', name: 'Sedan (Prime)', seats: 4, pricePerKm: 14, icon: Car },
-  { id: 'suv', name: 'SUV (Innova)', seats: 6, pricePerKm: 20, icon: Car },
-  { id: 'hatchback', name: 'Hatchback', seats: 4, pricePerKm: 11, icon: Car },
-  { id: 'luxury', name: 'Luxury', seats: 4, pricePerKm: 45, icon: Car },
+  { id: '21-seater-ac', name: '21 Seater AC Bus', seats: 21, pricePerKm: 34, icon: Car },
+  { id: '40-seater-ac', name: '40 Seater AC Bus', seats: 40, pricePerKm: 64, icon: Car },
+  { id: '50-seater-ac', name: '50 Seater AC Bus', seats: 50, pricePerKm: 58, icon: Car },
+  { id: 'luxury-bus', name: 'Luxury Bus', seats: 40, pricePerKm: 75, icon: Car },
 ];
 
 const BookingForm = () => {
@@ -21,12 +21,15 @@ const BookingForm = () => {
     name: '',
     phone: '',
     pickup: '',
+    pickupCoords: null,
     drop: '',
+    dropCoords: null,
     date: new Date().toISOString().split('T')[0],
     time: '',
     carType: 'Sedan (Prime)',
     tripType: 'one-way', // for outstation: one-way/two-way
     stops: [], // New multi-stop support for outstation
+    stopCoords: [], // Coordinates for multi-stop
     localPackage: '8hr/80km',
     airportType: 'to-airport' // to-airport/from-airport
   });
@@ -38,7 +41,14 @@ const BookingForm = () => {
   const isHoverable = useHoverQuery();
   const [searchParams] = useSearchParams();
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const getTodayStr = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const [todayStr, setTodayStr] = useState(getTodayStr());
+
+  // Update today indicator every minute
+  useEffect(() => {
+    const timer = setInterval(() => setTodayStr(getTodayStr()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Helper to add days to a date string
   const addDays = (dateStr, days) => {
@@ -50,11 +60,15 @@ const BookingForm = () => {
 
   const maxReturnDate = formData.date ? addDays(formData.date, 7) : '';
 
-  // Helper to get next available valid time slot
-  const getNextAvailableTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 30);
-    const minutes = now.getMinutes();
+  // Helper to get next available valid time slot with day rollover support
+  const getNextAvailableTime = (baseDate = new Date()) => {
+    const checkTime = new Date(baseDate);
+    const originalDate = checkTime.getDate();
+    
+    // Add 30m buffer
+    checkTime.setMinutes(checkTime.getMinutes() + 30);
+    
+    const minutes = checkTime.getMinutes();
     let roundedMinutes;
     
     if (minutes < 15) roundedMinutes = 15;
@@ -62,17 +76,28 @@ const BookingForm = () => {
     else if (minutes < 45) roundedMinutes = 45;
     else {
       roundedMinutes = 0;
-      now.setHours(now.getHours() + 1);
+      checkTime.setHours(checkTime.getHours() + 1);
     }
     
-    const h = now.getHours().toString().padStart(2, '0');
+    const h = checkTime.getHours().toString().padStart(2, '0');
     const m = roundedMinutes.toString().padStart(2, '0');
-    return `${h}:${m}`;
+    
+    return {
+      time: `${h}:${m}`,
+      rolledOver: checkTime.getDate() !== originalDate
+    };
   };
 
   useEffect(() => {
-    // Set initial available time
-    setFormData(prev => ({ ...prev, time: getNextAvailableTime() }));
+    // Set initial available time and check for mid-night rollover
+    const { time, rolledOver } = getNextAvailableTime();
+    const initialDate = rolledOver ? addDays(todayStr, 1) : todayStr;
+
+    setFormData(prev => ({ 
+      ...prev, 
+      time,
+      date: initialDate
+    }));
     
     const carParam = searchParams.get('car');
     if (carParam) {
@@ -81,7 +106,7 @@ const BookingForm = () => {
         setFormData(prev => ({ ...prev, carType: decodedCar }));
       }
     }
-  }, [searchParams]);
+  }, [searchParams, todayStr]);
 
   const AIRPORT_NAME = "Kempegowda International Airport";
 
@@ -92,13 +117,17 @@ const BookingForm = () => {
         setFormData(prev => ({ 
           ...prev, 
           drop: AIRPORT_NAME, 
-          pickup: prev.pickup === AIRPORT_NAME ? '' : prev.pickup 
+          dropCoords: { lat: 13.1986, lng: 77.7066 }, // Yelahanka/Airport Coords
+          pickup: prev.pickup === AIRPORT_NAME ? '' : prev.pickup,
+          pickupCoords: prev.pickup === AIRPORT_NAME ? null : prev.pickupCoords
         }));
       } else {
         setFormData(prev => ({ 
           ...prev, 
           pickup: AIRPORT_NAME, 
-          drop: prev.drop === AIRPORT_NAME ? '' : prev.drop 
+          pickupCoords: { lat: 13.1986, lng: 77.7066 },
+          drop: prev.drop === AIRPORT_NAME ? '' : prev.drop,
+          dropCoords: prev.drop === AIRPORT_NAME ? null : prev.dropCoords
         }));
       }
     } else {
@@ -114,9 +143,14 @@ const BookingForm = () => {
   const selectedCar = VEHICLE_OPTIONS.find(c => c.name === formData.carType) || VEHICLE_OPTIONS[0];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, coords } = e.target;
     setFormData(prev => {
       const newData = { ...prev, [name]: value };
+      
+      // Store coordinates if provided (from LocationInput)
+      if (coords) {
+        newData[`${name}Coords`] = coords;
+      }
       
       // If pickup date changes and return date is now before it or too far after, reset return date
       if (name === 'date') {
@@ -125,11 +159,16 @@ const BookingForm = () => {
           newData.returnDate = value;
         }
         
-        // Auto-set time: if today, use nearest available; if future, default to 12 AM
+        // Auto-set time: if today, use nearest available (considering rollover); if future, default to 10 AM (standard)
         if (value === todayStr) {
-          newData.time = getNextAvailableTime();
+          const { time, rolledOver } = getNextAvailableTime();
+          newData.time = time;
+          if (rolledOver) {
+            // Force tomorrow if today's booking window is closed
+            newData.date = addDays(todayStr, 1);
+          }
         } else {
-          newData.time = '00:00';
+          newData.time = '10:00';
         }
       }
       
@@ -138,31 +177,48 @@ const BookingForm = () => {
   };
 
   const handleAddStop = () => {
-    setFormData(prev => ({ ...prev, stops: [...prev.stops, ''] }));
+    setFormData(prev => ({ 
+      ...prev, 
+      stops: [...prev.stops, ''],
+      stopCoords: [...prev.stopCoords, null]
+    }));
   };
 
-  const handleStopChange = (index, value) => {
+  const handleStopChange = (index, value, coords) => {
     const newStops = [...formData.stops];
+    const newCoords = [...formData.stopCoords];
     newStops[index] = value;
-    setFormData(prev => ({ ...prev, stops: newStops }));
+    newCoords[index] = coords || null;
+    setFormData(prev => ({ ...prev, stops: newStops, stopCoords: newCoords }));
   };
 
   const handleRemoveStop = (index) => {
     const newStops = formData.stops.filter((_, i) => i !== index);
-    setFormData(prev => ({ ...prev, stops: newStops }));
+    const newCoords = formData.stopCoords.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, stops: newStops, stopCoords: newCoords }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Validation: Return date is mandatory for Round Trips
+    if (activeTab === 'outstation' && formData.tripType === 'two-way' && !formData.returnDate) {
+      setStatus({ type: 'error', msg: 'Please select a Return Date for Round Trip.' });
+      setTimeout(() => setStatus(null), 3000);
+      return;
+    }
+
     // Redirect to car selection page with query params
     const params = new URLSearchParams({
       pickup: formData.pickup,
+      pickupCoord: formData.pickupCoords ? `${formData.pickupCoords.lat},${formData.pickupCoords.lng}` : '',
       drop: formData.drop,
+      dropCoord: formData.dropCoords ? `${formData.dropCoords.lat},${formData.dropCoords.lng}` : '',
       date: formData.date,
       time: formData.time,
       type: activeTab,
-      stops: JSON.stringify(formData.stops)
+      stops: JSON.stringify(formData.stops),
+      stopCoords: JSON.stringify(formData.stopCoords.map(c => c ? `${c.lat},${c.lng}` : ''))
     });
 
     // Add trip-specific params only if they belong to the active tab

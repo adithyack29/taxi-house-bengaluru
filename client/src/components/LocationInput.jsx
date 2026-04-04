@@ -48,15 +48,35 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
   }, [value, isOpen]);
 
-  const handleSelect = (address) => {
-    onChange({ target: { name, value: address } });
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const handleSelect = (address, coords = null) => {
+    setSelectedLocation({ address, coords });
+    onChange({ 
+      target: { 
+        name, 
+        value: address,
+        coords: coords 
+      } 
+    });
     setIsOpen(false);
   };
 
+  const handleBlur = () => {
+    // Small timeout to allow handleSelect to trigger first
+    setTimeout(() => {
+      if (!selectedLocation || value !== selectedLocation.address) {
+        // If current value doesn't match a verified selection, clear it
+        onChange({ target: { name, value: '', coords: null } });
+        setSelectedLocation(null);
+      }
+      setIsOpen(false);
+    }, 200);
+  };
 
   const handleCurrentLocation = () => {
     setIsOpen(false);
-    onChange({ target: { name, value: 'Locating...' } }); 
+    onChange({ target: { name, value: 'Locating...', coords: null } }); 
     
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -65,9 +85,9 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
             const { latitude, longitude } = position.coords;
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
             const data = await res.json();
-            onChange({ target: { name, value: data.display_name || `${latitude}, ${longitude}` } });
+            handleSelect(data.display_name || `${latitude}, ${longitude}`, { lat: latitude, lng: longitude });
           } catch (error) {
-            onChange({ target: { name, value: "Error fetching address." } });
+            onChange({ target: { name, value: "Error fetching address.", coords: null } });
           }
         }, 
         (error) => {
@@ -76,12 +96,12 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
           else if (error.code === 2) msg = "Position Unavailable.";
           else if (error.code === 3) msg = "Timeout. Please try again.";
           
-          onChange({ target: { name, value: msg } });
+          onChange({ target: { name, value: msg, coords: null } });
           console.error("Geolocation Error:", error);
         }
       );
     } else {
-      onChange({ target: { name, value: "Geolocation not supported" } });
+      onChange({ target: { name, value: "Geolocation not supported", coords: null } });
     }
   };
 
@@ -97,6 +117,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
         value={value} 
         onChange={onChange}
         onFocus={() => setIsOpen(true)}
+        onBlur={handleBlur}
         autoComplete="off"
         className={`w-full pl-9 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base ${className}`}
         disabled={disabled}
@@ -110,7 +131,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
             {showCurrentLocation && (
               <li 
                 className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50"
-                onClick={handleCurrentLocation}
+                onMouseDown={(e) => { e.preventDefault(); handleCurrentLocation(); }}
               >
                 <div className="bg-primary/20 p-2 rounded-full text-primary shrink-0">
                   <Crosshair size={16} />
@@ -123,7 +144,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
             {/* Action Item: Choose on Map */}
             <li 
               className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50"
-              onClick={() => { setIsOpen(false); setIsMapOpen(true); }}
+              onMouseDown={(e) => { e.preventDefault(); setIsOpen(false); setIsMapOpen(true); }}
             >
               <div className="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0">
                 <Map size={16} />
@@ -142,7 +163,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
               <li 
                 key={idx}
                 className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-start space-x-3 border-b border-gray-50 last:border-0"
-                onClick={() => handleSelect(s.display_name)}
+                onMouseDown={(e) => { e.preventDefault(); handleSelect(s.display_name, { lat: parseFloat(s.lat), lng: parseFloat(s.lon) }); }}
               >
                 <MapPin size={16} className="text-gray-400 mt-0.5 shrink-0" />
                 <span className="text-sm text-gray-700 leading-snug">{s.display_name}</span>
@@ -156,7 +177,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
       <MapModal 
         isOpen={isMapOpen} 
         onClose={() => setIsMapOpen(false)}
-        onConfirm={(loc) => handleSelect(loc.address)}
+        onConfirm={(loc) => handleSelect(loc.address, { lat: loc.lat, lng: loc.lng })}
       />
     </div>
   );

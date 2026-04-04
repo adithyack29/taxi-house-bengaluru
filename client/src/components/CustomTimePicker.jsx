@@ -34,9 +34,9 @@ const CustomTimePicker = ({
   }, []);
 
   // Parse current value (HH:MM in 24h format)
-  const parseValue = () => {
-    if (!value) return { hour: '10', minute: '00', ampm: 'AM' };
-    const [h, m] = value.split(':');
+  const parseValue = (timeStr = value) => {
+    if (!timeStr) return { hour: '10', minute: '00', ampm: 'AM' };
+    const [h, m] = timeStr.split(':');
     let hour = parseInt(h);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     hour = hour % 12;
@@ -61,6 +61,9 @@ const CustomTimePicker = ({
     const bufferMinutes = 30;
     const limitTotalMinutes = (currentHour24 * 60) + currentMinute + bufferMinutes;
 
+    // If buffer pushes us into the next day, ALL times for TODAY are disabled
+    if (limitTotalMinutes >= 1440) return true;
+
     let { hour, minute, ampm } = parseValue();
     if (type === 'hour') hour = val;
     if (type === 'minute') minute = val;
@@ -72,19 +75,20 @@ const CustomTimePicker = ({
 
     const selectionTotalMinutes = (h * 60) + parseInt(minute);
 
-    // If we are checking HOURS, we can broadly disable if the entire hour is in the past
-    // But it's safer to check the combination
     if (type === 'hour') {
-      // An hour is disabled if even its latest minute (45) is in the past + buffer
-      if ((h * 60) + 45 < limitTotalMinutes) return true;
-      return false;
+      // An hour is disabled if even its latest slot (45 mins) is in the past + buffer
+      return (h * 60) + 45 < limitTotalMinutes;
     }
 
     if (type === 'ampm') {
-      if (val === 'AM' && currentHour24 >= 12) return true;
-      return false;
+      // AM is disabled if it's currently 11:30 AM (12 PM) or later
+      if (val === 'AM') {
+        return limitTotalMinutes >= 720; // 12:00 PM is 720 mins
+      }
+      return false; 
     }
 
+    // For minute selection, we check the specific time
     return selectionTotalMinutes < limitTotalMinutes;
   };
 
@@ -96,12 +100,33 @@ const CustomTimePicker = ({
     if (type === 'minute') minute = val;
     if (type === 'ampm') ampm = val;
 
-    // Convert back to 24h format
-    let h = parseInt(hour);
-    if (ampm === 'PM' && h < 12) h += 12;
-    if (ampm === 'AM' && h === 12) h = 0;
+    // Convert to 24h format for validation
+    const get24h = (h, m, p) => {
+      let hh = parseInt(h);
+      if (p === 'PM' && hh < 12) hh += 12;
+      if (p === 'AM' && hh === 12) hh = 0;
+      return (hh * 60) + parseInt(m);
+    };
+
+    // If the resulting selection is disabled (e.g. switching to an hour where 'minute' is in the past)
+    // we snap the minute to the first available one in that hour.
+    const now = currentTime;
+    const limitTotalMinutes = (now.getHours() * 60) + now.getMinutes() + 30;
+
+    if (isToday && get24h(hour, minute, ampm) < limitTotalMinutes) {
+      // Find first valid minute
+      const validMinute = minutes.find(m => get24h(hour, m, ampm) >= limitTotalMinutes);
+      if (validMinute) {
+        minute = validMinute;
+      }
+    }
+
+    // Convert back to 24h for final value
+    let hFinal = parseInt(hour);
+    if (ampm === 'PM' && hFinal < 12) hFinal += 12;
+    if (ampm === 'AM' && hFinal === 12) hFinal = 0;
     
-    const formattedValue = `${h.toString().padStart(2, '0')}:${minute}`;
+    const formattedValue = `${hFinal.toString().padStart(2, '0')}:${minute}`;
     onChange({ target: { name, value: formattedValue } });
   };
 
@@ -139,17 +164,17 @@ const CustomTimePicker = ({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className={`fixed z-[200] top-1/2 -translate-y-1/2 p-2.5 bg-white rounded-xl shadow-2xl border border-gray-100 w-[320px] ${
-                align === 'left' ? 'left-[15%] sm:left-[25%]' : 
-                align === 'right' ? 'right-[15%] sm:right-[25%]' : 
+              className={`fixed z-[200] top-1/2 -translate-y-1/2 p-4 bg-white rounded-2xl shadow-2xl border border-gray-50 w-[340px] ${
+                align === 'left' ? 'left-[10%] sm:left-[20%]' : 
+                align === 'right' ? 'right-[10%] sm:right-[20%]' : 
                 'left-1/2 -translate-x-1/2'
               }`}
             >
-              <div className="flex gap-2 divide-x divide-gray-50">
+              <div className="flex gap-4 divide-x divide-gray-50">
                 {/* Hours Column */}
-                <div className="flex-[3] pr-1">
-                  <p className="text-[9px] font-black uppercase text-gray-400 mb-1.5 ml-1">Hour</p>
-                  <div className="grid grid-cols-6 gap-1">
+                <div className="flex-[3] pr-2">
+                  <p className="text-[10px] font-black uppercase text-gray-400 mb-3 ml-1 tracking-wider">Hour</p>
+                  <div className="grid grid-cols-4 gap-2">
                     {hours.map(h => {
                       const disabledH = isTimeDisabled('hour', h);
                       return (
@@ -158,12 +183,12 @@ const CustomTimePicker = ({
                           type="button"
                           disabled={disabledH}
                           onClick={() => handleSelect('hour', h)}
-                          className={`h-7 w-full flex items-center justify-center rounded-lg text-[10px] font-bold transition-all ${
+                          className={`h-9 w-full flex items-center justify-center rounded-xl text-[11px] font-bold transition-all ${
                             selectedHour === h 
                               ? 'bg-primary text-secondary' 
                               : disabledH
-                                ? 'text-gray-300/50 cursor-not-allowed'
-                                : 'hover:bg-gray-100/50 text-gray-600'
+                                ? 'text-gray-200 cursor-not-allowed opacity-90 shadow-none'
+                                : 'hover:bg-gray-50 text-gray-600'
                           }`}
                         >
                           {h}
@@ -174,9 +199,9 @@ const CustomTimePicker = ({
                 </div>
 
                 {/* Minutes Column */}
-                <div className="flex-1 pl-2">
-                  <p className="text-[9px] font-black uppercase text-gray-400 mb-1.5 ml-1">Min</p>
-                  <div className="grid grid-cols-1 gap-1">
+                <div className="flex-1 pl-4">
+                  <p className="text-[10px] font-black uppercase text-gray-400 mb-3 ml-1 tracking-wider">Min</p>
+                  <div className="flex flex-col gap-2">
                     {minutes.map(m => {
                       const disabledM = isTimeDisabled('minute', m);
                       return (
@@ -185,12 +210,12 @@ const CustomTimePicker = ({
                           type="button"
                           disabled={disabledM}
                           onClick={() => handleSelect('minute', m)}
-                          className={`h-6 w-full flex items-center justify-center rounded-lg text-[10px] font-bold transition-all ${
+                          className={`h-9 w-full flex items-center justify-center rounded-xl text-[11px] font-bold transition-all ${
                             selectedMinute === m 
                               ? 'bg-primary text-secondary' 
                               : disabledM
-                                ? 'text-gray-300/50 cursor-not-allowed'
-                                : 'hover:bg-gray-100/50 text-gray-600'
+                                ? 'text-gray-200 cursor-not-allowed opacity-90'
+                                : 'hover:bg-gray-50 text-gray-600'
                           }`}
                         >
                           {m}
@@ -201,8 +226,8 @@ const CustomTimePicker = ({
                 </div>
 
                 {/* AM/PM Column */}
-                <div className="flex-1 pl-2 flex flex-col justify-end pb-1.5 overflow-hidden">
-                  <div className="flex flex-col gap-1 bg-gray-50/50 p-1 rounded-lg">
+                <div className="flex-none pl-4 flex flex-col justify-center">
+                  <div className="flex flex-col gap-2 bg-gray-50/50 p-1.5 rounded-2xl border border-gray-100">
                     {['AM', 'PM'].map(p => {
                       const disabledP = isTimeDisabled('ampm', p);
                       return (
@@ -211,12 +236,12 @@ const CustomTimePicker = ({
                           type="button"
                           disabled={disabledP}
                           onClick={() => handleSelect('ampm', p)}
-                          className={`h-6 w-full flex items-center justify-center rounded-md text-[9px] font-black transition-all ${
+                          className={`h-10 w-12 flex items-center justify-center rounded-xl text-[10px] font-black transition-all ${
                             selectedAMPM === p 
-                              ? 'bg-primary text-secondary shadow-sm' 
+                              ? 'bg-primary text-secondary shadow-lg shadow-primary/20' 
                               : disabledP
-                                ? 'text-gray-300/40 cursor-not-allowed'
-                                : 'text-gray-400 hover:text-gray-600'
+                                ? 'text-gray-400/90 cursor-not-allowed opacity-90'
+                                : 'text-gray-400 hover:text-secondary'
                           }`}
                         >
                           {p}
@@ -227,15 +252,18 @@ const CustomTimePicker = ({
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
-                <p className="text-[10px] font-bold text-gray-300 italic">
-                  {isToday ? '*30m buffer applied' : '*Select time to continue'}
-                </p>
+              {/* Footer Indicator */}
+              <div className="mt-6 pt-4 border-t border-gray-50 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full ${isToday ? 'bg-orange-400 animate-pulse' : 'bg-green-400'}`} />
+                  <p className="text-[10px] font-bold text-gray-400">
+                    {isToday ? 'Booking with 30m buffer' : 'Advance booking active'}
+                  </p>
+                </div>
                 <button 
                   type="button" 
                   onClick={() => setIsOpen(false)}
-                  className="text-[10px] font-black uppercase text-secondary hover:text-primary transition-colors flex items-center"
+                  className="px-4 py-2 bg-gray-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-black transition-all"
                 >
                   Confirm
                 </button>

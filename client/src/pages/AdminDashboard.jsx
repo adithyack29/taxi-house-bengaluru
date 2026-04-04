@@ -14,7 +14,9 @@ import {
   RotateCcw,
   ChevronDown,
   Database,
-  Phone
+  Phone,
+  Pencil,
+  Save
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { WhatsAppIcon } from '../components/WhatsAppButton';
@@ -31,6 +33,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ bookings: [], messages: [], cars: [] });
   const [deleteId, setDeleteId] = useState(null);
+  const [editingCar, setEditingCar] = useState(null);
   const [viewingBooking, setViewingBooking] = useState(null);
   const [isResetMenuOpen, setIsResetMenuOpen] = useState(false);
   const [resetConfirmType, setResetConfirmType] = useState(null); // 'bookings', 'messages', 'cars'
@@ -64,8 +67,10 @@ const AdminDashboard = () => {
         const { data: cars } = await supabase
           .from('cars')
           .select('*')
-          .order('name', { ascending: true });
-        setData(prev => ({ ...prev, cars: cars || [] }));
+          .order('seats', { ascending: true });
+        // Guaranteed client-side sort
+        const sortedCars = (cars || []).sort((a, b) => a.seats - b.seats);
+        setData(prev => ({ ...prev, cars: sortedCars }));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -111,7 +116,6 @@ const AdminDashboard = () => {
       console.error('Error deleting car:', error);
     }
   };
-
   const addCar = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -119,6 +123,13 @@ const AdminDashboard = () => {
       name: formData.get('name'),
       seats: parseInt(formData.get('seats')),
       price_per_km: parseFloat(formData.get('price')),
+      min_km: parseInt(formData.get('min_km')) || 0,
+      driver_bata: parseInt(formData.get('driver_bata')) || 0,
+      night_bata: parseInt(formData.get('night_bata')) || 0,
+      permit_charge: parseInt(formData.get('permit_charge')) || 0,
+      available_categories: formData.getAll('categories'),
+      is_ac: formData.get('is_ac') === 'on',
+      image_url: formData.get('image_url'),
       is_available: true
     };
 
@@ -128,6 +139,40 @@ const AdminDashboard = () => {
       fetchData();
     } catch (error) {
       console.error('Error adding car:', error);
+    }
+  };
+
+  const handleUpdateCar = async (e) => {
+    e.preventDefault();
+    if (!editingCar) return;
+
+    const formData = new FormData(e.target);
+    const updatedCar = {
+      name: formData.get('name'),
+      seats: parseInt(formData.get('seats')),
+      price_per_km: parseFloat(formData.get('price')),
+      min_km: parseInt(formData.get('min_km')) || 0,
+      driver_bata: parseInt(formData.get('driver_bata')) || 0,
+      night_bata: parseInt(formData.get('night_bata')) || 0,
+      permit_charge: parseInt(formData.get('permit_charge')) || 0,
+      available_categories: formData.getAll('categories'),
+      is_ac: formData.get('is_ac') === 'on',
+      image_url: formData.get('image_url'),
+    };
+
+    try {
+      const { error } = await supabase
+        .from('cars')
+        .update(updatedCar)
+        .eq('id', editingCar.id);
+
+      if (error) throw error;
+      
+      setEditingCar(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating car:', error);
+      alert('Failed to update car');
     }
   };
 
@@ -505,13 +550,73 @@ const AdminDashboard = () => {
                         <Plus size={16} className="text-primary" />
                         Add New Vehicle
                       </h3>
-                      <form onSubmit={addCar} className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-                        <input name="name" placeholder="Name" className="col-span-2 md:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                        <input name="seats" type="number" min="1" placeholder="Seats" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                        <input name="price" type="number" min="0" step="0.1" placeholder="₹/KM" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                        <button type="submit" className="col-span-2 md:col-span-1 bg-primary text-secondary font-black py-2 rounded-lg hover:bg-primary/90 transition-all text-[11px] md:text-sm shadow-md uppercase">
-                          Add Car
-                        </button>
+                      <form onSubmit={addCar} className="space-y-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-4">
+                          <input name="name" placeholder="Name" className="col-span-2 lg:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
+                          <input name="seats" type="number" min="1" placeholder="Seats" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
+                          <input name="price" type="number" min="0" step="0.1" placeholder="₹/KM" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
+                          <input name="image_url" placeholder="Image URL" className="col-span-2 lg:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                          <button type="submit" className="col-span-2 lg:col-span-1 bg-primary text-secondary font-black py-2 rounded-lg hover:bg-primary/90 transition-all text-[11px] md:text-sm shadow-md uppercase">
+                            Add Car
+                          </button>
+                        </div>
+                        
+                        {/* New Pricing Grid Row */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Min KM</label>
+                            <input name="min_km" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Driver Bata</label>
+                            <input name="driver_bata" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Night Bata</label>
+                            <input name="night_bata" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Permit Charge</label>
+                            <input name="permit_charge" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4 px-1">
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available For</p>
+                            <div className="flex flex-wrap items-center gap-6">
+                              {['outstation', 'local', 'airport'].map(cat => (
+                                <label key={cat} className="flex items-center gap-2 cursor-pointer group">
+                                  <input 
+                                    type="checkbox" 
+                                    name="categories" 
+                                    value={cat} 
+                                    defaultChecked 
+                                    className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
+                                  />
+                                  <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase group-hover:text-primary transition-colors">
+                                    {cat === 'airport' ? 'Airport Transfer' : cat}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AC Status</p>
+                            <label className="flex items-center gap-2 cursor-pointer group w-fit">
+                              <input 
+                                type="checkbox" 
+                                name="is_ac" 
+                                defaultChecked 
+                                className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
+                              />
+                              <span className="text-[10px] md:text-xs font-black text-slate-900 uppercase group-hover:text-primary transition-colors">
+                                AC Vehicle
+                              </span>
+                            </label>
+                          </div>
+                        </div>
                       </form>
                     </div>
 
@@ -542,6 +647,12 @@ const AdminDashboard = () => {
                               {car.is_available ? <CheckCircle size={12} /> : <XCircle size={12} />}
                               <span className="hidden xs:inline">{car.is_available ? 'Available' : 'Disabled'}</span>
                               <span className="xs:hidden">{car.is_available ? 'ON' : 'OFF'}</span>
+                            </button>
+                            <button 
+                              onClick={() => setEditingCar(car)}
+                              className="p-1.5 text-slate-200 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                            >
+                              <Pencil size={16} />
                             </button>
                             <button 
                               onClick={(e) => { e.stopPropagation(); setDeleteId(car.id); }}
@@ -599,6 +710,177 @@ const AdminDashboard = () => {
                   Delete
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Vehicle Modal */}
+      <AnimatePresence>
+        {editingCar && (
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-secondary/40 backdrop-blur-sm"
+              onClick={() => setEditingCar(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 max-w-lg w-full border border-slate-100"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                  <Pencil size={20} className="text-primary" />
+                  Edit Vehicle
+                </h3>
+                <button onClick={() => setEditingCar(null)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                  <XCircle size={24} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleUpdateCar} className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Vehicle Name</label>
+                    <input
+                      name="name"
+                      defaultValue={editingCar.name}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Seats</label>
+                      <input
+                        name="seats"
+                        type="number"
+                        min="1"
+                        defaultValue={editingCar.seats}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">₹ Per KM</label>
+                      <input
+                        name="price"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        defaultValue={editingCar.price_per_km}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Min KM</label>
+                      <input
+                        name="min_km"
+                        type="number"
+                        defaultValue={editingCar.min_km || 0}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Bata (Day)</label>
+                      <input
+                        name="driver_bata"
+                        type="number"
+                        defaultValue={editingCar.driver_bata || 0}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Bata (Night)</label>
+                      <input
+                        name="night_bata"
+                        type="number"
+                        defaultValue={editingCar.night_bata || 0}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Permit Charge</label>
+                      <input
+                        name="permit_charge"
+                        type="number"
+                        defaultValue={editingCar.permit_charge || 0}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Vehicle Image URL</label>
+                    <input
+                      name="image_url"
+                      defaultValue={editingCar.image_url}
+                      placeholder="https://example.com/image.png"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+                  </div>
+                  
+                  <div className="space-y-6 pt-2">
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Available For</label>
+                      <div className="flex flex-wrap items-center gap-6 px-1">
+                        {['outstation', 'local', 'airport'].map(cat => (
+                          <label key={cat} className="flex items-center gap-2 cursor-pointer group">
+                            <input 
+                              type="checkbox" 
+                              name="categories" 
+                              value={cat} 
+                              defaultChecked={editingCar.available_categories?.includes(cat) ?? true}
+                              className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
+                            />
+                            <span className="text-xs font-bold text-slate-600 uppercase group-hover:text-primary transition-colors">
+                              {cat === 'airport' ? 'Airport Transfer' : cat}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AC Status</label>
+                      <label className="flex items-center gap-2 cursor-pointer group px-1 w-fit">
+                        <input 
+                          type="checkbox" 
+                          name="is_ac" 
+                          defaultChecked={editingCar.is_ac ?? true}
+                          className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
+                        />
+                        <span className="text-xs font-bold text-slate-900 uppercase group-hover:text-primary transition-colors">
+                          AC Vehicle
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button 
+                    type="button"
+                    onClick={() => setEditingCar(null)}
+                    className="flex-1 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-xl transition-all text-xs uppercase"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 px-6 py-3 bg-secondary text-white font-black rounded-xl hover:bg-black transition-all shadow-lg shadow-black/10 text-xs uppercase flex items-center justify-center gap-2"
+                  >
+                    <Save size={16} />
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

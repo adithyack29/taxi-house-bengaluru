@@ -9,11 +9,12 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import SelectVehicle from './pages/SelectVehicle';
 import AdminDashboard from './pages/AdminDashboard';
+import ConfirmBooking from './pages/ConfirmBooking';
 import { useLocation } from 'react-router-dom';
 
 function AppContent() {
   const location = useLocation();
-  const isMinimalPage = ['/select-vehicle', '/admin'].includes(location.pathname);
+  const isMinimalPage = ['/select-vehicle', '/confirm-booking', '/admin'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -25,6 +26,7 @@ function AppContent() {
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/select-vehicle" element={<SelectVehicle />} />
+          <Route path="/confirm-booking" element={<ConfirmBooking />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>

@@ -114,17 +114,24 @@ const CustomDatePicker = ({
           type="button"
           disabled={disabledDay}
           onClick={() => handleDateSelect(day)}
-          className={`h-6 w-6 flex items-center justify-center rounded-md text-[10px] font-bold transition-all relative ${
+          className={`h-7 w-7 flex items-center justify-center rounded-xl text-[10px] font-bold transition-all relative ${
             active 
-              ? 'bg-primary text-secondary' 
+              ? 'bg-primary text-secondary shadow-lg shadow-primary/20 scale-110 z-10' 
               : disabledDay
-                ? 'text-gray-300/50 cursor-not-allowed'
-                : 'hover:bg-gray-100 text-gray-700'
+                ? 'text-gray-300 cursor-not-allowed opacity-90'
+                : today
+                  ? 'bg-gray-50 text-secondary border border-primary/30 ring-1 ring-primary/10'
+                  : 'hover:bg-gray-50 text-gray-600'
           }`}
         >
           {day}
+          {disabledDay && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-4 h-[1px] bg-gray-200 rotate-45 opacity-50" />
+            </div>
+          )}
           {today && !active && !disabledDay && (
-            <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+            <div className="absolute top-1 right-1 w-1 h-1 bg-primary rounded-full animate-pulse" />
           )}
         </button>
       );
