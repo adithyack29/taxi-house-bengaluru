@@ -52,11 +52,20 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (activeTab === 'bookings') {
-        const { data: bookings } = await supabase
-          .from('bookings')
-          .select('*')
-          .order('created_at', { ascending: false });
-        setData(prev => ({ ...prev, bookings: bookings || [] }));
+        const [{ data: bookings }, { data: cars }] = await Promise.all([
+          supabase
+            .from('bookings')
+            .select('*')
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('cars')
+            .select('*')
+        ]);
+        setData(prev => ({ 
+          ...prev, 
+          bookings: bookings || [],
+          cars: cars || prev.cars 
+        }));
       } else if (activeTab === 'messages') {
         const { data: messages } = await supabase
           .from('messages')
@@ -371,121 +380,158 @@ const AdminDashboard = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                          {data.bookings.map((booking) => (
-                            <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="py-3">
-                                <div className="text-base font-bold text-slate-900">{booking.user_name}</div>
-                                <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
-                              </td>
-                              <td className="py-3 px-4 text-center">
-                                <div className="inline-flex flex-col items-center">
-                                  <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight mb-0.5">
-                                    {(booking.trip_category || 'Trip').replace('-', ' ')}
-                                  </span>
-                                  <span className="text-[9px] font-black text-primary uppercase bg-primary/5 px-2 py-0.5 rounded-full mb-1">
-                                    {booking.trip_category === 'local' 
-                                      ? booking.local_package 
-                                      : (booking.sub_type || '').replace('-', ' ')}
-                                  </span>
-                                  <button 
-                                    onClick={() => setViewingBooking(booking)}
-                                    className="text-[9px] font-black text-slate-300 uppercase hover:text-primary transition-colors flex items-center gap-1"
-                                  >
-                                    <span>Route</span>
-                                    {booking.stops?.length > 0 && <span>(+{booking.stops.length})</span>}
-                                  </button>
-                                </div>
-                              </td>
-                              <td className="py-3">
-                                <div className="text-[11px] font-bold text-slate-900">
-                                  {formatDate(booking.booking_date)}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-medium">{formatTime(booking.booking_time)}</div>
-                              </td>
-                              <td className="py-3">
-                                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-[10px] font-black">
-                                  {booking.car_type}
-                                </span>
-                              </td>
-                              <td className="py-3 text-center">
-                                <div className="flex items-center justify-center gap-1.5">
-                                  <a 
-                                    href={`https://wa.me/${formatPhoneForWhatsApp(booking.phone)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-1.5 hover:bg-[#25D366]/10 rounded-lg transition-all"
-                                  >
-                                    <WhatsAppIcon size={14} className="text-[#25D366]" />
-                                  </a>
-                                  <a 
-                                    href={`tel:${booking.phone}`}
-                                    className="p-1.5 hover:bg-blue-500/10 rounded-lg transition-all"
-                                  >
-                                    <Phone size={14} className="text-blue-500" />
-                                  </a>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {data.bookings.map((booking) => {
+                            const vehicleSeats = data.cars.find(c => c.name === booking.car_type)?.seats || 'N/A';
+                            return (
+                              <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="py-3">
+                                  <div className="text-base font-bold text-slate-900">{booking.user_name}</div>
+                                  <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="inline-flex flex-col items-center">
+                                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight mb-0.5">
+                                      {(booking.trip_category || 'Trip').replace('-', ' ')}
+                                    </span>
+                                    <span className="text-[9px] font-black text-primary uppercase bg-primary/5 px-2 py-0.5 rounded-full mb-1">
+                                      {booking.trip_category === 'local' 
+                                        ? booking.local_package 
+                                        : (booking.sub_type || '').replace('-', ' ')}
+                                    </span>
+                                    <button 
+                                      onClick={() => setViewingBooking(booking)}
+                                      className="text-[9px] font-black text-slate-400/60 uppercase hover:text-primary transition-colors flex items-center gap-1 border-b border-transparent hover:border-primary/30"
+                                    >
+                                      <span>Route Info</span>
+                                      {booking.stops?.length > 0 && <span className="text-primary/70">+{booking.stops.length}</span>}
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="py-3">
+                                  <div className="flex flex-col gap-0.5">
+                                    <div className="text-[11px] font-black flex items-center gap-1.5">
+                                      <span className="text-green-600 opacity-60">PD</span>
+                                      <span className="text-slate-900">{formatDate(booking.booking_date)}</span>
+                                    </div>
+                                    <div className="text-[10px] font-bold flex items-center gap-1.5">
+                                      <span className="text-slate-300">PT</span>
+                                      <span className="text-slate-500">{formatTime(booking.booking_time)}</span>
+                                    </div>
+                                    {booking.sub_type === 'round-trip' && booking.return_date && (
+                                      <div className="text-[10px] font-bold flex items-center gap-1.5">
+                                        <span className="text-orange-400 opacity-60">RD</span>
+                                        <span className="text-slate-500">{formatDate(booking.return_date)}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="py-3">
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+                                      {booking.car_type}
+                                    </span>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1.5 py-0.5 bg-slate-50 rounded w-fit">
+                                      {vehicleSeats} Seats
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-3 text-center">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <a 
+                                      href={`https://wa.me/${formatPhoneForWhatsApp(booking.phone)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 hover:bg-[#25D366]/10 rounded-lg transition-all"
+                                    >
+                                      <WhatsAppIcon size={16} className="text-[#25D366]" />
+                                    </a>
+                                    <a 
+                                      href={`tel:${booking.phone}`}
+                                      className="p-2 hover:bg-blue-500/10 rounded-lg transition-all"
+                                    >
+                                      <Phone size={16} className="text-blue-500" />
+                                    </a>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
 
                     {/* Mobile Card View */}
                     <div className="md:hidden space-y-3">
-                      {data.bookings.map((booking) => (
-                        <div key={booking.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <div className="text-[15px] font-bold text-slate-900">{booking.user_name}</div>
-                              <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                      {data.bookings.map((booking) => {
+                        const vehicleSeats = data.cars.find(c => c.name === booking.car_type)?.seats || 'N/A';
+                        return (
+                          <div key={booking.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <div className="text-[15px] font-bold text-slate-900">{booking.user_name}</div>
+                                <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <a href={`tel:${booking.phone}`} className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                                  <Phone size={14} />
+                                </a>
+                                <a href={`https://wa.me/${formatPhoneForWhatsApp(booking.phone)}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#25D366]/10 rounded-lg text-[#25D366]">
+                                  <WhatsAppIcon size={14} />
+                                </a>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <a href={`tel:${booking.phone}`} className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                                <Phone size={14} />
-                              </a>
-                              <a href={`https://wa.me/${formatPhoneForWhatsApp(booking.phone)}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#25D366]/10 rounded-lg text-[#25D366]">
-                                <WhatsAppIcon size={14} />
-                              </a>
-                            </div>
-                          </div>
 
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            <div className="bg-white p-2 rounded-lg border border-slate-100">
-                              <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Trip Type</span>
-                              <div className="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate">
-                                {(booking.trip_category || 'Trip').replace('-', ' ')}
+                            <div className="grid grid-cols-2 gap-2 mb-2">
+                              <div className="bg-white p-2 rounded-lg border border-slate-100 flex flex-col justify-center">
+                                <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Trip Type</span>
+                                <div className="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate leading-tight">
+                                  {(booking.trip_category || 'Trip').replace('-', ' ')}
+                                </div>
+                                <div className="text-[8px] font-bold text-primary uppercase truncate mt-0.5">
+                                  {booking.trip_category === 'local' 
+                                    ? booking.local_package 
+                                    : (booking.sub_type || '').replace('-', ' ')}
+                                </div>
+                              </div>
+                              <div className="bg-white p-2 rounded-lg border border-slate-100">
+                                <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Vehicle</span>
+                                <div className="text-[10px] font-black text-slate-900 uppercase truncate">
+                                  {booking.car_type}
+                                </div>
+                                <div className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">
+                                  {vehicleSeats} Seats
+                                </div>
                               </div>
                             </div>
-                            <div className="bg-white p-2 rounded-lg border border-slate-100">
-                              <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Vehicle</span>
-                              <div className="text-[10px] font-black text-primary uppercase truncate">
-                                {booking.car_type}
-                              </div>
-                            </div>
-                          </div>
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex flex-col">
-                                <span className="text-[8px] font-bold text-slate-300 uppercase">Date</span>
-                                <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.booking_date)}</span>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="flex flex-col">
+                                  <span className="text-[7px] font-black text-green-600 opacity-60 uppercase">PD</span>
+                                  <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.booking_date)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-[7px] font-black text-slate-300 uppercase">PT</span>
+                                  <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.booking_time)}</span>
+                                </div>
+                                {booking.sub_type === 'round-trip' && booking.return_date && (
+                                  <div className="flex flex-col">
+                                    <span className="text-[7px] font-black text-orange-400 opacity-60 uppercase">RD</span>
+                                    <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.return_date)}</span>
+                                  </div>
+                                )}
                               </div>
-                              <div className="flex flex-col">
-                                <span className="text-[8px] font-bold text-slate-300 uppercase">Time</span>
-                                <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.booking_time)}</span>
-                              </div>
+                              <button 
+                                onClick={() => setViewingBooking(booking)}
+                                className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"
+                              >
+                                Route
+                                {booking.stops?.length > 0 && <span className="text-primary">+{booking.stops.length}</span>}
+                              </button>
                             </div>
-                            <button 
-                              onClick={() => setViewingBooking(booking)}
-                              className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"
-                            >
-                              Route Info
-                              {booking.stops?.length > 0 && <span className="text-primary">+{booking.stops.length}</span>}
-                            </button>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {(data.bookings.length === 0) && (
