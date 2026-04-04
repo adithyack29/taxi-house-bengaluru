@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDate } from '../utils/formatters';
 
 const CustomDatePicker = ({ 
   value, 
@@ -143,9 +144,7 @@ const CustomDatePicker = ({
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const displayValue = value ? new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  }) : 'Select Date';
+  const displayValue = value ? formatDate(value) : 'Select Date';
 
   return (
     <div className="relative" ref={containerRef}>

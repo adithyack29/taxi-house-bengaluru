@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { WhatsAppIcon } from '../components/WhatsAppButton';
+import { formatDate, formatTime } from '../utils/formatters';
 
 const formatPhoneForWhatsApp = (phone) => {
   return phone.replace(/\D/g, '');
@@ -202,16 +203,16 @@ const AdminDashboard = () => {
     );
   }
   return (
-    <div className="min-h-screen bg-slate-50 pt-10 md:pt-20 pb-8 flex flex-col">
+    <div className="min-h-screen bg-slate-50 pt-10 md:pt-20 pb-8 flex flex-col font-sans">
       <div className="max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3">
           <div className="flex flex-col">
-            <h1 className="text-xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <h1 className="text-xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
               <LayoutDashboard className="text-primary" size={20} />
               Owner Dashboard
             </h1>
-            <p className="text-[10px] md:text-sm text-slate-500 font-bold uppercase tracking-tight opacity-70">Backend management system</p>
+            <p className="text-[10px] md:text-sm text-slate-500 font-semibold uppercase tracking-tight opacity-70">Backend management system</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -219,7 +220,7 @@ const AdminDashboard = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsResetMenuOpen(!isResetMenuOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 font-black text-[10px] hover:bg-slate-50 transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 font-bold text-[10px] hover:bg-slate-50 transition-all shadow-sm"
               >
                 <RotateCcw size={12} className="text-orange-500" />
                 <span>Reset Data</span>
@@ -266,7 +267,7 @@ const AdminDashboard = () => {
 
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all text-[10px] font-black"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all text-[10px] font-bold"
             >
               <Power size={12} />
               Logout
@@ -284,7 +285,7 @@ const AdminDashboard = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 md:px-6 py-2 md:py-2.5 rounded-lg font-black text-[11px] md:text-sm transition-all whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 md:px-6 py-2 md:py-2.5 rounded-lg font-bold text-[11px] md:text-sm transition-all whitespace-nowrap ${
                 activeTab === tab.id 
                   ? 'bg-primary text-secondary shadow-md' 
                   : 'text-slate-400 hover:bg-slate-50'
@@ -317,19 +318,19 @@ const AdminDashboard = () => {
                       <table className="w-full text-left">
                         <thead>
                           <tr className="border-b border-slate-100">
-                            <th className="pb-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Customer</th>
-                            <th className="pb-4 font-black text-slate-400 uppercase text-[10px] tracking-widest px-4 text-center">Trip Type</th>
-                            <th className="pb-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Schedule</th>
-                            <th className="pb-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Vehicle</th>
-                            <th className="pb-4 font-black text-slate-400 uppercase text-[10px] tracking-widest text-center">Contact</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Customer</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4 text-center">Trip Type</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Schedule</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Vehicle</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Contact</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                           {data.bookings.map((booking) => (
                             <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors">
                               <td className="py-3">
-                                <div className="text-sm font-black text-slate-900">{booking.user_name}</div>
-                                <div className="text-[10px] font-bold text-slate-400">{booking.phone}</div>
+                                <div className="text-base font-bold text-slate-900">{booking.user_name}</div>
+                                <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
                               </td>
                               <td className="py-3 px-4 text-center">
                                 <div className="inline-flex flex-col items-center">
@@ -351,10 +352,10 @@ const AdminDashboard = () => {
                                 </div>
                               </td>
                               <td className="py-3">
-                                <div className="text-[11px] font-black text-slate-900">
-                                  {booking.booking_date?.split('-').reverse().join('/')}
+                                <div className="text-[11px] font-bold text-slate-900">
+                                  {formatDate(booking.booking_date)}
                                 </div>
-                                <div className="text-[10px] text-slate-400 font-bold">{booking.booking_time?.substring(0, 5)}</div>
+                                <div className="text-[10px] text-slate-400 font-medium">{formatTime(booking.booking_time)}</div>
                               </td>
                               <td className="py-3">
                                 <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-[10px] font-black">
@@ -391,8 +392,8 @@ const AdminDashboard = () => {
                         <div key={booking.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <div className="text-[13px] font-black text-slate-900">{booking.user_name}</div>
-                              <div className="text-[10px] font-bold text-slate-400">{booking.phone}</div>
+                              <div className="text-[15px] font-bold text-slate-900">{booking.user_name}</div>
+                              <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
                             </div>
                             <div className="flex items-center gap-2">
                               <a href={`tel:${booking.phone}`} className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
@@ -422,12 +423,12 @@ const AdminDashboard = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="flex flex-col">
-                                <span className="text-[8px] font-black text-slate-300 uppercase">Date</span>
-                                <span className="text-[10px] font-bold text-slate-700">{booking.booking_date?.split('-').reverse().join('/')}</span>
+                                <span className="text-[8px] font-bold text-slate-300 uppercase">Date</span>
+                                <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.booking_date)}</span>
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[8px] font-black text-slate-300 uppercase">Time</span>
-                                <span className="text-[10px] font-bold text-slate-700">{booking.booking_time?.substring(0, 5)}</span>
+                                <span className="text-[8px] font-bold text-slate-300 uppercase">Time</span>
+                                <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.booking_time)}</span>
                               </div>
                             </div>
                             <button 
@@ -477,7 +478,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <div className="text-[9px] md:text-xs text-slate-300 font-bold">
-                            {new Date(msg.created_at).toLocaleDateString()}
+                            {formatDate(msg.created_at)}
                           </div>
                         </div>
                         <p className="text-slate-600 leading-relaxed text-[11px] md:text-sm bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-slate-100 font-medium">

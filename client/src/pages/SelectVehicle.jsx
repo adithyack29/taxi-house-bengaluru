@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Car, MapPin, Calendar, Clock, User, Phone, CheckCircle, ChevronLeft, ArrowRight, Loader2, Info, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { loadRazorpay } from '../utils/razorpay';
+import { formatDate, formatTime } from '../utils/formatters';
 
 const SelectVehicle = () => {
   const [searchParams] = useSearchParams();
@@ -227,12 +228,12 @@ const SelectVehicle = () => {
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Pickup Date</p>
                     <p className="text-sm font-black text-secondary uppercase tracking-tighter">
-                      {tripDetails.date?.split('-').reverse().join('/')}
+                      {formatDate(tripDetails.date)}
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Pickup Time</p>
-                    <p className="text-sm font-black text-secondary uppercase tracking-tighter">{tripDetails.time}</p>
+                    <p className="text-sm font-black text-secondary uppercase tracking-tighter">{formatTime(tripDetails.time)}</p>
                   </div>
                 </div>
 
@@ -240,7 +241,7 @@ const SelectVehicle = () => {
                   <div className="pt-4 border-t border-gray-50">
                     <p className="text-[10px] font-bold text-orange-500 uppercase">Return Date</p>
                     <p className="text-sm font-black text-orange-600 uppercase tracking-tighter">
-                      {tripDetails.returnDate?.split('-').reverse().join('/')}
+                      {formatDate(tripDetails.returnDate)}
                     </p>
                   </div>
                 )}
