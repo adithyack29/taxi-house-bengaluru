@@ -43,7 +43,7 @@ const WhyChooseUs = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-10 sm:py-16 lg:py-24 bg-white overflow-hidden px-6 sm:px-8 lg:px-12">
+    <section className="py-6 sm:py-16 lg:py-24 bg-white overflow-hidden px-4 sm:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
         
         <div className="flex flex-col lg:flex-row items-start justify-between mb-10 sm:mb-16 gap-6 sm:gap-8">
@@ -57,7 +57,7 @@ const WhyChooseUs = () => {
               <Zap size={12} sm:size={14} className="fill-primary" />
               <span>The Taxi House Advantage</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight">
+            <h2 className="text-xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight">
               Why Choose Us For <br />
               <span className="text-primary">Your Commute?</span>
             </h2>
@@ -67,7 +67,7 @@ const WhyChooseUs = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-gray-500 font-medium max-w-md text-sm sm:text-base leading-relaxed"
+            className="text-gray-500 font-medium max-w-md text-xs sm:text-base leading-relaxed"
           >
             We provide a premium travel experience that combines local expertise with professional standards across Karnataka.
           </motion.p>
@@ -86,13 +86,13 @@ const WhyChooseUs = () => {
               <motion.div 
                 key={idx} 
                 variants={itemVariants}
-                className="group p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
+                className="group p-4 sm:p-8 rounded-xl sm:rounded-3xl border border-gray-100 bg-gray-50/30 hover:bg-white hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300"
               >
-                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-secondary text-primary mb-4 sm:mb-6 transition-transform">
-                  <Icon size={20} sm:size={24} />
+                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-secondary text-primary mb-3 sm:mb-6 transition-transform">
+                  <Icon size={16} sm:size={24} />
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-secondary mb-2 sm:mb-3 tracking-tight">{feature.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
+                <h3 className="text-base sm:text-xl font-bold text-secondary mb-1.5 sm:mb-3 tracking-tight">{feature.title}</h3>
+                <p className="text-[11px] sm:text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
             );
           })}

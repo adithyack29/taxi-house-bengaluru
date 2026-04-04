@@ -88,7 +88,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
   return (
     <div className="relative" ref={wrapperRef}>
-      <Icon className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconColorClass}`} size={20} />
+      <Icon className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconColorClass}`} size={18} />
       <input 
         type="text" 
         name={name} 
@@ -98,7 +98,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
         onChange={onChange}
         onFocus={() => setIsOpen(true)}
         autoComplete="off"
-        className={`w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-base ${className}`}
+        className={`w-full pl-9 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base ${className}`}
         disabled={disabled}
       />
 

@@ -198,7 +198,7 @@ const BookingForm = () => {
                 setActiveTab(tab.id);
                 setFareEstimate(null);
               }}
-              className={`flex-1 flex items-center justify-center space-x-2 py-3 sm:py-4 text-[10px] sm:text-sm font-bold transition-all relative ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-2.5 sm:py-4 text-[10px] sm:text-sm font-bold transition-all relative ${
                 isActive ? 'text-secondary' : 'text-gray-400 hover:text-secondary/70'
               }`}
             >
@@ -215,8 +215,8 @@ const BookingForm = () => {
         })}
       </div>
 
-      <div className="p-4 sm:p-8">
-        <h2 className="text-lg sm:text-2xl font-black text-secondary mb-4 flex items-center space-x-3">
+      <div className="px-3 py-4 sm:p-8">
+        <h2 className="text-base sm:text-2xl font-black text-secondary mb-3 flex items-center space-x-3">
           <div className="w-1.5 h-6 bg-primary rounded-full" />
           <span>Book Your <span className="text-primary italic">Perfect Ride</span></span>
         </h2>
@@ -263,7 +263,7 @@ const BookingForm = () => {
           )}
 
           {activeTab === 'outstation' ? (
-            <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-3 sm:space-y-8 animate-in fade-in duration-300">
               {/* Row 1: From/To */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 relative">
                 <div className="space-y-1.5">
@@ -373,7 +373,7 @@ const BookingForm = () => {
 
               <button 
                 type="submit" 
-                className="w-full bg-[#eb5e1c] text-white font-black py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-base tracking-wide mt-4 uppercase"
+                className="w-full bg-[#eb5e1c] text-white font-black py-3 sm:py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm sm:text-base tracking-wide mt-2 uppercase"
               >
                 Search Available Cars
               </button>
@@ -476,7 +476,7 @@ const BookingForm = () => {
 
               <button 
                 type="submit" 
-                className="w-full bg-[#eb5e1c] text-white font-black py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-base tracking-wide mt-4 uppercase"
+                className="w-full bg-[#eb5e1c] text-white font-black py-3 sm:py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm sm:text-base tracking-wide mt-2 uppercase"
               >
                 Search Available Cars
               </button>
@@ -570,7 +570,7 @@ const BookingForm = () => {
 
               <button 
                 type="submit" 
-                className="w-full bg-[#eb5e1c] text-white font-black py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-base tracking-wide mt-4 uppercase"
+                className="w-full bg-[#eb5e1c] text-white font-black py-3 sm:py-4 rounded-xl shadow-lg ring-2 ring-orange-500/20 hover:bg-[#d45115] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm sm:text-base tracking-wide mt-2 uppercase"
               >
                 Search Available Cars
               </button>

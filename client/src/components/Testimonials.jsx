@@ -21,14 +21,14 @@ const Testimonials = () => {
   const isHoverable = useHoverQuery();
 
   return (
-    <section className="py-16 lg:py-28 bg-gray-50/50 overflow-hidden relative px-4">
+    <section className="py-8 sm:py-16 lg:py-28 bg-gray-50/50 overflow-hidden relative px-4">
       {/* Decorative background element */}
       <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none flex items-center justify-center">
         <MessageSquare size={800} strokeWidth={0.5} className="text-secondary" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12 lg:mb-20">
+        <div className="text-center mb-6 lg:mb-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -43,7 +43,7 @@ const Testimonials = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight"
+            className="text-2xl sm:text-5xl lg:text-7xl font-bold text-secondary leading-[1.1] tracking-tight"
           >
             Trusted By <span className="text-primary italic">Thousands</span> <br />
             Of Happy Riders
@@ -61,7 +61,7 @@ const Testimonials = () => {
             <motion.div 
               key={testimonial.id} 
               variants={itemVariants}
-              className="bg-white p-8 sm:p-10 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col justify-between relative group hover:border-primary/30 transition-all duration-300"
+              className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col justify-between relative group hover:border-primary/30 transition-all duration-300"
             >
               <Quote className="absolute top-8 right-8 text-gray-100 group-hover:text-primary/20 transition-colors" size={48} strokeWidth={3} />
               
@@ -72,7 +72,7 @@ const Testimonials = () => {
                   ))}
                 </div>
                 
-                <p className="text-gray-700 font-medium text-sm sm:text-base lg:text-lg leading-relaxed italic relative z-10">
+                <p className="text-gray-700 font-medium text-xs sm:text-base lg:text-lg leading-relaxed italic relative z-10">
                   "{testimonial.text}"
                 </p>
               </div>

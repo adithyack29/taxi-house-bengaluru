@@ -116,11 +116,11 @@ const CustomTimePicker = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center space-x-3 pl-10 pr-4 py-4 bg-white border border-gray-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/30 transition text-base font-medium text-left ${
+        className={`w-full flex items-center space-x-3 pl-9 pr-4 py-3 sm:py-4 bg-white border border-gray-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/30 transition text-sm sm:text-base font-medium text-left ${
           disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'hover:border-primary/30'
         }`}
       >
-        <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={20} />
+        <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
         <span className={value ? 'text-secondary font-bold' : 'text-gray-400'}>
           {displayTime}
         </span>

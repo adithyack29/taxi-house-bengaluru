@@ -5,17 +5,17 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <div className="relative min-h-[60vh] lg:min-h-[85vh] flex items-center bg-secondary pb-8 sm:pb-20 overflow-hidden">
+    <div className="relative min-h-[50vh] lg:min-h-[85vh] flex items-center bg-secondary pb-4 sm:pb-20 overflow-hidden">
       {/* Background Pattern - Subtle */}
       <div className="absolute inset-0 z-0 overflow-hidden opacity-[0.03]">
         <div className="absolute inset-x-0 top-0 h-full w-full bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:40px_40px]"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full relative z-[10] pt-8 lg:pt-16">
-        <div className="flex flex-col items-center text-center space-y-6 sm:space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full relative z-[10] pt-4 lg:pt-16">
+        <div className="flex flex-col items-center text-center space-y-4 sm:space-y-10">
           
           {/* Text Content */}
-          <div className="text-white space-y-4 max-w-4xl mx-auto">
+          <div className="text-white space-y-3 max-w-4xl mx-auto">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -29,7 +29,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight block px-2"
+              className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.15] tracking-tight block px-2"
             >
               Book Your Ride & <br />
               <span className="text-primary">Ride across Karnataka</span>
@@ -39,18 +39,18 @@ const Hero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-wrap items-center justify-center gap-4 pt-2"
+              className="flex flex-wrap items-center justify-center gap-4 pt-1"
             >
               <div className="flex items-center space-x-2">
-                <div className="flex -space-x-1">
-                  {[1,2,3,4,5].map(i => <Star key={i} size={12} className="fill-primary text-primary" />)}
+                <div className="flex -space-x-0.5">
+                  {[1,2,3,4,5].map(i => <Star key={i} size={10} className="fill-primary text-primary" />)}
                 </div>
-                <span className="text-[10px] font-bold text-gray-300">4.9/5 Rating</span>
+                <span className="text-[9px] font-bold text-gray-300">4.9/5 Rating</span>
               </div>
               <div className="h-3 w-px bg-gray-700 hidden sm:block" />
               <div className="flex items-center space-x-2">
-                <ShieldCheck size={14} className="text-primary" />
-                <span className="text-[10px] font-bold text-gray-300">Verified Drivers</span>
+                <ShieldCheck size={12} className="text-primary" />
+                <span className="text-[9px] font-bold text-gray-300">Verified Drivers</span>
               </div>
             </motion.div>
 
@@ -58,7 +58,7 @@ const Hero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-xs sm:text-base text-gray-400 max-w-lg mx-auto leading-relaxed font-medium px-4"
+              className="text-[10px] sm:text-base text-gray-400 max-w-lg mx-auto leading-relaxed font-medium px-2"
             >
               Experience the gold standard of travel across Karnataka. Safe, comfortable, and punctual—every single time.
             </motion.p>
