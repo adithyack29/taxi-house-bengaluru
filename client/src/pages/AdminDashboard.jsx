@@ -375,7 +375,7 @@ const AdminDashboard = () => {
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Customer</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4 text-center">Trip Type</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Schedule</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Vehicle</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4">Vehicle</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Contact</th>
                           </tr>
                         </thead>
@@ -414,18 +414,18 @@ const AdminDashboard = () => {
                                       <span className="text-slate-900">{formatDate(booking.booking_date)}</span>
                                     </div>
                                     <div className="text-[10px] font-bold flex items-center gap-1.5">
-                                      <span className="text-slate-300">PT</span>
+                                      <span className="text-green-600 opacity-60">PT</span>
                                       <span className="text-slate-500">{formatTime(booking.booking_time)}</span>
                                     </div>
-                                    {booking.sub_type === 'round-trip' && booking.return_date && (
+                                    {(booking.sub_type === 'round-trip' || booking.sub_type === 'two-way') && booking.return_date && (
                                       <div className="text-[10px] font-bold flex items-center gap-1.5">
-                                        <span className="text-orange-400 opacity-60">RD</span>
+                                        <span className="text-red-500 opacity-70">RD</span>
                                         <span className="text-slate-500">{formatDate(booking.return_date)}</span>
                                       </div>
                                     )}
                                   </div>
                                 </td>
-                                <td className="py-3">
+                                <td className="py-3 px-4">
                                   <div className="flex flex-col gap-0.5">
                                     <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
                                       {booking.car_type}
@@ -511,12 +511,12 @@ const AdminDashboard = () => {
                                   <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.booking_date)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[7px] font-black text-slate-300 uppercase">PT</span>
+                                  <span className="text-[7px] font-black text-green-600 opacity-60 uppercase">PT</span>
                                   <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.booking_time)}</span>
                                 </div>
-                                {booking.sub_type === 'round-trip' && booking.return_date && (
+                                {(booking.sub_type === 'round-trip' || booking.sub_type === 'two-way') && booking.return_date && (
                                   <div className="flex flex-col">
-                                    <span className="text-[7px] font-black text-orange-400 opacity-60 uppercase">RD</span>
+                                    <span className="text-[7px] font-black text-red-500 opacity-70 uppercase">RD</span>
                                     <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.return_date)}</span>
                                   </div>
                                 )}
