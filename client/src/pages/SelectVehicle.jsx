@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Car, MapPin, Calendar, Clock, User, Phone, CheckCircle, ChevronLeft, ArrowRight, Loader2, Info } from 'lucide-react';
+import { Car, MapPin, Calendar, Clock, User, Phone, CheckCircle, ChevronLeft, ArrowRight, Loader2, Info, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { loadRazorpay } from '../utils/razorpay';
 
 const SelectVehicle = () => {
   const [searchParams] = useSearchParams();
@@ -48,37 +49,117 @@ const SelectVehicle = () => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
+    setBookingStatus({ type: 'loading', msg: 'Preparing payment...' });
+
     const stops = JSON.parse(searchParams.get('stops') || '[]');
     const tripCategory = searchParams.get('type');
     const subType = searchParams.get('type') === 'airport' ? searchParams.get('airport') : searchParams.get('trip');
     const returnDate = searchParams.get('returnDate');
     const localPackage = searchParams.get('package');
     
+    // Test Amount: ₹1 (100 paise)
+    const testAmount = 1;
+
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .insert([{
-          user_name: formData.name,
-          phone: formData.phone,
-          pickup: tripDetails.pickup,
-          drop_off: tripDetails.drop,
-          booking_date: tripDetails.date,
-          booking_time: tripDetails.time,
-          car_type: selectedCar.name,
-          trip_category: tripCategory,
-          sub_type: subType,
-          return_date: returnDate || null,
-          local_package: localPackage || null,
-          stops: stops,
-          status: 'pending'
-        }]);
+      // 1. Load Razorpay Script
+      const res = await loadRazorpay();
+      if (!res) {
+        throw new Error('Razorpay SDK failed to load. Are you online?');
+      }
 
-      if (error) throw error;
+      // 2. Create Order on our backend
+      const orderResponse = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: testAmount,
+          currency: 'INR',
+        }),
+      });
 
-      setBookingStatus({ type: 'success', msg: 'Booking Successful! Our team will contact you shortly.' });
-      setTimeout(() => navigate('/'), 5000);
+      if (!orderResponse.ok) {
+        throw new Error('Failed to initialize payment order.');
+      }
+
+      const orderData = await orderResponse.json();
+
+      // 3. Configure Razorpay Options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'TaxiHouse Bengaluru',
+        description: `Booking for ${selectedCar.name}`,
+        order_id: orderData.id,
+        handler: async function (response) {
+          setBookingStatus({ type: 'loading', msg: 'Verifying payment...' });
+
+          // 4. Verify Payment on our backend
+          const verifyResponse = await fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          const verifyData = await verifyResponse.json();
+
+          if (verifyData.status === 'success') {
+            // 5. Create Booking in Supabase on successful payment
+            const { error: supabaseError } = await supabase
+              .from('bookings')
+              .insert([{
+                user_name: formData.name,
+                phone: formData.phone,
+                pickup: tripDetails.pickup,
+                drop_off: tripDetails.drop,
+                booking_date: tripDetails.date,
+                booking_time: tripDetails.time,
+                car_type: selectedCar.name,
+                trip_category: tripCategory,
+                sub_type: subType,
+                return_date: returnDate || null,
+                local_package: localPackage || null,
+                stops: stops,
+                status: 'confirmed', // Mark as confirmed since paid
+                amount: testAmount,
+                payment_status: 'paid',
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              }]);
+
+            if (supabaseError) throw supabaseError;
+
+            setBookingStatus({ type: 'success', msg: 'Payment Successful! Booking Confirmed.' });
+            setTimeout(() => navigate('/'), 5000);
+          } else {
+            setBookingStatus({ type: 'error', msg: 'Payment verification failed. Please contact support.' });
+          }
+        },
+        prefill: {
+          name: formData.name,
+          contact: formData.phone,
+        },
+        theme: {
+          color: '#F97316', // Primary orange color
+        },
+        modal: {
+          ondismiss: function() {
+            setBookingStatus(null);
+          }
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
     } catch (err) {
-      setBookingStatus({ type: 'error', msg: 'Booking failed. Please try again or call us.' });
+      console.error('Booking/Payment Error:', err);
+      setBookingStatus({ type: 'error', msg: err.message || 'Something went wrong. Please try again.' });
     }
   };
 
@@ -300,9 +381,15 @@ const SelectVehicle = () => {
                         className="w-full bg-secondary text-white font-black py-4 rounded-2xl shadow-lg hover:bg-black transition-all text-base uppercase flex items-center justify-center gap-3"
                       >
                         {bookingStatus?.type === 'loading' ? (
-                          <Loader2 className="animate-spin" size={20} />
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="animate-spin" size={20} />
+                            <span>{bookingStatus.msg || 'Processing...'}</span>
+                          </div>
                         ) : (
-                          <>Confirm Booking Request</>
+                          <>
+                            <CreditCard size={20} />
+                            Pay ₹1 & Confirm Booking
+                          </>
                         )}
                       </button>
                     </form>
