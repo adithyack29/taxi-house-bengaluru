@@ -32,7 +32,7 @@ const Hero = () => {
               className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.15] tracking-tight block px-2"
             >
               Book Your Ride & <br />
-              <span className="text-primary">Ride across Karnataka</span>
+              <span className="text-primary">Ride across South India</span>
             </motion.h1>
 
             <motion.div 
