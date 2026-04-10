@@ -5,6 +5,6 @@
     "build": "npm run build --prefix client"
   },
   "dependencies": {
-    "razorpay": "^2.9.6"
+    "cashfree-pg": "^5.1.0"
   }
 }

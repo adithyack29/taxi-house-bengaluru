@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Car, MapPin, Calendar, Clock, User, Phone, CheckCircle, 
   ChevronLeft, ArrowRight, Loader2, Info, CreditCard, 
-  ShieldCheck, AlertCircle, IndianRupee, Users, Wind, Zap
+  ShieldCheck, AlertCircle, IndianRupee, Users, Wind, Zap, Calculator
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { loadRazorpay } from '../utils/razorpay';
+import { loadCashfree } from '../utils/cashfree';
 import { formatDate, formatTime } from '../utils/formatters';
 
 const ConfirmBooking = () => {
@@ -18,6 +18,7 @@ const ConfirmBooking = () => {
   const [bookingStatus, setBookingStatus] = useState(null);
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [roadDistance, setRoadDistance] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Safe JSON parsing helper
   const safeParseArr = (val) => {
@@ -42,6 +43,7 @@ const ConfirmBooking = () => {
     package: searchParams.get('package'),
     airport: searchParams.get('airport'),
     returnDate: searchParams.get('returnDate'),
+    returnTime: searchParams.get('returnTime') || '12:00',
     stops: safeParseArr(searchParams.get('stops')),
     stopCoords: safeParseArr(searchParams.get('stopCoords'))
   };
@@ -111,78 +113,71 @@ const ConfirmBooking = () => {
     const testAmount = 1;
 
     try {
-      const res = await loadRazorpay();
-      if (!res) throw new Error('Razorpay SDK failed to load.');
+      const res = await loadCashfree();
+      if (!res) throw new Error('Cashfree SDK failed to load.');
 
-      const orderResponse = await fetch('/api/create-order', {
+      const orderResponse = await fetch('/api/cashfree-create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: testAmount, currency: 'INR' }),
+        body: JSON.stringify({ 
+          amount: testAmount, 
+          customerName: formData.name,
+          customerPhone: formData.phone
+        }),
       });
 
       if (!orderResponse.ok) throw new Error('Failed to initialize payment.');
       const orderData = await orderResponse.json();
 
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'TaxiHouse Bengaluru',
-        description: `Booking for ${car.name}`,
-        order_id: orderData.id,
-        handler: async function (response) {
-          setBookingStatus({ type: 'loading', msg: 'Verifying payment...' });
+      const cashfree = window.Cashfree({
+        mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox"
+      });
 
-          const verifyResponse = await fetch('/api/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-
-          const verifyData = await verifyResponse.json();
-
-          if (verifyData.status === 'success') {
-            const { error: supabaseError } = await supabase
-              .from('bookings')
-              .insert([{
-                user_name: formData.name,
-                phone: formData.phone,
-                pickup: tripDetails.pickup,
-                drop_off: tripDetails.drop,
-                booking_date: tripDetails.date,
-                booking_time: tripDetails.time,
-                car_type: car.name,
-                trip_category: tripCategory,
-                sub_type: subType,
-                return_date: tripDetails.returnDate || null,
-                local_package: tripDetails.package || null,
-                stops: tripDetails.stops,
-                status: 'confirmed',
-                amount: testAmount,
-                payment_status: 'paid',
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              }]);
-
-            if (supabaseError) throw supabaseError;
-            setBookingStatus({ type: 'success', msg: 'Booking Confirmed!' });
-            setTimeout(() => navigate('/'), 3000);
-          } else {
-            setBookingStatus({ type: 'error', msg: 'Payment verification failed.' });
-          }
-        },
-        prefill: { name: formData.name, contact: formData.phone },
-        theme: { color: '#F97316' },
-        modal: { ondismiss: () => setBookingStatus(null) }
+      const checkoutOptions = {
+        paymentSessionId: orderData.payment_session_id,
+        returnUrl: `${window.location.origin}/`,
       };
 
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      cashfree.checkout(checkoutOptions).then(async (result) => {
+        if (result.error) {
+          setBookingStatus({ type: 'error', msg: result.error.message });
+          return;
+        }
+
+        if (result.redirect) {
+          // This will happen if the payment flow requires a redirect
+          console.log("Payment redirecting...");
+          return;
+        }
+
+        // Handle success (Payment is completed)
+        setBookingStatus({ type: 'loading', msg: 'Persisting booking...' });
+
+        const { error: supabaseError } = await supabase
+          .from('bookings')
+          .insert([{
+            user_name: formData.name,
+            phone: formData.phone,
+            pickup: tripDetails.pickup,
+            drop_off: tripDetails.drop,
+            booking_date: tripDetails.date,
+            booking_time: tripDetails.time,
+            car_type: car.name,
+            trip_category: tripCategory,
+            sub_type: subType,
+            return_date: tripDetails.returnDate || null,
+            local_package: tripDetails.package || null,
+            stops: tripDetails.stops,
+            status: 'confirmed',
+            amount: testAmount,
+            payment_status: 'paid',
+            cashfree_order_id: orderData.order_id
+          }]);
+
+        if (supabaseError) throw supabaseError;
+        setBookingStatus({ type: 'success', msg: 'Booking Confirmed!' });
+        setTimeout(() => navigate('/'), 3000);
+      });
 
     } catch (err) {
       setBookingStatus({ type: 'error', msg: err.message || 'Payment failed.' });
@@ -240,7 +235,41 @@ const ConfirmBooking = () => {
     // Outstation Distance Calculation
     effectiveKm = roadDistance ? Math.max(minKm, roadDistance) : minKm;
     baseFare = Math.round(effectiveKm * pricePerKm);
-    totalEstimated = baseFare + driverBata + nightBata;
+    
+    // Day Bata calculation (based on calendar days and distance threshold)
+    const pickupD = new Date(tripDetails.date);
+    const returnD = tripDetails.returnDate ? new Date(tripDetails.returnDate) : pickupD;
+    const calendarDays = Math.ceil((returnD - pickupD) / (1000 * 60 * 60 * 24)) + 1;
+    // Distance and Days Calculation: Use a 50km buffer to avoid over-billing on small overages (e.g. 610km is 2 days)
+    const distanceThresholdDays = Math.max(1, Math.floor(effectiveKm / 300) + (effectiveKm % 300 > 50 ? 1 : 0));
+    const bataDays = Math.max(calendarDays, distanceThresholdDays);
+    
+    // Night Bata calculation
+    const parseTime = (t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h + m/60;
+    };
+    const isNight = (t) => {
+      const h = parseTime(t);
+      return h >= 22 || h < 6;
+    };
+    
+    const nights = Math.max(0, bataDays - 1);
+    const pickupNight = isNight(tripDetails.time) ? 1 : 0;
+    const returnNight = (tripDetails.returnDate && isNight(tripDetails.returnTime)) ? 1 : 0;
+    const totalNights = nights + pickupNight + returnNight;
+
+    const totalDayBata = bataDays * driverBata;
+    const totalNightBata = totalNights * nightBata;
+    
+    totalEstimated = baseFare + totalDayBata + totalNightBata;
+    
+    // Expose these for the modal
+    tripDetails.bataDays = bataDays;
+    tripDetails.totalNights = totalNights;
+    tripDetails.baseFare = baseFare;
+    tripDetails.totalDayBata = totalDayBata;
+    tripDetails.totalNightBata = totalNightBata;
   }
 
   return (
@@ -384,13 +413,25 @@ const ConfirmBooking = () => {
                 <p className="text-sm font-black text-secondary">₹{(baseFare || 0).toLocaleString()}</p>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-xs font-bold text-gray-500">Driver Bata <span className="text-[10px] text-gray-400 font-medium">(Night Stay)</span></p>
-                <p className="text-sm font-black text-secondary">₹{(driverBata || 0).toLocaleString()}</p>
+                <p className="text-xs font-bold text-gray-500">Driver Bata <span className="text-[10px] text-gray-400 font-medium">(day)</span></p>
+                <p className="text-sm font-black text-secondary">₹{(tripDetails.totalDayBata || driverBata).toLocaleString()}</p>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-xs font-bold text-gray-500">Night Bata <span className="text-[10px] text-gray-400 font-medium">(Night Allowance)</span></p>
-                <p className="text-sm font-black text-secondary">₹{(nightBata || 0).toLocaleString()}</p>
+                <p className="text-xs font-bold text-gray-500">Driver Bata <span className="text-[10px] text-gray-400 font-medium">(night allowance)</span></p>
+                <p className="text-sm font-black text-secondary">₹{(tripDetails.totalNightBata || nightBata).toLocaleString()}</p>
               </div>
+
+              {/* See Full Details Button */}
+              {tripDetails.type === 'outstation' && (
+                <button 
+                  onClick={() => setIsDetailsOpen(true)}
+                  className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-[10px] font-bold text-primary flex items-center justify-center gap-2 transition-all border border-dashed border-gray-200 mt-2"
+                >
+                  <Info size={12} />
+                  See full details of estimation
+                </button>
+              )}
+
               <div className="pt-6 mt-4 border-t-2 border-dashed border-gray-100 flex justify-between items-end">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest">Estimated Total</p>
@@ -409,7 +450,10 @@ const ConfirmBooking = () => {
               </div>
             </div>
           </motion.div>
+        </div>
 
+        {/* Row 2: Inclusions & Confirm Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           {/* Row 2 / Col 1: Inclusions / Exclusions */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -564,6 +608,102 @@ const ConfirmBooking = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Fare Detail Modal */}
+      <AnimatePresence>
+        {isDetailsOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl w-full max-w-lg flex flex-col border border-gray-100"
+            >
+              <div className="p-8 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-black text-secondary tracking-tight">Fare Estimation <span className="text-primary uppercase text-xs italic ml-2">Details</span></h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Breakdown of your trip cost</p>
+                </div>
+                <button onClick={() => setIsDetailsOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
+                  <CheckCircle size={24} />
+                </button>
+              </div>
+              
+              <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
+                {/* Distance Section */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black text-secondary/40 uppercase tracking-widest flex items-center gap-2">
+                    <MapPin size={12} className="text-primary" /> Route & Distance
+                  </p>
+                  <div className="bg-white p-4 rounded-2xl border border-gray-100 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 font-medium">Calculated Road Distance</span>
+                      <span className="font-black text-secondary">{roadDistance?.toFixed(1)} KM</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 font-medium">Minimum Kilometers</span>
+                      <span className="font-black text-secondary">{car.min_km} KM</span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-50 flex justify-between text-sm">
+                      <span className="text-secondary font-black">Effective KM used</span>
+                      <span className="text-primary font-black">{effectiveKm % 1 === 0 ? effectiveKm : effectiveKm.toFixed(1)} KM</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calculations Section */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black text-secondary/40 uppercase tracking-widest flex items-center gap-2">
+                    <Calculator size={12} className="text-primary" /> Fare Mathematics
+                  </p>
+                  <div className="bg-white p-4 rounded-2xl border border-gray-100 space-y-4">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm font-bold text-secondary">
+                        <span>Base Fare</span>
+                        <span>₹{tripDetails.baseFare?.toLocaleString()}</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-medium italic">Logic: {effectiveKm % 1 === 0 ? effectiveKm : effectiveKm.toFixed(1)} KM × ₹{car.price_per_km}/KM</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm font-bold text-secondary">
+                        <span>Driver Bata (Day)</span>
+                        <span>₹{tripDetails.totalDayBata?.toLocaleString()}</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-medium italic">Logic: {tripDetails.bataDays} Days × ₹{car.driver_bata}/Day (Threshold: 300KM/Day)</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm font-bold text-secondary">
+                        <span>Night Allowance</span>
+                        <span>₹{tripDetails.totalNightBata?.toLocaleString()}</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-medium italic">Logic: {tripDetails.totalNights} Nights × ₹{car.night_bata}/Night (10 PM - 6 AM)</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Important Note */}
+                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex gap-3">
+                  <AlertCircle size={20} className="text-orange-500 shrink-0" />
+                  <p className="text-[11px] text-orange-800 font-medium leading-relaxed">
+                    <strong>Note:</strong> OSRM distance is used for estimation. Final fare will be calculated based on the actual vehicle odometer reading. Tolls, state permits, and parking are payable at actuals.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-gray-50 border-t border-gray-100">
+                <button 
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="w-full bg-secondary text-white py-4 rounded-2xl font-black uppercase text-sm shadow-lg hover:shadow-secondary/20 transition-all"
+                >
+                  Got it, Thanks!
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
