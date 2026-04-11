@@ -373,9 +373,10 @@ const AdminDashboard = () => {
                         <thead>
                           <tr className="border-b border-slate-100">
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Customer</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4 text-center">Trip Type</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Trip Type</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Schedule</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4">Vehicle</th>
+                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Status</th>
                             <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Contact</th>
                           </tr>
                         </thead>
@@ -435,6 +436,20 @@ const AdminDashboard = () => {
                                     </span>
                                   </div>
                                 </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="flex flex-col items-center gap-1">
+                                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                      booking.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 
+                                      booking.status === 'pending' ? 'bg-orange-500/10 text-orange-600' : 
+                                      'bg-slate-100 text-slate-400'
+                                    }`}>
+                                      {booking.status}
+                                    </span>
+                                    <span className="text-[8px] font-bold text-slate-400 uppercase">
+                                      {booking.payment_status}
+                                    </span>
+                                  </div>
+                                </td>
                                 <td className="py-3 text-center">
                                   <div className="flex items-center justify-center gap-2">
                                     <a 
@@ -469,7 +484,16 @@ const AdminDashboard = () => {
                             <div className="flex justify-between items-start mb-2">
                               <div>
                                 <div className="text-[15px] font-bold text-slate-900">{booking.user_name}</div>
-                                <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                                    booking.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 
+                                    booking.status === 'pending' ? 'bg-orange-500/10 text-orange-600' : 
+                                    'bg-slate-100 text-slate-400'
+                                  }`}>
+                                    {booking.status}
+                                  </span>
+                                  <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <a href={`tel:${booking.phone}`} className="p-2 bg-blue-500/10 rounded-lg text-blue-500">

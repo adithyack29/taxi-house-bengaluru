@@ -10,11 +10,14 @@ import Contact from './pages/Contact';
 import SelectVehicle from './pages/SelectVehicle';
 import AdminDashboard from './pages/AdminDashboard';
 import ConfirmBooking from './pages/ConfirmBooking';
+import TermsAndConditions from './pages/TermsAndConditions';
+import RefundPolicy from './pages/RefundPolicy';
+import PaymentSuccess from './pages/PaymentSuccess';
 import { useLocation } from 'react-router-dom';
 
 function AppContent() {
   const location = useLocation();
-  const isMinimalPage = ['/select-vehicle', '/confirm-booking', '/admin'].includes(location.pathname);
+  const isMinimalPage = ['/select-vehicle', '/confirm-booking', '/admin', '/payment-success'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -28,6 +31,9 @@ function AppContent() {
           <Route path="/select-vehicle" element={<SelectVehicle />} />
           <Route path="/confirm-booking" element={<ConfirmBooking />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
       </main>
       {!isMinimalPage && <Footer />}

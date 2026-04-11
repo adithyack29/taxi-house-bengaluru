@@ -24,6 +24,8 @@ const Footer = () => {
               <li><Link to="/about" className="text-white/80 hover:text-primary transition-all duration-300">About Us</Link></li>
               <li><Link to="/services" className="text-white/80 hover:text-primary transition-all duration-300">Our Services</Link></li>
               <li><Link to="/contact" className="text-white/80 hover:text-primary transition-all duration-300">Contact Us</Link></li>
+              <li><Link to="/terms" className="text-white/80 hover:text-primary transition-all duration-300">Terms & Conditions</Link></li>
+              <li><Link to="/refund-policy" className="text-white/80 hover:text-primary transition-all duration-300">Cancellation & Refund Policy</Link></li>
             </ul>
           </div>
 

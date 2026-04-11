@@ -129,54 +129,48 @@ const ConfirmBooking = () => {
       if (!orderResponse.ok) throw new Error('Failed to initialize payment.');
       const orderData = await orderResponse.json();
 
+      // 1. Persist "Initiated" Booking BEFORE Redirect
+      setBookingStatus({ type: 'loading', msg: 'Recording booking...' });
+      const { error: supabaseError } = await supabase
+        .from('bookings')
+        .insert([{
+          user_name: formData.name,
+          phone: formData.phone,
+          pickup: tripDetails.pickup,
+          drop_off: tripDetails.drop,
+          booking_date: tripDetails.date,
+          booking_time: tripDetails.time,
+          car_type: car.name,
+          trip_category: tripCategory,
+          sub_type: subType,
+          return_date: tripDetails.returnDate || null,
+          local_package: tripDetails.package || null,
+          stops: tripDetails.stops,
+          status: 'pending',
+          amount: testAmount,
+          payment_status: 'awaiting payment',
+          cashfree_order_id: orderData.order_id
+        }]);
+
+      if (supabaseError) throw supabaseError;
+
+      // 2. Initialise Cashfree Checkout
       const cashfree = window.Cashfree({
         mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox"
       });
 
       const checkoutOptions = {
         paymentSessionId: orderData.payment_session_id,
-        returnUrl: `${window.location.origin}/`,
+        returnUrl: `${window.location.origin}/payment-success?order_id=${orderData.order_id}`,
       };
 
-      cashfree.checkout(checkoutOptions).then(async (result) => {
+      cashfree.checkout(checkoutOptions).then((result) => {
         if (result.error) {
           setBookingStatus({ type: 'error', msg: result.error.message });
-          return;
         }
-
         if (result.redirect) {
-          // This will happen if the payment flow requires a redirect
           console.log("Payment redirecting...");
-          return;
         }
-
-        // Handle success (Payment is completed)
-        setBookingStatus({ type: 'loading', msg: 'Persisting booking...' });
-
-        const { error: supabaseError } = await supabase
-          .from('bookings')
-          .insert([{
-            user_name: formData.name,
-            phone: formData.phone,
-            pickup: tripDetails.pickup,
-            drop_off: tripDetails.drop,
-            booking_date: tripDetails.date,
-            booking_time: tripDetails.time,
-            car_type: car.name,
-            trip_category: tripCategory,
-            sub_type: subType,
-            return_date: tripDetails.returnDate || null,
-            local_package: tripDetails.package || null,
-            stops: tripDetails.stops,
-            status: 'confirmed',
-            amount: testAmount,
-            payment_status: 'paid',
-            cashfree_order_id: orderData.order_id
-          }]);
-
-        if (supabaseError) throw supabaseError;
-        setBookingStatus({ type: 'success', msg: 'Booking Confirmed!' });
-        setTimeout(() => navigate('/'), 3000);
       });
 
     } catch (err) {
@@ -246,6 +240,7 @@ const ConfirmBooking = () => {
     
     // Night Bata calculation
     const parseTime = (t) => {
+      if (!t || typeof t !== 'string' || !t.includes(':')) return 12; // Default to noon
       const [h, m] = t.split(':').map(Number);
       return h + m/60;
     };
