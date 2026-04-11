@@ -9,3 +9,5 @@ client/node_modules
 client/dist
 backend/.env
 client/.env
+.vercel
+.env*.local

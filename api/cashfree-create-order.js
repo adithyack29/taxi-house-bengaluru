@@ -1,10 +1,11 @@
-const { Cashfree } = require('cashfree-pg');
+const { Cashfree, CFEnvironment } = require('cashfree-pg');
 
-Cashfree.XClientId = process.env.CASHFREE_APP_ID;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY;
-Cashfree.XEnvironment = process.env.CASHFREE_ENVIRONMENT === 'PRODUCTION' 
-    ? Cashfree.Environment.PRODUCTION 
-    : Cashfree.Environment.SANDBOX;
+// Initialize Cashfree Instance
+const cashfree = new Cashfree(
+    process.env.CASHFREE_ENVIRONMENT === 'PRODUCTION' ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
+    process.env.CASHFREE_APP_ID,
+    process.env.CASHFREE_SECRET_KEY
+);
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -13,7 +14,7 @@ module.exports = async (req, res) => {
 
   const { amount, customerName, customerPhone, customerEmail = 'test@example.com' } = req.body;
 
-  if (!Cashfree.XClientId || !Cashfree.XClientSecret) {
+  if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {
     return res.status(500).json({ error: 'Cashfree API keys are not configured.' });
   }
 
@@ -34,13 +35,15 @@ module.exports = async (req, res) => {
       }
     };
 
-    const response = await Cashfree.PGCreateOrder("2023-08-01", request);
+    const response = await cashfree.PGCreateOrder(request);
+    console.log('[API] Cashfree Response received');
     res.status(200).json(response.data);
   } catch (err) {
-    console.error('Error creating Cashfree order:', err.response?.data || err.message);
+    const errorMsg = err.response?.data || err.message;
+    console.error('Error creating Cashfree order:', errorMsg);
     res.status(500).json({ 
       error: 'Failed to create Cashfree order', 
-      details: err.response?.data || err.message 
+      details: errorMsg 
     });
   }
 };

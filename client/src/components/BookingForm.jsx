@@ -31,7 +31,10 @@ const BookingForm = () => {
     stops: [], // New multi-stop support for outstation
     stopCoords: [], // Coordinates for multi-stop
     localPackage: '8hr/80km',
-    airportType: 'to-airport' // to-airport/from-airport
+    airportType: 'to-airport',
+    returnTime: '12:00', // Default return time
+    estimatedDistance: null,
+    daysRequired: 1
   });
   
   const [status, setStatus] = useState(null);
@@ -140,6 +143,41 @@ const BookingForm = () => {
     }
   }, [activeTab, formData.airportType]);
 
+  // Fetch Road Distance for Outstation
+  useEffect(() => {
+    const fetchDistance = async () => {
+      if (activeTab === 'outstation' && formData.pickupCoords && formData.dropCoords) {
+        setCalculating(true);
+        try {
+          const coordsArr = [
+            `${formData.pickupCoords.lng},${formData.pickupCoords.lat}`,
+            ...formData.stopCoords.filter(c => c).map(c => `${c.lng},${c.lat}`),
+            `${formData.dropCoords.lng},${formData.dropCoords.lat}`
+          ].join(';');
+
+          const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordsArr}?overview=false`);
+          const data = await res.json();
+
+          if (data.code === 'Ok' && data.routes && data.routes[0]) {
+            const distanceInKm = data.routes[0].distance / 1000;
+            const daysNeeded = Math.ceil(distanceInKm / 300);
+            setFormData(prev => ({ 
+              ...prev, 
+              estimatedDistance: distanceInKm,
+              daysRequired: daysNeeded
+            }));
+          }
+        } catch (err) {
+          console.error('Error fetching OSRM distance:', err);
+        } finally {
+          setCalculating(false);
+        }
+      }
+    };
+
+    fetchDistance();
+  }, [activeTab, formData.pickupCoords, formData.dropCoords, formData.stopCoords]);
+
   const selectedCar = VEHICLE_OPTIONS.find(c => c.name === formData.carType) || VEHICLE_OPTIONS[0];
 
   const handleChange = (e) => {
@@ -155,8 +193,8 @@ const BookingForm = () => {
       // If pickup date changes and return date is now before it or too far after, reset return date
       if (name === 'date') {
         const newMax = addDays(value, 7);
-        if (prev.returnDate && (prev.returnDate < value || prev.returnDate > newMax)) {
-          newData.returnDate = value;
+        if (prev.returnDate && (prev.returnDate < addDays(value, prev.daysRequired || 1))) {
+          newData.returnDate = addDays(value, prev.daysRequired || 1);
         }
         
         // Auto-set time: if today, use nearest available (considering rollover); if future, default to 10 AM (standard)
@@ -225,6 +263,7 @@ const BookingForm = () => {
     if (activeTab === 'outstation') {
       params.set('trip', formData.tripType);
       params.set('returnDate', formData.returnDate || '');
+      params.set('returnTime', formData.returnTime || '');
     } else if (activeTab === 'local') {
       params.set('package', formData.localPackage);
     } else if (activeTab === 'airport') {
@@ -389,7 +428,7 @@ const BookingForm = () => {
               )}
 
               {/* Row 2: Date/Time/Return */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Date</label>
                   <CustomDatePicker 
@@ -421,8 +460,19 @@ const BookingForm = () => {
                     value={formData.returnDate || ''} 
                     onChange={handleChange} 
                     align="right"
-                    minDate={formData.date || todayStr}
+                    minDate={addDays(formData.date, formData.daysRequired || 1)}
                     maxDate={maxReturnDate}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Return Time</label>
+                  <CustomTimePicker 
+                    name="returnTime" 
+                    required={formData.tripType === 'two-way'}
+                    disabled={formData.tripType === 'one-way'}
+                    value={formData.returnTime || ''} 
+                    onChange={handleChange} 
+                    align="right"
                   />
                 </div>
               </div>

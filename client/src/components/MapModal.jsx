@@ -98,6 +98,8 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
             <MapContainer 
               center={position} 
               zoom={13} 
+              minZoom={6}
+              maxBounds={[[8.0, 72.0], [22.5, 85.5]]}
               style={{ height: '100%', width: '100%', zIndex: 10 }}
             >
               <TileLayer

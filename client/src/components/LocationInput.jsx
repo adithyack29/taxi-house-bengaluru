@@ -36,7 +36,9 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
     timeoutRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&countrycodes=in&format=json&limit=5`);
+        // Restricted to South India (KT, TN, KL, AP, TS, PY) and Maharashtra
+        // Bounding box: 72.0,22.5 (North West) to 85.5,8.0 (South East)
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&countrycodes=in&viewbox=72.0,22.5,85.5,8.0&bounded=1&format=json&limit=5`);
         const data = await res.json();
         setSuggestions(data);
       } catch (error) {
@@ -155,7 +157,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
             {/* Autocomplete Suggestions */}
             {loading && value && value.length >= 3 && (
               <li className="px-4 py-3 text-sm text-gray-500 text-center animate-pulse">
-                Searching India...
+                Searching South India & Maharashtra...
               </li>
             )}
             
