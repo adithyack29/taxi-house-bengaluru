@@ -31,7 +31,7 @@ function AppContent() {
           <Route path="/select-vehicle" element={<SelectVehicle />} />
           <Route path="/confirm-booking" element={<ConfirmBooking />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>

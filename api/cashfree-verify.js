@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
   try {
     console.log(`[Verify] Checking status for Order: ${order_id}`);
-    const response = await cashfree.PGOrderFetch("2023-08-01", order_id);
+    const response = await cashfree.PGFetchOrder(order_id);
     const order = response.data;
     
     console.log(`[Verify] Cashfree response for ${order_id}:`, JSON.stringify(order));
@@ -46,11 +46,11 @@ module.exports = async (req, res) => {
       });
     }
   } catch (err) {
-    const errorMsg = err.response?.data || err.message;
-    console.error(`[Verify] Error for Order ${order_id}:`, errorMsg);
+    const errorDetails = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+    console.error(`[Verify] Error for Order ${order_id}:`, errorDetails);
     res.status(500).json({ 
       error: 'Failed to verify Cashfree order', 
-      details: errorMsg 
+      details: errorDetails 
     });
   }
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader2, AlertCircle, Home, Calendar, MapPin, IndianRupee, RotateCcw } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, Home, Calendar, MapPin, IndianRupee, RotateCcw, ChevronLeft, Copy, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const PaymentSuccess = () => {
@@ -9,14 +9,16 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
   const orderId = searchParams.get('order_id');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
+  const [errorMessage, setErrorMessage] = useState('');
   const [booking, setBooking] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    let timeoutId;
     
     const verifyPayment = async () => {
       if (!orderId) {
         setStatus('error');
+        setErrorMessage('Order ID is missing from URL.');
         return;
       }
 
@@ -32,7 +34,17 @@ const PaymentSuccess = () => {
           body: JSON.stringify({ order_id: orderId })
         });
         
+        if (!verifyRes.ok) {
+          const errData = await verifyRes.json();
+          const msg = errData.details || errData.error || 'Server error during verification';
+          setErrorMessage(typeof msg === 'string' ? msg : JSON.stringify(msg));
+          setStatus('error');
+          return;
+        }
+        
         const verifyData = await verifyRes.json();
+
+        console.log('[Verify] verifyData:', verifyData);
 
         if (verifyData.status === 'SUCCESS') {
           // 2. Update Supabase status
@@ -40,38 +52,48 @@ const PaymentSuccess = () => {
             .from('bookings')
             .update({ 
               status: 'confirmed', 
-              payment_status: 'paid',
-              cashfree_payment_status: 'SUCCESS'
+              payment_status: 'paid'
             })
             .eq('cashfree_order_id', orderId)
-            .select('*')
-            .single();
+            .select();
 
-          if (error) throw error;
-          setBooking(data);
+          if (error) {
+            console.error('[Verify] Supabase update error:', error);
+            setErrorMessage(`Database Error: ${error.message}`);
+            throw error;
+          }
+
+          if (!data || data.length === 0) {
+            console.error('[Verify] No booking found with order_id:', orderId);
+            setErrorMessage(`No booking record found for Order: ${orderId}`);
+            setStatus('error');
+            return;
+          }
+
+          setBooking(data[0]);
           setStatus('success');
-          
-          // Auto redirect after 8 seconds
-          timeoutId = setTimeout(() => {
-            navigate('/');
-          }, 8000);
         } else if (verifyData.status === 'PENDING') {
           setStatus('pending_confirmation');
         } else {
+          console.error('[Verify] Cashfree verification status:', verifyData.status, verifyData.message);
+          setErrorMessage(verifyData.message || `Verification status: ${verifyData.status}`);
           setStatus('error');
         }
       } catch (err) {
         console.error('Verification error:', err);
+        setErrorMessage(err.message || 'An unexpected error occurred during verification.');
         setStatus('error');
       }
     };
 
     verifyPayment();
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
   }, [orderId, navigate]);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(orderId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleManualRetry = () => {
     window.location.reload();
@@ -115,9 +137,9 @@ const PaymentSuccess = () => {
             <RotateCcw size={18} />
             Check Again
           </button>
-          <Link to="/" className="text-gray-400 hover:text-secondary text-xs font-bold uppercase tracking-widest border-b border-transparent hover:border-gray-200 transition-all">
-            Return to Home
-          </Link>
+          <button onClick={() => navigate(-1)} className="w-full text-gray-400 hover:text-secondary text-xs font-bold uppercase tracking-widest border-b border-transparent hover:border-gray-200 transition-all inline-flex items-center justify-center gap-1">
+            <ChevronLeft size={14} /> Back
+          </button>
         </motion.div>
       </div>
     );
@@ -133,9 +155,23 @@ const PaymentSuccess = () => {
           >
             <AlertCircle size={60} className="text-red-500 mx-auto mb-6" />
             <h2 className="text-2xl font-black text-secondary mb-2 tracking-tight">Verification Failed</h2>
-            <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-              We couldn't verify your payment. If the amount was deducted, please don't worry—our team will confirm it manually.
-              <br/><br/>
+            
+            <div className="bg-red-50 p-4 rounded-2xl border border-red-100 mb-6 text-left">
+              <p className="text-red-600 text-[10px] font-black uppercase tracking-widest mb-2 border-b border-red-100 pb-1">Error Information</p>
+              <p className="text-red-800 text-sm font-bold leading-relaxed">{errorMessage}</p>
+              
+              {/* Added tech details display */}
+              {errorMessage ? (
+                <div className="mt-3 pt-3 border-t border-red-100">
+                  <p className="text-[9px] text-red-400 font-bold uppercase mb-1">Technical Details</p>
+                  <pre className="text-[10px] bg-white/50 p-2 rounded-lg break-all whitespace-pre-wrap font-mono text-red-600 border border-red-100/50 max-h-48 overflow-y-auto w-full">
+                    {errorMessage}
+                  </pre>
+                </div>
+              ) : null}
+            </div>
+
+            <p className="text-gray-500 mb-8 text-xs leading-relaxed font-medium">
               Order ID: <span className="font-bold text-secondary">{orderId}</span>
             </p>
             <div className="flex flex-col gap-3">
@@ -146,13 +182,13 @@ const PaymentSuccess = () => {
                 <RotateCcw size={18} />
                 Try Verify Again
               </button>
-              <Link 
-                to="/" 
+              <button 
+                onClick={() => navigate(-1)} 
                 className="inline-flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-2xl font-black uppercase text-sm shadow-lg hover:bg-secondary/90 transition-all"
               >
-                <Home size={18} />
-                Back to Home
-              </Link>
+                <ChevronLeft size={18} />
+                Back
+              </button>
             </div>
           </motion.div>
         </div>
@@ -186,7 +222,19 @@ const PaymentSuccess = () => {
             <div className="grid grid-cols-2 gap-6">
                 <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Booking ID</p>
-                    <p className="text-sm font-black text-secondary">{orderId}</p>
+                    <div className="flex items-center gap-2 group">
+                      <p className="text-sm font-black text-secondary">{orderId}</p>
+                      <button 
+                        onClick={copyToClipboard}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-all text-gray-400 hover:text-primary relative"
+                        title="Copy Booking ID"
+                      >
+                        {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                        {copied && (
+                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-secondary text-white text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">Copied!</span>
+                        )}
+                      </button>
+                    </div>
                 </div>
                 {booking && (
                     <div className="text-right">
@@ -230,7 +278,6 @@ const PaymentSuccess = () => {
                     <Home size={18} />
                     Back to Homepage
                 </Link>
-                <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2 animate-pulse">Redirecting you in 8 seconds...</p>
             </div>
         </div>
       </motion.div>

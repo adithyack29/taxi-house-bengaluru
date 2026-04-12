@@ -16,11 +16,21 @@ import {
   Database,
   Phone,
   Pencil,
-  Save
+  Save,
+  MapPin,
+  Plane,
+  Zap,
+  Eye,
+  EyeOff,
+  Copy,
+  Timer,
+  Calculator
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { WhatsAppIcon } from '../components/WhatsAppButton';
 import { formatDate, formatTime } from '../utils/formatters';
+import TripPlanModal from '../components/TripPlanModal';
+import FareDetailModal from '../components/FareDetailModal';
 
 const formatPhoneForWhatsApp = (phone) => {
   return phone.replace(/\D/g, '');
@@ -37,6 +47,12 @@ const AdminDashboard = () => {
   const [viewingBooking, setViewingBooking] = useState(null);
   const [isResetMenuOpen, setIsResetMenuOpen] = useState(false);
   const [resetConfirmType, setResetConfirmType] = useState(null); // 'bookings', 'messages', 'cars'
+  const [selectedCategory, setSelectedCategory] = useState(null); // 'local', 'outstation', 'airport'
+  const [revealedOrderIds, setRevealedOrderIds] = useState(new Set());
+  const [copiedOrderId, setCopiedOrderId] = useState(null);
+  const [viewingPlan, setViewingPlan] = useState(null);
+  const [viewingFare, setViewingFare] = useState(null);
+  const [formStep, setFormStep] = useState('category'); // 'category', 'details'
 
   // Admin password (simple for trial as requested)
   // In a real app, this should be an env variable or Supabase Auth
@@ -77,8 +93,11 @@ const AdminDashboard = () => {
           .from('cars')
           .select('*')
           .order('seats', { ascending: true });
-        // Guaranteed client-side sort
-        const sortedCars = (cars || []).sort((a, b) => a.seats - b.seats);
+        // Sort by price (Lowest to Highest)
+        const sortedCars = (cars || []).sort((a, b) => 
+          (a.price_per_km || 0) - (b.price_per_km || 0) || 
+          (a.base_fare || 0) - (b.base_fare || 0)
+        );
         setData(prev => ({ ...prev, cars: sortedCars }));
       }
     } catch (error) {
@@ -130,24 +149,37 @@ const AdminDashboard = () => {
     const formData = new FormData(e.target);
     const newCar = {
       name: formData.get('name'),
-      seats: parseInt(formData.get('seats')),
-      price_per_km: parseFloat(formData.get('price')),
+      seats: parseInt(formData.get('seats')) || 4,
+      price_per_km: parseFloat(formData.get('price_round_trip')) || 0,
+      price_per_km_one_way: parseFloat(formData.get('price_one_way')) || 0,
       min_km: parseInt(formData.get('min_km')) || 0,
       driver_bata: parseInt(formData.get('driver_bata')) || 0,
       night_bata: parseInt(formData.get('night_bata')) || 0,
       permit_charge: parseInt(formData.get('permit_charge')) || 0,
-      available_categories: formData.getAll('categories'),
+      available_categories: [selectedCategory],
       is_ac: formData.get('is_ac') === 'on',
       image_url: formData.get('image_url'),
-      is_available: true
+      is_available: true,
+      // New fields for Local
+      base_fare: parseFloat(formData.get('base_fare')) || 0,
+      local_package: formData.get('local_package') || '8 Hours / 80 KM',
+      extra_km_price: parseFloat(formData.get('extra_km_price')) || 0,
+      extra_hr_price: parseFloat(formData.get('extra_hr_price')) || 0,
+      seating_style: formData.get('seating_style') || null,
+      is_round_trip_only: formData.get('is_round_trip_only') === 'on'
     };
 
     try {
-      await supabase.from('cars').insert([newCar]);
+      const { error } = await supabase.from('cars').insert([newCar]);
+      if (error) throw error;
+      
       e.target.reset();
+      setFormStep('category');
+      setSelectedCategory(null);
       fetchData();
     } catch (error) {
       console.error('Error adding car:', error);
+      alert('Failed to add car: ' + error.message);
     }
   };
 
@@ -158,8 +190,9 @@ const AdminDashboard = () => {
     const formData = new FormData(e.target);
     const updatedCar = {
       name: formData.get('name'),
-      seats: parseInt(formData.get('seats')),
-      price_per_km: parseFloat(formData.get('price')),
+      seats: parseInt(formData.get('seats')) || 4,
+      price_per_km: parseFloat(formData.get('price_round_trip')) || 0,
+      price_per_km_one_way: parseFloat(formData.get('price_one_way')) || 0,
       min_km: parseInt(formData.get('min_km')) || 0,
       driver_bata: parseInt(formData.get('driver_bata')) || 0,
       night_bata: parseInt(formData.get('night_bata')) || 0,
@@ -167,6 +200,13 @@ const AdminDashboard = () => {
       available_categories: formData.getAll('categories'),
       is_ac: formData.get('is_ac') === 'on',
       image_url: formData.get('image_url'),
+      // Specialized local fields
+      base_fare: parseFloat(formData.get('base_fare')) || 0,
+      local_package: formData.get('local_package') || '8 Hours / 80 KM',
+      extra_km_price: parseFloat(formData.get('extra_km_price')) || 0,
+      extra_hr_price: parseFloat(formData.get('extra_hr_price')) || 0,
+      seating_style: formData.get('seating_style') || null,
+      is_round_trip_only: formData.get('is_round_trip_only') === 'on'
     };
 
     try {
@@ -266,7 +306,7 @@ const AdminDashboard = () => {
               <LayoutDashboard className="text-primary" size={20} />
               Owner Dashboard
             </h1>
-            <p className="text-[10px] md:text-sm text-slate-500 font-semibold uppercase tracking-tight opacity-70">Backend management system</p>
+            <p className="text-[10px] md:text-sm text-slate-500 font-semibold   opacity-70">Backend management system</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -372,12 +412,13 @@ const AdminDashboard = () => {
                       <table className="w-full text-left">
                         <thead>
                           <tr className="border-b border-slate-100">
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Customer</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Trip Type</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest">Schedule</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest px-4">Vehicle</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Status</th>
-                            <th className="pb-4 font-bold text-slate-400 uppercase text-[10px] tracking-widest text-center">Contact</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px] ">Customer</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px]  text-center">Trip Type</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px] ">Schedule</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px]  px-4">Vehicle</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px]  text-center">Plan & Fare</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px]  text-center">Status</th>
+                            <th className="pb-4 font-bold text-slate-400  text-[10px]  text-center">Contact</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -391,17 +432,17 @@ const AdminDashboard = () => {
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <div className="inline-flex flex-col items-center">
-                                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight mb-0.5">
+                                    <span className="text-[10px] font-black text-slate-900   mb-0.5">
                                       {(booking.trip_category || 'Trip').replace('-', ' ')}
                                     </span>
-                                    <span className="text-[9px] font-black text-primary uppercase bg-primary/5 px-2 py-0.5 rounded-full mb-1">
+                                    <span className="text-[9px] font-black text-primary  bg-primary/5 px-2 py-0.5 rounded-full mb-1">
                                       {booking.trip_category === 'local' 
                                         ? booking.local_package 
                                         : (booking.sub_type || '').replace('-', ' ')}
                                     </span>
                                     <button 
                                       onClick={() => setViewingBooking(booking)}
-                                      className="text-[9px] font-black text-slate-400/60 uppercase hover:text-primary transition-colors flex items-center gap-1 border-b border-transparent hover:border-primary/30"
+                                      className="text-[9px] font-black text-slate-400/60  hover:text-primary transition-colors flex items-center gap-1 border-b border-transparent hover:border-primary/30"
                                     >
                                       <span>Route Info</span>
                                       {booking.stops?.length > 0 && <span className="text-primary/70">+{booking.stops.length}</span>}
@@ -419,36 +460,124 @@ const AdminDashboard = () => {
                                       <span className="text-slate-500">{formatTime(booking.booking_time)}</span>
                                     </div>
                                     {(booking.sub_type === 'round-trip' || booking.sub_type === 'two-way') && booking.return_date && (
-                                      <div className="text-[10px] font-bold flex items-center gap-1.5">
-                                        <span className="text-red-500 opacity-70">RD</span>
-                                        <span className="text-slate-500">{formatDate(booking.return_date)}</span>
-                                      </div>
+                                      <>
+                                        <div className="text-[10px] font-bold flex items-center gap-1.5">
+                                          <span className="text-red-500 opacity-70">RD</span>
+                                          <span className="text-slate-500">{formatDate(booking.return_date)}</span>
+                                        </div>
+                                        <div className="text-[10px] font-bold flex items-center gap-1.5">
+                                          <span className="text-red-500 opacity-70">RT</span>
+                                          <span className="text-slate-500">{formatTime(booking.return_time)}</span>
+                                        </div>
+                                      </>
                                     )}
                                   </div>
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex flex-col gap-0.5">
-                                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+                                    <span className="text-[11px] font-black text-slate-900  ">
                                       {booking.car_type}
                                     </span>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1.5 py-0.5 bg-slate-50 rounded w-fit">
+                                    <span className="text-[9px] font-black text-slate-400   px-1.5 py-0.5 bg-slate-50 rounded w-fit">
                                       {vehicleSeats} Seats
                                     </span>
                                   </div>
                                 </td>
+                                <td className="py-3 px-4">
+                                  <div className="flex flex-col items-center gap-1.5">
+                                    {booking.audit_data ? (
+                                      <>
+                                        <button 
+                                          onClick={() => setViewingPlan(booking)}
+                                          className="w-full flex items-center justify-center gap-1.5 px-3 py-1 bg-slate-50 hover:bg-slate-100 rounded-lg text-[9px] font-black text-secondary/60 hover:text-primary transition-all border border-slate-100"
+                                        >
+                                          <Timer size={10} /> TIMELINE
+                                        </button>
+                                        <button 
+                                          onClick={() => setViewingFare(booking)}
+                                          className="w-full flex items-center justify-center gap-1.5 px-3 py-1 bg-slate-50 hover:bg-slate-100 rounded-lg text-[9px] font-black text-secondary/60 hover:text-primary transition-all border border-slate-100"
+                                        >
+                                          <Calculator size={10} /> FARE MATH
+                                        </button>
+                                        <div className="w-full mt-1.5 pt-1.5 border-t border-slate-100/60 flex flex-col items-center">
+                                           <span className="text-[7px] font-black text-slate-300 uppercase leading-none mb-1">Total Est.</span>
+                                           <span className="text-[10px] font-black text-primary leading-none">
+                                              ₹{(booking.audit_data.totalFare || 
+                                                 booking.audit_data.total || 
+                                                 (Number(booking.audit_data.baseFare || 0) + 
+                                                  Number(booking.audit_data.totalDayBata || 0) + 
+                                                  Number(booking.audit_data.totalNightBata || 0))
+                                                ).toLocaleString()}
+                                           </span>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <span className="text-[8px] font-black text-slate-300 uppercase italic leading-none text-center block">Snapshots<br/>Unavailable</span>
+                                    )}
+                                  </div>
+                                </td>
                                 <td className="py-3 px-4 text-center">
                                   <div className="flex flex-col items-center gap-1">
-                                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                      booking.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 
-                                      booking.status === 'pending' ? 'bg-orange-500/10 text-orange-600' : 
-                                      'bg-slate-100 text-slate-400'
-                                    }`}>
-                                      {booking.status}
-                                    </span>
-                                    <span className="text-[8px] font-bold text-slate-400 uppercase">
-                                      {booking.payment_status}
-                                    </span>
-                                  </div>
+                                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
+                                        booking.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 
+                                        booking.status === 'pending' ? 'bg-orange-500/10 text-orange-600' : 
+                                        'bg-slate-100 text-slate-400'
+                                      }`}>
+                                        {booking.status}
+                                      </span>
+                                      
+                                      {booking.payment_status === 'paid' ? (
+                                        <div className="flex flex-col items-center gap-1 mt-1">
+                                          {revealedOrderIds.has(booking.id) ? (
+                                            <div className="flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-lg border border-green-100 shadow-sm transition-all animate-in fade-in zoom-in duration-200">
+                                              <span className="text-[9px] font-mono text-green-700 font-black whitespace-nowrap">
+                                                {booking.cashfree_order_id}
+                                              </span>
+                                              <div className="flex items-center gap-1">
+                                                <button 
+                                                  onClick={() => {
+                                                    navigator.clipboard.writeText(booking.cashfree_order_id);
+                                                    setCopiedOrderId(booking.id);
+                                                    setTimeout(() => setCopiedOrderId(null), 2000);
+                                                  }}
+                                                  className="p-1 hover:bg-green-100 rounded transition-colors text-green-600"
+                                                  title="Copy ID"
+                                                >
+                                                  {copiedOrderId === booking.id ? <CheckCircle size={10} /> : <Copy size={10} />}
+                                                </button>
+                                                <button 
+                                                  onClick={() => {
+                                                    const next = new Set(revealedOrderIds);
+                                                    next.delete(booking.id);
+                                                    setRevealedOrderIds(next);
+                                                  }}
+                                                  className="p-1 hover:bg-green-100 rounded transition-colors text-green-400"
+                                                  title="Hide ID"
+                                                >
+                                                  <EyeOff size={10} />
+                                                </button>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <button 
+                                              onClick={() => {
+                                                const next = new Set(revealedOrderIds);
+                                                next.add(booking.id);
+                                                setRevealedOrderIds(next);
+                                              }}
+                                              className="flex items-center gap-1 text-[8px] font-black text-green-600 uppercase tracking-tighter bg-green-50 hover:bg-green-100 px-2 py-1 rounded-lg border border-green-100 transition-all"
+                                            >
+                                              <Eye size={10} />
+                                              PAID / VIEW ID
+                                            </button>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                          {booking.payment_status}
+                                        </span>
+                                      )}
+                                    </div>
                                 </td>
                                 <td className="py-3 text-center">
                                   <div className="flex items-center justify-center gap-2">
@@ -485,7 +614,7 @@ const AdminDashboard = () => {
                               <div>
                                 <div className="text-[15px] font-bold text-slate-900">{booking.user_name}</div>
                                 <div className="flex items-center gap-2">
-                                  <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                                  <span className={`text-[8px] font-black  px-1.5 py-0.5 rounded-md ${
                                     booking.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 
                                     booking.status === 'pending' ? 'bg-orange-500/10 text-orange-600' : 
                                     'bg-slate-100 text-slate-400'
@@ -506,48 +635,94 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="bg-white p-2 rounded-lg border border-slate-100 flex flex-col justify-center">
-                                <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Trip Type</span>
-                                <div className="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate leading-tight">
-                                  {(booking.trip_category || 'Trip').replace('-', ' ')}
-                                </div>
-                                <div className="text-[8px] font-bold text-primary uppercase truncate mt-0.5">
-                                  {booking.trip_category === 'local' 
-                                    ? booking.local_package 
-                                    : (booking.sub_type || '').replace('-', ' ')}
-                                </div>
-                              </div>
-                              <div className="bg-white p-2 rounded-lg border border-slate-100">
-                                <span className="text-[8px] font-black text-slate-300 uppercase block mb-0.5">Vehicle</span>
-                                <div className="text-[10px] font-black text-slate-900 uppercase truncate">
-                                  {booking.car_type}
-                                </div>
-                                <div className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">
-                                  {vehicleSeats} Seats
-                                </div>
-                              </div>
-                            </div>
+                               <div className="bg-white p-2 rounded-lg border border-slate-100 flex flex-col justify-center">
+                                 <span className="text-[8px] font-black text-slate-300 block mb-0.5">Trip Type</span>
+                                 <div className="text-[10px] font-black text-slate-800 truncate leading-tight">
+                                   {(booking.trip_category || 'Trip').replace('-', ' ')}
+                                 </div>
+                                 <div className="text-[8px] font-bold text-primary truncate mt-0.5">
+                                   {booking.trip_category === 'local' 
+                                     ? booking.local_package 
+                                     : (booking.sub_type || '').replace('-', ' ')}
+                                 </div>
+                               </div>
+
+                               <div className="bg-white p-2 rounded-lg border border-slate-100 flex flex-col justify-center">
+                                 <span className="text-[8px] font-black text-slate-300 block mb-0.5">Logistics</span>
+                                 <div className="flex gap-1.5 pt-0.5">
+                                   {booking.audit_data ? (
+                                     <>
+                                       <button 
+                                         onClick={() => setViewingPlan(booking)}
+                                         className="flex-1 bg-primary/5 hover:bg-primary/10 py-1 rounded-md text-[8px] font-black text-primary flex items-center justify-center gap-1 transition-colors"
+                                       >
+                                         <Timer size={8} /> PLAN
+                                       </button>
+                                       <button 
+                                         onClick={() => setViewingFare(booking)}
+                                         className="flex-1 bg-primary/5 hover:bg-primary/10 py-1 rounded-md text-[8px] font-black text-primary flex items-center justify-center gap-1 transition-colors"
+                                       >
+                                         <Calculator size={8} /> FARE
+                                       </button>
+                                     </>
+                                   ) : (
+                                     <span className="text-[8px] font-bold text-slate-300 italic">No Snapshot</span>
+                                   )}
+                                 </div>
+                                 {booking.audit_data && (
+                                   <div className="mt-1.5 pt-1.5 border-t border-slate-100 flex justify-between items-center px-1">
+                                      <span className="text-[7px] font-black text-slate-300 uppercase">Est. Total</span>
+                                      <span className="text-[10px] font-black text-primary">
+                                        ₹{(booking.audit_data.totalFare || 
+                                           booking.audit_data.total || 
+                                           (Number(booking.audit_data.baseFare || 0) + 
+                                            Number(booking.audit_data.totalDayBata || 0) + 
+                                            Number(booking.audit_data.totalNightBata || 0))
+                                          ).toLocaleString()}
+                                      </span>
+                                   </div>
+                                 )}
+                               </div>
+
+                               <div className="bg-white p-2 rounded-lg border border-slate-100 flex flex-col justify-center col-span-2">
+                                 <span className="text-[8px] font-black text-slate-300 block mb-0.5">Vehicle Details</span>
+                                 <div className="flex justify-between items-center">
+                                   <div className="text-[10px] font-black text-slate-900 truncate">
+                                      {booking.car_type}
+                                   </div>
+                                   <div className="text-[9px] font-black text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">
+                                      {data.cars.find(c => c.name === booking.car_type)?.seats || 'N/A'} Seats
+                                   </div>
+                                 </div>
+                               </div>
+                             </div>
 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
                                 <div className="flex flex-col">
-                                  <span className="text-[7px] font-black text-green-600 opacity-60 uppercase">PD</span>
+                                  <span className="text-[7px] font-black text-green-600 opacity-60 ">PD</span>
                                   <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.booking_date)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[7px] font-black text-green-600 opacity-60 uppercase">PT</span>
+                                  <span className="text-[7px] font-black text-green-600 opacity-60 ">PT</span>
                                   <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.booking_time)}</span>
                                 </div>
                                 {(booking.sub_type === 'round-trip' || booking.sub_type === 'two-way') && booking.return_date && (
-                                  <div className="flex flex-col">
-                                    <span className="text-[7px] font-black text-red-500 opacity-70 uppercase">RD</span>
-                                    <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.return_date)}</span>
-                                  </div>
+                                  <>
+                                    <div className="flex flex-col">
+                                      <span className="text-[7px] font-black text-red-500 opacity-70 ">RD</span>
+                                      <span className="text-[10px] font-bold text-slate-700">{formatDate(booking.return_date)}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-[7px] font-black text-red-500 opacity-70 ">RT</span>
+                                      <span className="text-[10px] font-bold text-slate-700">{formatTime(booking.return_time)}</span>
+                                    </div>
+                                  </>
                                 )}
                               </div>
                               <button 
                                 onClick={() => setViewingBooking(booking)}
-                                className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"
+                                className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-500  flex items-center gap-1"
                               >
                                 Route
                                 {booking.stops?.length > 0 && <span className="text-primary">+{booking.stops.length}</span>}
@@ -559,7 +734,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {(data.bookings.length === 0) && (
-                      <div className="py-12 text-center text-slate-400 font-bold text-sm tracking-tight">No bookings found</div>
+                      <div className="py-12 text-center text-slate-400 font-bold text-sm ">No bookings found</div>
                     )}
                   </motion.div>
                 )}
@@ -602,7 +777,7 @@ const AdminDashboard = () => {
                       </div>
                     ))}
                     {data.messages.length === 0 && (
-                      <div className="py-12 text-center text-slate-400 font-bold text-sm tracking-tight">No messages found</div>
+                      <div className="py-12 text-center text-slate-400 font-bold text-sm ">No messages found</div>
                     )}
                   </motion.div>
                 )}
@@ -614,122 +789,245 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                   >
+                    <div className="flex justify-between items-end mb-6">
+                      <div className="flex flex-col">
+                        <h2 className="text-2xl font-black text-slate-900  ">Fleet Management</h2>
+                        <p className="text-[10px] font-bold text-slate-400   mt-1">Configure your vehicles and pricing</p>
+                      </div>
+                    </div>
                     {/* Add Car Form */}
-                    <div className="mb-6 md:mb-10 bg-slate-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-dashed border-slate-200">
-                      <h3 className="font-black text-xs md:text-sm text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-wider">
-                        <Plus size={16} className="text-primary" />
-                        Add New Vehicle
-                      </h3>
-                      <form onSubmit={addCar} className="space-y-4">
-                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-4">
-                          <input name="name" placeholder="Name" className="col-span-2 lg:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                          <input name="seats" type="number" min="1" placeholder="Seats" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                          <input name="price" type="number" min="0" step="0.1" placeholder="₹/KM" className="px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" required />
-                          <input name="image_url" placeholder="Image URL" className="col-span-2 lg:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
-                          <button type="submit" className="col-span-2 lg:col-span-1 bg-primary text-secondary font-black py-2 rounded-lg hover:bg-primary/90 transition-all text-[11px] md:text-sm shadow-md uppercase">
-                            Add Car
+                    <div className="mb-6 md:mb-10 bg-slate-50 p-4 md:p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 shadow-inner">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-black text-sm md:text-base text-slate-800 flex items-center gap-3  tracking-wider">
+                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                            <Plus size={18} className="text-primary" />
+                          </div>
+                          Add New Vehicle
+                        </h3>
+                        {formStep === 'details' && (
+                          <button 
+                            onClick={() => { setFormStep('category'); setSelectedCategory(null); }}
+                            className="text-[10px] font-black text-primary  flex items-center gap-1 hover:underline"
+                          >
+                            <RotateCcw size={12} />
+                            Change Category
                           </button>
+                        )}
+                      </div>
+
+                      {formStep === 'category' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {[
+                            { id: 'outstation', label: 'Outstation', icon: MapPin, desc: 'Long distance trips' },
+                            { id: 'local', label: 'Local', icon: Calendar, desc: 'Hourly packages' },
+                            { id: 'airport', label: 'Airport', icon: Plane, desc: 'Pickup/Drop service' }
+                          ].map((cat) => (
+                            <button
+                              key={cat.id}
+                              onClick={() => { setSelectedCategory(cat.id); setFormStep('details'); }}
+                              className="group p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all flex flex-col items-center text-center gap-3 active:scale-95"
+                            >
+                              <div className="w-16 h-16 bg-slate-50 group-hover:bg-primary/10 rounded-2xl flex items-center justify-center transition-colors">
+                                <cat.icon size={32} className="text-slate-400 group-hover:text-primary transition-colors" />
+                              </div>
+                              <div>
+                                <h4 className="font-black text-secondary  ">{cat.label}</h4>
+                                <p className="text-[10px] font-bold text-slate-400 mt-1">{cat.desc}</p>
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                        
-                        {/* New Pricing Grid Row */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Min KM</label>
-                            <input name="min_km" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
+                      ) : (
+                        <form onSubmit={addCar} className="space-y-6">
+                          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                            <p className="text-[10px] font-black text-primary   mb-6 px-1 italic">
+                              Category: {selectedCategory} Booking
+                            </p>
+                            
+                            {selectedCategory === 'local' ? (
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Car Name</label>
+                                    <input name="name" placeholder="e.g., Swift Dzire" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Package Name</label>
+                                    <input name="local_package" defaultValue="8 Hours / 80 KM" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-6">
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Base Fare (Pkg Price)</label>
+                                    <input name="base_fare" type="number" placeholder="₹2100" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Extra KM Rate</label>
+                                    <input name="extra_km_price" type="number" placeholder="₹12" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Extra HR Rate</label>
+                                    <input name="extra_hr_price" type="number" placeholder="₹150" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Vehicle Image</label>
+                                    <div className="relative group">
+                                      <input name="image_url" placeholder="Paste Image URL here" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-slate-50 group-hover:bg-white" />
+                                      <div className="mt-2 p-4 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-300">
+                                        <Car size={32} />
+                                        <span className="text-[10px] font-bold mt-1 ">Image Holder</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col justify-end gap-6 pb-2">
+                                    <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                                      <input type="checkbox" name="is_ac" defaultChecked className="w-5 h-5 rounded-lg border-slate-200 text-primary focus:ring-primary/20 cursor-pointer transition-all" />
+                                      <span className="text-xs font-black text-slate-900 ">Air Conditioned (AC)</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                                      <input type="checkbox" name="is_round_trip_only" className="w-5 h-5 rounded-lg border-slate-200 text-primary focus:ring-primary/20 cursor-pointer transition-all" />
+                                      <span className="text-xs font-black text-orange-600 ">Round Trip Only (Heavy Duty)</span>
+                                    </label>
+                                    <div>
+                                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1">Seating Style (Optional)</label>
+                                      <input name="seating_style" placeholder="e.g., 2+2 or 3+2" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
+                                    </div>
+                                    <button type="submit" className="w-full bg-secondary text-white font-black py-4 rounded-2xl hover:bg-black transition-all shadow-xl shadow-black/10 text-sm  tracking-wide flex items-center justify-center gap-3">
+                                      <Save size={18} />
+                                      Create local Vehicle
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="py-20 text-center space-y-4">
+                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                                  <Zap size={40} className="text-primary animate-pulse" />
+                                </div>
+                                <h4 className="text-lg font-black text-secondary  ">Coming Soon</h4>
+                                <p className="text-slate-400 text-xs font-bold max-w-xs mx-auto">
+                                  Specialized forms for {selectedCategory} are being refined. Check back later!
+                                </p>
+                                <button 
+                                  type="button"
+                                  onClick={() => { setFormStep('category'); setSelectedCategory(null); }}
+                                  className="text-xs font-black text-primary underline "
+                                >
+                                  Go Back
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Driver Bata</label>
-                            <input name="driver_bata" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Night Bata</label>
-                            <input name="night_bata" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">Permit Charge</label>
-                            <input name="permit_charge" type="number" defaultValue="0" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] md:text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none" />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4 px-1">
-                          <div className="flex flex-col gap-2">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available For</p>
-                            <div className="flex flex-wrap items-center gap-6">
-                              {['outstation', 'local', 'airport'].map(cat => (
-                                <label key={cat} className="flex items-center gap-2 cursor-pointer group">
-                                  <input 
-                                    type="checkbox" 
-                                    name="categories" 
-                                    value={cat} 
-                                    defaultChecked 
-                                    className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
-                                  />
-                                  <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase group-hover:text-primary transition-colors">
-                                    {cat === 'airport' ? 'Airport Transfer' : cat}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col gap-2">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AC Status</p>
-                            <label className="flex items-center gap-2 cursor-pointer group w-fit">
-                              <input 
-                                type="checkbox" 
-                                name="is_ac" 
-                                defaultChecked 
-                                className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
-                              />
-                              <span className="text-[10px] md:text-xs font-black text-slate-900 uppercase group-hover:text-primary transition-colors">
-                                AC Vehicle
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-                      </form>
+                        </form>
+                      )}
                     </div>
 
                     {/* Cars List */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                       {data.cars.map((car) => (
-                        <div key={car.id} className="flex items-center justify-between p-3 md:p-5 bg-white rounded-xl md:rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-lg md:rounded-xl flex items-center justify-center text-slate-300">
-                              <Car size={20} />
-                            </div>
-                            <div>
-                              <h4 className="font-black text-sm md:text-lg text-slate-900 leading-tight">{car.name}</h4>
-                              <div className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-tight">
-                                {car.seats} Seats • ₹{car.price_per_km}/km
+                        <div key={car.id} className="relative group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                          <div className="flex flex-col sm:flex-row">
+                            {/* Car Image/Placeholder */}
+                            <div className="w-full sm:w-40 h-40 bg-slate-50 flex items-center justify-center relative overflow-hidden">
+                              {car.image_url ? (
+                                <img src={car.image_url} alt={car.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                              ) : (
+                                <Car size={40} className="text-slate-200" />
+                              )}
+                              <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-[8px] font-black   ${
+                                car.is_available ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                              }`}>
+                                {car.is_available ? 'Live' : 'Hidden'}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <button 
-                              onClick={() => toggleCarAvailability(car.id, car.is_available)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all uppercase ${
-                                car.is_available 
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                                  : 'bg-red-100 text-red-700 hover:bg-red-200'
-                              }`}
-                            >
-                              {car.is_available ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                              <span className="hidden xs:inline">{car.is_available ? 'Available' : 'Disabled'}</span>
-                              <span className="xs:hidden">{car.is_available ? 'ON' : 'OFF'}</span>
-                            </button>
-                            <button 
-                              onClick={() => setEditingCar(car)}
-                              className="p-1.5 text-slate-200 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); setDeleteId(car.id); }}
-                              className="p-1.5 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+
+                            {/* Car Details */}
+                            <div className="flex-1 p-5 md:p-6 flex flex-col justify-between">
+                              <div>
+                                <div className="flex justify-between items-start mb-1">
+                                  <h4 className="font-black text-lg text-slate-900 leading-tight">{car.name}</h4>
+                                  <div className="flex gap-1">
+                                    {car.available_categories?.map(cat => (
+                                      <span key={cat} className="text-[7px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase">
+                                        {cat}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-400 mb-4">
+                                  {car.is_ac ? 'AC Vehicle' : 'Non-AC'} • {car.seats || 4} Seats 
+                                  {car.seating_style && <span className="text-primary ml-1">• Layout: {car.seating_style}</span>}
+                                  {car.is_round_trip_only && <span className="text-orange-600 ml-1">• Round Trip Only</span>}
+                                </p>
+
+                                {car.available_categories?.includes('local') ? (
+                                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                    <div className="text-center">
+                                      <span className="text-[7px] font-black text-slate-300 block">Pkg Price</span>
+                                      <span className="text-xs font-black text-slate-800">₹{car.base_fare}</span>
+                                    </div>
+                                    <div className="text-center border-x border-slate-200/50">
+                                      <span className="text-[7px] font-black text-slate-300 block">Ex KM</span>
+                                      <span className="text-xs font-black text-slate-800">₹{car.extra_km_price}</span>
+                                    </div>
+                                    <div className="text-center">
+                                      <span className="text-[7px] font-black text-slate-300 block">Ex HR</span>
+                                      <span className="text-xs font-black text-slate-800">₹{car.extra_hr_price}</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                    <div className="flex items-center gap-4">
+                                      <div>
+                                        <span className="text-[7px] font-black text-slate-300 block">Round Trip</span>
+                                        <span className="text-xs font-black text-slate-800">₹{car.price_per_km}/KM</span>
+                                      </div>
+                                      <div className="w-px h-6 bg-slate-200/50" />
+                                      <div>
+                                        <span className="text-[7px] font-black text-slate-300 block">One Way</span>
+                                        <span className="text-xs font-black text-slate-800">₹{car.price_per_km_one_way || 0}/KM</span>
+                                      </div>
+                                      <div className="w-px h-6 bg-slate-200/50 ml-auto" />
+                                      <div className="text-right">
+                                        <span className="text-[7px] font-black text-slate-300 block">Min Dist</span>
+                                        <span className="text-xs font-black text-slate-800">{car.min_km}KM</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
+                                <div className="flex gap-1.5">
+                                  <button 
+                                    onClick={() => setEditingCar(car)}
+                                    className="p-2 text-slate-900 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+                                  >
+                                    <Pencil size={14} />
+                                  </button>
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); setDeleteId(car.id); }}
+                                    className="p-2 text-slate-900 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                                <button 
+                                  onClick={() => toggleCarAvailability(car.id, car.is_available)}
+                                  className={`px-4 py-1.5 rounded-full text-[9px] font-black  tracking-wider transition-all shadow-sm active:scale-95 ${
+                                    car.is_available 
+                                      ? 'bg-secondary text-white hover:bg-black' 
+                                      : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {car.is_available ? 'Disable Vehicle' : 'Enable Vehicle'}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -762,20 +1060,20 @@ const AdminDashboard = () => {
               <div className="w-16 h-16 md:w-20 md:h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
                 <Trash2 className="text-red-500" size={32} />
               </div>
-              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Delete Vehicle?</h3>
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2  ">Delete Vehicle?</h3>
               <p className="text-slate-500 text-[11px] md:text-sm mb-6 md:mb-8 leading-relaxed font-medium">
                 This action cannot be undone. This vehicle will be permanently removed from your fleet.
               </p>
               <div className="flex gap-2 md:gap-3">
                 <button 
                   onClick={() => setDeleteId(null)}
-                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl md:rounded-2xl transition-all text-[11px] md:text-sm uppercase"
+                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl md:rounded-2xl transition-all text-[11px] md:text-sm "
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={deleteCar}
-                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl md:rounded-2xl transition-all shadow-lg shadow-red-500/20 text-[11px] md:text-sm uppercase"
+                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl md:rounded-2xl transition-all shadow-lg shadow-red-500/20 text-[11px] md:text-sm "
                 >
                   Delete
                 </button>
@@ -803,7 +1101,7 @@ const AdminDashboard = () => {
               className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 max-w-lg w-full border border-slate-100"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-black text-slate-900   flex items-center gap-2">
                   <Pencil size={20} className="text-primary" />
                   Edit Vehicle
                 </h3>
@@ -815,7 +1113,7 @@ const AdminDashboard = () => {
               <form onSubmit={handleUpdateCar} className="space-y-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Vehicle Name</label>
+                    <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Vehicle Name</label>
                     <input
                       name="name"
                       defaultValue={editingCar.name}
@@ -824,81 +1122,131 @@ const AdminDashboard = () => {
                     />
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Seats</label>
+                      <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Vehicle Image URL</label>
                       <input
-                        name="seats"
-                        type="number"
-                        min="1"
-                        defaultValue={editingCar.seats}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">₹ Per KM</label>
-                      <input
-                        name="price"
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        defaultValue={editingCar.price_per_km}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Min KM</label>
-                      <input
-                        name="min_km"
-                        type="number"
-                        defaultValue={editingCar.min_km || 0}
+                        name="image_url"
+                        defaultValue={editingCar.image_url}
+                        placeholder="https://example.com/image.png"
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                       />
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Bata (Day)</label>
-                      <input
-                        name="driver_bata"
-                        type="number"
-                        defaultValue={editingCar.driver_bata || 0}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Bata (Night)</label>
-                      <input
-                        name="night_bata"
-                        type="number"
-                        defaultValue={editingCar.night_bata || 0}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 whitespace-nowrap">Permit Charge</label>
-                      <input
-                        name="permit_charge"
-                        type="number"
-                        defaultValue={editingCar.permit_charge || 0}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Vehicle Image URL</label>
-                    <input
-                      name="image_url"
-                      defaultValue={editingCar.image_url}
-                      placeholder="https://example.com/image.png"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    />
+
+                    {/* Outstation Pricing (Conditional) */}
+                    {editingCar.available_categories?.includes('outstation') && (
+                      <div className="bg-slate-50 p-6 rounded-3xl space-y-4 border border-slate-100">
+                        <p className="text-[10px] font-black text-slate-400 px-1">Outstation Pricing</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Round Trip ₹/KM</label>
+                            <input
+                              name="price_round_trip"
+                              type="number"
+                              min="0"
+                              step="0.1"
+                              defaultValue={editingCar.price_per_km}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">One Way ₹/KM</label>
+                            <input
+                              name="price_one_way"
+                              type="number"
+                              min="0"
+                              step="0.1"
+                              defaultValue={editingCar.price_per_km_one_way || 0}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Min KM / Day</label>
+                            <input
+                              name="min_km"
+                              type="number"
+                              defaultValue={editingCar.min_km || 0}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Driver Bata</label>
+                            <input
+                              name="driver_bata"
+                              type="number"
+                              defaultValue={editingCar.driver_bata || 0}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Night Bata</label>
+                            <input
+                              name="night_bata"
+                              type="number"
+                              defaultValue={editingCar.night_bata || 0}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Permit Charge</label>
+                            <input
+                              name="permit_charge"
+                              type="number"
+                              defaultValue={editingCar.permit_charge || 0}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Seats</label>
+                            <input
+                              name="seats"
+                              type="number"
+                              min="1"
+                              defaultValue={editingCar.seats}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Local Pricing (Conditional) */}
+                    {editingCar.available_categories?.includes('local') && (
+                      <div className="bg-primary/5 p-6 rounded-3xl border border-primary/10 space-y-4">
+                        <div className="flex justify-between items-center px-1">
+                          <p className="text-[10px] font-black text-primary  ">Local Package Settings</p>
+                          {!editingCar.available_categories?.includes('outstation') && (
+                             <div className="flex items-center gap-2">
+                               <label className="text-[10px] font-black text-slate-400 ">Seats:</label>
+                               <input name="seats" type="number" defaultValue={editingCar.seats} className="w-12 bg-transparent border-b border-primary/10 text-[10px] font-black text-secondary outline-none text-center" />
+                             </div>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Package Name</label>
+                            <input name="local_package" defaultValue={editingCar.local_package} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Base Fare</label>
+                            <input name="base_fare" type="number" defaultValue={editingCar.base_fare} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Extra KM Rate</label>
+                            <input name="extra_km_price" type="number" defaultValue={editingCar.extra_km_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Extra HR Rate</label>
+                            <input name="extra_hr_price" type="number" defaultValue={editingCar.extra_hr_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-6 pt-2">
                     <div className="flex flex-col gap-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Available For</label>
+                      <label className="block text-[10px] font-black text-slate-400   ml-1">Available For</label>
                       <div className="flex flex-wrap items-center gap-6 px-1">
                         {['outstation', 'local', 'airport'].map(cat => (
                           <label key={cat} className="flex items-center gap-2 cursor-pointer group">
@@ -909,7 +1257,7 @@ const AdminDashboard = () => {
                               defaultChecked={editingCar.available_categories?.includes(cat) ?? true}
                               className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
                             />
-                            <span className="text-xs font-bold text-slate-600 uppercase group-hover:text-primary transition-colors">
+                            <span className="text-xs font-bold text-slate-600  group-hover:text-primary transition-colors">
                               {cat === 'airport' ? 'Airport Transfer' : cat}
                             </span>
                           </label>
@@ -918,7 +1266,7 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AC Status</label>
+                      <label className="block text-[10px] font-black text-slate-400   ml-1">AC Status</label>
                       <label className="flex items-center gap-2 cursor-pointer group px-1 w-fit">
                         <input 
                           type="checkbox" 
@@ -926,10 +1274,35 @@ const AdminDashboard = () => {
                           defaultChecked={editingCar.is_ac ?? true}
                           className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
                         />
-                        <span className="text-xs font-bold text-slate-900 uppercase group-hover:text-primary transition-colors">
+                        <span className="text-xs font-bold text-slate-900  group-hover:text-primary transition-colors">
                           AC Vehicle
                         </span>
                       </label>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-[10px] font-black text-slate-400 ml-1">Fleet Settings</label>
+                      <label className="flex items-center gap-2 cursor-pointer group px-1 w-fit">
+                        <input 
+                          type="checkbox" 
+                          name="is_round_trip_only" 
+                          defaultChecked={editingCar.is_round_trip_only ?? false}
+                          className="w-4 h-4 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer" 
+                        />
+                        <span className="text-xs font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                          Round Trip Only (Heavy Duty)
+                        </span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 mb-1.5 ml-1">Seating Style (Optional)</label>
+                      <input
+                        name="seating_style"
+                        defaultValue={editingCar.seating_style}
+                        placeholder="e.g., 2+2 or 3+2"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      />
                     </div>
                   </div>
                 </div>
@@ -938,13 +1311,13 @@ const AdminDashboard = () => {
                   <button 
                     type="button"
                     onClick={() => setEditingCar(null)}
-                    className="flex-1 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-xl transition-all text-xs uppercase"
+                    className="flex-1 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-xl transition-all text-xs "
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-secondary text-white font-black rounded-xl hover:bg-black transition-all shadow-lg shadow-black/10 text-xs uppercase flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-secondary text-white font-black rounded-xl hover:bg-black transition-all shadow-lg shadow-black/10 text-xs  flex items-center justify-center gap-2"
                   >
                     <Save size={16} />
                     Save Changes
@@ -974,7 +1347,7 @@ const AdminDashboard = () => {
               className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl p-5 md:p-8 max-w-2xl w-full border border-slate-100"
             >
               <div className="flex justify-between items-center mb-4 md:mb-6">
-                <h3 className="text-sm md:text-xl font-black text-secondary uppercase tracking-tight">Full Route Details</h3>
+                <h3 className="text-sm md:text-xl font-black text-secondary  ">Full Route Details</h3>
                 <button onClick={() => setViewingBooking(null)} className="text-slate-300 hover:text-secondary">
                   <XCircle size={20} />
                 </button>
@@ -983,12 +1356,12 @@ const AdminDashboard = () => {
               <div className="space-y-4 md:space-y-6 text-left max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-2 md:gap-4 mb-4 md:mb-8">
                   <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100">
-                    <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block mb-0.5 md:mb-1">Category</span>
-                    <p className="font-black text-[10px] md:text-sm text-slate-800 uppercase tracking-tight">{(viewingBooking.trip_category || '-').replace('-', ' ')}</p>
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-300   block mb-0.5 md:mb-1">Category</span>
+                    <p className="font-black text-[10px] md:text-sm text-slate-800  ">{(viewingBooking.trip_category || '-').replace('-', ' ')}</p>
                   </div>
                   <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100">
-                    <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block mb-0.5 md:mb-1">Type/Package</span>
-                    <p className="font-black text-[10px] md:text-sm text-primary uppercase tracking-tight">
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-300   block mb-0.5 md:mb-1">Type/Package</span>
+                    <p className="font-black text-[10px] md:text-sm text-primary  ">
                       {viewingBooking.trip_category === 'local' 
                         ? viewingBooking.local_package 
                         : (viewingBooking.sub_type || '-').replace('-', ' ')}
@@ -1000,7 +1373,7 @@ const AdminDashboard = () => {
                   {/* Pickup */}
                   <div className="relative">
                     <div className="absolute -left-7.5 md:-left-9.5 top-0 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 ring-4 ring-green-50" />
-                    <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block mb-0.5 md:mb-1">Pickup Point</span>
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-300   block mb-0.5 md:mb-1">Pickup Point</span>
                     <p className="text-[11px] md:text-sm font-bold text-slate-800 leading-relaxed">{viewingBooking.pickup}</p>
                   </div>
 
@@ -1008,7 +1381,7 @@ const AdminDashboard = () => {
                   {viewingBooking.stops && viewingBooking.stops.map((stop, idx) => (
                     <div key={idx} className="relative">
                       <div className="absolute -left-7.5 md:-left-9.5 top-0 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-blue-400 ring-4 ring-blue-50" />
-                      <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block mb-0.5 md:mb-1">Stop {idx + 1}</span>
+                      <span className="text-[8px] md:text-[10px] font-black text-slate-300   block mb-0.5 md:mb-1">Stop {idx + 1}</span>
                       <p className="text-[11px] md:text-sm font-bold text-slate-800 leading-relaxed">{stop}</p>
                     </div>
                   ))}
@@ -1016,7 +1389,7 @@ const AdminDashboard = () => {
                   {/* Drop off */}
                   <div className="relative">
                     <div className="absolute -left-7.5 md:-left-9.5 top-0 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-red-500 ring-4 ring-red-50" />
-                    <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block mb-0.5 md:mb-1">Final Destination</span>
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-300   block mb-0.5 md:mb-1">Final Destination</span>
                     <p className="text-[11px] md:text-sm font-bold text-slate-800 leading-relaxed">{viewingBooking.drop_off}</p>
                   </div>
                 </div>
@@ -1024,12 +1397,12 @@ const AdminDashboard = () => {
 
               <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-slate-50 flex justify-between items-center">
                 <div className="text-left font-black">
-                  <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest block">Customer</span>
+                  <span className="text-[8px] md:text-[10px] font-black text-slate-300   block">Customer</span>
                   <p className="text-[11px] md:text-sm text-slate-800">{viewingBooking.user_name}</p>
                 </div>
                 <button 
                   onClick={() => setViewingBooking(null)}
-                  className="px-6 py-2.5 md:px-8 md:py-3 bg-secondary text-white font-black rounded-xl md:rounded-2xl hover:bg-black transition-all shadow-lg text-[10px] md:text-sm uppercase tracking-wide"
+                  className="px-6 py-2.5 md:px-8 md:py-3 bg-secondary text-white font-black rounded-xl md:rounded-2xl hover:bg-black transition-all shadow-lg text-[10px] md:text-sm  tracking-wide"
                 >
                   Close
                 </button>
@@ -1059,20 +1432,20 @@ const AdminDashboard = () => {
               <div className="w-16 h-16 md:w-20 md:h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
                 <Database className="text-red-500" size={32} />
               </div>
-              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Reset {resetConfirmType}?</h3>
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2  ">Reset {resetConfirmType}?</h3>
               <p className="text-slate-500 text-[11px] md:text-sm mb-6 md:mb-8 leading-relaxed font-medium">
                 This will permanently delete all {resetConfirmType} from your database. This action cannot be undone.
               </p>
               <div className="flex gap-2 md:gap-3">
                 <button 
                   onClick={() => setResetConfirmType(null)}
-                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl md:rounded-2xl transition-all text-[11px] md:text-sm uppercase"
+                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl md:rounded-2xl transition-all text-[11px] md:text-sm "
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleResetData}
-                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl md:rounded-2xl transition-all shadow-lg shadow-red-500/20 text-[11px] md:text-sm uppercase"
+                  className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl md:rounded-2xl transition-all shadow-lg shadow-red-500/20 text-[11px] md:text-sm "
                 >
                   Clear All
                 </button>
@@ -1081,6 +1454,27 @@ const AdminDashboard = () => {
           </div>
         )}
       </AnimatePresence>
+      <TripPlanModal
+        isOpen={!!viewingPlan}
+        onClose={() => setViewingPlan(null)}
+        formData={{
+          date: viewingPlan?.booking_date,
+          time: viewingPlan?.booking_time,
+          returnDate: viewingPlan?.return_date,
+          returnTime: viewingPlan?.return_time,
+          estimatedDistance: viewingPlan?.audit_data?.roadDistance / (viewingPlan?.sub_type === 'two-way' ? 2 : 1),
+          routeLegs: viewingPlan?.audit_data?.routeLegs,
+          tripType: viewingPlan?.sub_type
+        }}
+        strategy={viewingPlan?.audit_data?.selectedScenario}
+      />
+
+      <FareDetailModal
+        isOpen={!!viewingFare}
+        onClose={() => setViewingFare(null)}
+        car={data.cars.find(c => c.name === viewingFare?.car_type)}
+        data={viewingFare?.audit_data}
+      />
     </div>
   );
 };
