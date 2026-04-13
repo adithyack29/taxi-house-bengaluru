@@ -429,6 +429,10 @@ const AdminDashboard = () => {
                                 <td className="py-3">
                                   <div className="text-base font-bold text-slate-900">{booking.user_name}</div>
                                   <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                                  <div className="text-[9px] font-bold text-slate-700 mt-0.5">
+                                    {new Date(booking.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: '2-digit' }).replace(/\//g, '-') + ' | ' + 
+                                     new Date(booking.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(' ', '').replace(':', '.')}
+                                  </div>
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <div className="inline-flex flex-col items-center">
@@ -622,6 +626,10 @@ const AdminDashboard = () => {
                                     {booking.status}
                                   </span>
                                   <div className="text-xs font-medium text-slate-400">{booking.phone}</div>
+                                  <div className="text-[9px] font-bold text-slate-700">
+                                    {new Date(booking.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: '2-digit' }).replace(/\//g, '-') + ' | ' + 
+                                     new Date(booking.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(' ', '').replace(':', '.')}
+                                  </div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
