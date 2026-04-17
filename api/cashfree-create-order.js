@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
       },
       order_meta: {
         // In V3, the SDK handles the response, but we can provide a return_url for redundancy
-        return_url: "https://taxihouse.app/payment-status?order_id={order_id}"
+        return_url: "https://www.taxihousebengaluru.com/payment-status?order_id={order_id}"
       }
     };
 

@@ -67,7 +67,7 @@ serve(async (req: Request) => {
                 <p style="margin: 5px 0 0; font-size: 28px; font-weight: 900; color: #EAB308;">₹${displayFare}</p>
               </div>
 
-              <a href="https://taxihouse.app/admin" style="display: block; background: #EAB308; color: #000; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: bold;">Open Dashboard</a>
+              <a href="https://www.taxihousebengaluru.com/admin" style="display: block; background: #EAB308; color: #000; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: bold;">Open Dashboard</a>
             </div>
           `
         } else {
