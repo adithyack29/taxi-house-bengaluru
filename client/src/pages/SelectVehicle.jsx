@@ -191,12 +191,16 @@ const SelectVehicle = () => {
                   >
                     <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-6">
                       {/* Vehicle Image Area */}
-                      <div className="w-full sm:w-48 h-32 bg-slate-50 rounded-2xl flex items-center justify-center p-3 relative overflow-hidden group/img shrink-0 border border-slate-100/50">
+                      <div className="w-full sm:w-48 h-32 bg-white rounded-2xl flex items-center justify-center p-1 relative overflow-hidden group/img shrink-0 border border-slate-100/50">
                         {car.image_url ? (
                           <img 
                             src={car.image_url} 
                             alt={car.name}
-                            className="w-full h-full object-contain group-hover/img:scale-110 transition-transform duration-700" 
+                            className={`w-full h-full object-contain group-hover/img:scale-110 transition-transform duration-700 ${
+                              car.name?.toLowerCase().includes('swift') || car.name?.toLowerCase().includes('etios') 
+                                ? 'scale-[1.5]' 
+                                : 'scale-100'
+                            }`} 
                           />
                         ) : (
                           <Car size={48} className="text-slate-200 group-hover/img:scale-110 transition-transform duration-500" />

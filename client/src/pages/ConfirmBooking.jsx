@@ -501,9 +501,17 @@ const ConfirmBooking = () => {
               {/* Vehicle Footer Bar */}
               <div className="pt-6 border-t border-gray-100 flex items-center justify-between mt-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-12 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-100 shrink-0 shadow-sm">
+                  <div className="w-14 h-12 bg-white rounded-xl overflow-hidden flex items-center justify-center border border-gray-100 shrink-0 shadow-sm p-0.5">
                     {car?.image_url ? (
-                      <img src={car.image_url} alt={car.name} className="w-full h-full object-contain" />
+                      <img 
+                        src={car.image_url} 
+                        alt={car.name} 
+                        className={`w-full h-full object-contain ${
+                          car.name?.toLowerCase().includes('swift') || car.name?.toLowerCase().includes('etios') 
+                            ? 'scale-[1.5]' 
+                            : 'scale-100'
+                        }`} 
+                      />
                     ) : (
                       <Car size={24} className="text-primary/20" />
                     )}

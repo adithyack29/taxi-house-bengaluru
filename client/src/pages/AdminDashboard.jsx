@@ -64,6 +64,19 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated, activeTab]);
 
+  // Body scroll lock when modals are open
+  useEffect(() => {
+    const isModalOpen = editingCar || deleteId || viewingBooking || viewingPlan || viewingFare || resetConfirmType;
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [editingCar, deleteId, viewingBooking, viewingPlan, viewingFare, resetConfirmType]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -868,15 +881,15 @@ const AdminDashboard = () => {
                                 <div className="grid grid-cols-3 gap-6">
                                   <div>
                                     <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Base Fare (Pkg Price)</label>
-                                    <input name="base_fare" type="number" placeholder="₹2100" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                    <input name="base_fare" type="number" step="any" placeholder="₹2100" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
                                   </div>
                                   <div>
                                     <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Extra KM Rate</label>
-                                    <input name="extra_km_price" type="number" placeholder="₹12" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                    <input name="extra_km_price" type="number" step="any" placeholder="₹12" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
                                   </div>
                                   <div>
                                     <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Extra HR Rate</label>
-                                    <input name="extra_hr_price" type="number" placeholder="₹150" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
+                                    <input name="extra_hr_price" type="number" step="any" placeholder="₹150" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all" required />
                                   </div>
                                 </div>
 
@@ -885,9 +898,9 @@ const AdminDashboard = () => {
                                     <label className="block text-[10px] font-black text-slate-400   mb-2 ml-1">Vehicle Image</label>
                                     <div className="relative group">
                                       <input name="image_url" placeholder="Paste Image URL here" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-slate-50 group-hover:bg-white" />
-                                      <div className="mt-2 p-4 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-300">
-                                        <Car size={32} />
-                                        <span className="text-[10px] font-bold mt-1 ">Image Holder</span>
+                                      <div className="mt-2 p-8 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300 bg-slate-50/50">
+                                        <Car size={48} />
+                                        <span className="text-[10px] font-bold mt-2 uppercase tracking-widest opacity-50">Image Preview</span>
                                       </div>
                                     </div>
                                   </div>
@@ -940,12 +953,20 @@ const AdminDashboard = () => {
                         <div key={car.id} className="relative group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
                           <div className="flex flex-col sm:flex-row">
                             {/* Car Image/Placeholder */}
-                            <div className="w-full sm:w-40 h-40 bg-slate-50 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-full sm:w-40 h-40 bg-white flex items-center justify-center relative overflow-hidden p-2">
                               {car.image_url ? (
-                                <img src={car.image_url} alt={car.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                              ) : (
-                                <Car size={40} className="text-slate-200" />
-                              )}
+                                <img 
+                                  src={car.image_url} 
+                                  alt={car.name} 
+                                  className={`w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ${
+                                    car.name?.toLowerCase().includes('swift') || car.name?.toLowerCase().includes('etios') 
+                                      ? 'scale-[1.5]' 
+                                      : 'scale-100'
+                                  }`} 
+                                />
+                               ) : (
+                                 <Car size={64} className="text-slate-200 group-hover:scale-110 transition-transform duration-500" />
+                               )}
                               <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-[8px] font-black   ${
                                 car.is_available ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
                               }`}>
@@ -1106,19 +1127,22 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-8 max-w-lg w-full border border-slate-100"
+              className="relative bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden max-w-lg w-full border border-slate-100 flex flex-col max-h-[90vh]"
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-slate-900   flex items-center gap-2">
-                  <Pencil size={20} className="text-primary" />
-                  Edit Vehicle
-                </h3>
-                <button onClick={() => setEditingCar(null)} className="text-slate-300 hover:text-slate-600 transition-colors">
-                  <XCircle size={24} />
-                </button>
+              <div className="p-6 md:p-8 border-b border-slate-50 shrink-0">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-black text-slate-900   flex items-center gap-2">
+                    <Pencil size={20} className="text-primary" />
+                    Edit Vehicle
+                  </h3>
+                  <button onClick={() => setEditingCar(null)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                    <XCircle size={24} />
+                  </button>
+                </div>
               </div>
-              
-              <form onSubmit={handleUpdateCar} className="space-y-6">
+
+              <div className="p-6 md:p-8 overflow-y-auto flex-1 scrollbar-hide">
+                <form onSubmit={handleUpdateCar} className="space-y-6">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Vehicle Name</label>
@@ -1148,61 +1172,65 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Round Trip ₹/KM</label>
-                            <input
-                              name="price_round_trip"
-                              type="number"
-                              min="0"
-                              step="0.1"
-                              defaultValue={editingCar.price_per_km}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="price_round_trip"
+                                type="number"
+                                min="0"
+                                step="any"
+                                defaultValue={editingCar.price_per_km}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">One Way ₹/KM</label>
-                            <input
-                              name="price_one_way"
-                              type="number"
-                              min="0"
-                              step="0.1"
-                              defaultValue={editingCar.price_per_km_one_way || 0}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="price_one_way"
+                                type="number"
+                                min="0"
+                                step="any"
+                                defaultValue={editingCar.price_per_km_one_way || 0}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Min KM / Day</label>
-                            <input
-                              name="min_km"
-                              type="number"
-                              defaultValue={editingCar.min_km || 0}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="min_km"
+                                type="number"
+                                step="any"
+                                defaultValue={editingCar.min_km || 0}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Driver Bata</label>
-                            <input
-                              name="driver_bata"
-                              type="number"
-                              defaultValue={editingCar.driver_bata || 0}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="driver_bata"
+                                type="number"
+                                step="any"
+                                defaultValue={editingCar.driver_bata || 0}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Night Bata</label>
-                            <input
-                              name="night_bata"
-                              type="number"
-                              defaultValue={editingCar.night_bata || 0}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="night_bata"
+                                type="number"
+                                step="any"
+                                defaultValue={editingCar.night_bata || 0}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Permit Charge</label>
-                            <input
-                              name="permit_charge"
-                              type="number"
-                              defaultValue={editingCar.permit_charge || 0}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
-                            />
+                              <input
+                                name="permit_charge"
+                                type="number"
+                                step="any"
+                                defaultValue={editingCar.permit_charge || 0}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
+                              />
                           </div>
                           <div>
                             <label className="block text-[10px] font-black text-slate-400   mb-1.5 ml-1">Seats</label>
@@ -1210,6 +1238,7 @@ const AdminDashboard = () => {
                               name="seats"
                               type="number"
                               min="1"
+                              step="any"
                               defaultValue={editingCar.seats}
                               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all bg-white"
                             />
@@ -1226,7 +1255,7 @@ const AdminDashboard = () => {
                           {!editingCar.available_categories?.includes('outstation') && (
                              <div className="flex items-center gap-2">
                                <label className="text-[10px] font-black text-slate-400 ">Seats:</label>
-                               <input name="seats" type="number" defaultValue={editingCar.seats} className="w-12 bg-transparent border-b border-primary/10 text-[10px] font-black text-secondary outline-none text-center" />
+                               <input name="seats" type="number" step="any" defaultValue={editingCar.seats} className="w-12 bg-transparent border-b border-primary/10 text-[10px] font-black text-secondary outline-none text-center" />
                              </div>
                           )}
                         </div>
@@ -1237,15 +1266,15 @@ const AdminDashboard = () => {
                           </div>
                           <div>
                             <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Base Fare</label>
-                            <input name="base_fare" type="number" defaultValue={editingCar.base_fare} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                            <input name="base_fare" type="number" step="any" defaultValue={editingCar.base_fare} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
                           </div>
                           <div>
                             <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Extra KM Rate</label>
-                            <input name="extra_km_price" type="number" defaultValue={editingCar.extra_km_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                            <input name="extra_km_price" type="number" step="any" defaultValue={editingCar.extra_km_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
                           </div>
                           <div>
                             <label className="block text-[8px] font-black text-slate-400  mb-1 ml-1">Extra HR Rate</label>
-                            <input name="extra_hr_price" type="number" defaultValue={editingCar.extra_hr_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
+                            <input name="extra_hr_price" type="number" step="any" defaultValue={editingCar.extra_hr_price} className="w-full px-4 py-2.5 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/10" />
                           </div>
                         </div>
                       </div>
@@ -1332,7 +1361,8 @@ const AdminDashboard = () => {
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
+          </motion.div>
           </div>
         )}
       </AnimatePresence>
