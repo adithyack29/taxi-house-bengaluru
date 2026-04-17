@@ -45,7 +45,7 @@ const Hero = () => {
                 <div className="flex -space-x-0.5">
                   {[1,2,3,4,5].map(i => <Star key={i} size={10} className="fill-primary text-primary" />)}
                 </div>
-                <span className="text-[9px] font-bold text-gray-300">4.9/5 Rating</span>
+                <span className="text-[9px] font-bold text-gray-300">5/5 Rating</span>
               </div>
               <div className="h-3 w-px bg-gray-700 hidden sm:block" />
               <div className="flex items-center space-x-2">
