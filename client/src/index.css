@@ -39,3 +39,10 @@ input[type=number] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+.adlam-display-regular {
+  font-family: "ADLaM Display", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -0.05em;
+}
