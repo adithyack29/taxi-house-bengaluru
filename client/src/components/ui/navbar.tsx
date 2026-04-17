@@ -4,6 +4,7 @@ import { Equal, X, Phone, Mail } from 'lucide-react'
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SOCIAL_LINKS } from '@/constants/socialLinks'
 
 const menuItems = [
     { name: 'Home', href: '/' },
@@ -40,10 +41,18 @@ export const Header = () => {
                             <Phone size={12} className="text-primary fill-primary/10" />
                             <span>+91 7795965640</span>
                         </a>
-                        <a href="mailto:taxihousebengaluru@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+                        <a href="mailto:taxihousebengaluru@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors pr-2 border-r border-white/10">
                             <Mail size={12} className="text-primary fill-primary/10" />
                             <span>taxihousebengaluru@gmail.com</span>
                         </a>
+                        <div className="flex items-center gap-3">
+                            <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-110" title="Facebook">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2" stroke="#1877F2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                            </a>
+                            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-110" title="Instagram">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4405F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                            </a>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-primary">

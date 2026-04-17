@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SOCIAL_LINKS } from '../constants/socialLinks';
 
 const Footer = () => {
   return (
@@ -43,7 +44,17 @@ const Footer = () => {
 
           {/* Contact Details - Vertical Stack */}
           <div className="col-span-2 md:col-span-2 mt-2 sm:mt-0 border-t border-gray-800 pt-6 sm:pt-0 sm:border-0">
-            <h4 className="text-[10px] sm:text-sm font-bold text-white/40 mb-3 text-center sm:text-left">Get in Touch</h4>
+            <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
+              <h4 className="text-[10px] sm:text-sm font-bold text-white/40 uppercase tracking-widest">Get in Touch</h4>
+              <div className="flex items-center gap-2.5 pb-0.5">
+                <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-all duration-300" title="Facebook">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2" stroke="#1877F2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-all duration-300" title="Instagram">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4405F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                </a>
+              </div>
+            </div>
             <div className="flex flex-col space-y-4 items-center sm:items-start justify-center sm:justify-start">
               <div className="flex items-center space-x-3 sm:space-x-4 group">
                 <Phone className="text-primary group-hover:scale-110 transition-transform" size={16} />
