@@ -31,9 +31,6 @@ const ConfirmBooking = () => {
   const [selectedScenario, setSelectedScenario] = useState(searchParams.get('strategy') || 'day-only');
   const [refinedPickup, setRefinedPickup] = useState('');
   const [refinedPickupCoords, setRefinedPickupCoords] = useState(null);
-  const [couponCode, setCouponCode] = useState('');
-  const [isCouponApplied, setIsCouponApplied] = useState(false);
-  const [couponError, setCouponError] = useState('');
 
   // Trip details from URL
   const tripDetails = useMemo(() => {
@@ -212,8 +209,7 @@ const ConfirmBooking = () => {
   const calculatedToken = Math.floor((totalEstimated * 0.15) / 100) * 100;
   const baseTokenAmount = calculatedToken > 0 ? calculatedToken : Math.max(1, Math.round(totalEstimated * 0.15));
   
-  // Apply Test Coupon Logic
-  const tokenAmount = isCouponApplied && couponCode.toUpperCase() === 'TEST1' ? 1 : baseTokenAmount;
+  const tokenAmount = baseTokenAmount;
 
   useEffect(() => {
     const initPage = async () => {
@@ -504,64 +500,6 @@ const ConfirmBooking = () => {
                 </div>
               </div>
 
-              {/* Promo Code Section */}
-              <div className="bg-primary/5 rounded-[2rem] p-6 border border-primary/10 mt-6 box-border">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Zap size={14} className="text-primary" />
-                    <p className="text-[10px] font-black text-secondary uppercase tracking-widest">Offers & Coupons</p>
-                  </div>
-                  {isCouponApplied && (
-                    <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 animate-pulse">
-                      Code Applied!
-                    </span>
-                  )}
-                </div>
-                
-                <div className="relative group">
-                  <input 
-                    type="text" 
-                    placeholder="Enter Code (e.g. TEST1)"
-                    value={couponCode}
-                    onChange={(e) => {
-                      setCouponCode(e.target.value);
-                      setCouponError('');
-                    }}
-                    disabled={isCouponApplied}
-                    className={`w-full bg-white border ${isCouponApplied ? 'border-green-200' : 'border-gray-100'} px-5 py-4 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 outline-none transition-all pr-24 uppercase placeholder:normal-case shadow-sm group-hover:shadow-md`}
-                  />
-                  <button
-                    onClick={() => {
-                      if (couponCode.toUpperCase() === 'TEST1') {
-                        setIsCouponApplied(true);
-                        setCouponError('');
-                      } else {
-                        setCouponError('Invalid coupon code');
-                      }
-                    }}
-                    disabled={!couponCode || isCouponApplied}
-                    className={`absolute right-2 top-2 bottom-2 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-                      isCouponApplied 
-                        ? 'bg-green-100 text-green-600 cursor-default' 
-                        : 'bg-secondary text-white hover:bg-black shadow-lg shadow-black/10'
-                    }`}
-                  >
-                    {isCouponApplied ? 'Applied' : 'Apply'}
-                  </button>
-                </div>
-                {couponError && <p className="text-[9px] font-black text-red-500 mt-2 ml-1 flex items-center gap-1"><AlertCircle size={10} /> {couponError}</p>}
-                {isCouponApplied && (
-                  <button 
-                    onClick={() => {
-                      setIsCouponApplied(false);
-                      setCouponCode('');
-                    }}
-                    className="text-[9px] font-black text-gray-400 mt-3 hover:text-red-500 transition-colors flex items-center gap-1.5 ml-1"
-                  >
-                    <RotateCcw size={10} /> Remove Coupon
-                  </button>
-                )}
-              </div>
 
               {/* Vehicle Footer Bar */}
               <div className="pt-6 border-t border-gray-100 flex items-center justify-between mt-4">
