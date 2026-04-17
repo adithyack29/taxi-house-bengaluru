@@ -5,6 +5,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 // @ts-ignore
 const OWNER_EMAIL = Deno.env.get('OWNER_EMAIL')
+// @ts-ignore
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.taxihousebengaluru.com'
 
 interface WebhookPayload {
   type: 'INSERT' | 'UPDATE' | 'DELETE'
@@ -67,7 +69,7 @@ serve(async (req: Request) => {
                 <p style="margin: 5px 0 0; font-size: 28px; font-weight: 900; color: #EAB308;">₹${displayFare}</p>
               </div>
 
-              <a href="https://www.taxihousebengaluru.com/admin" style="display: block; background: #EAB308; color: #000; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: bold;">Open Dashboard</a>
+              <a href="${SITE_URL}/admin" style="display: block; background: #EAB308; color: #000; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: bold;">Open Dashboard</a>
             </div>
           `
         } else {
