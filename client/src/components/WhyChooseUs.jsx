@@ -7,7 +7,7 @@ const features = [
   {
     icon: Award,
     title: 'Top Rated Service',
-    desc: 'Consistently rated 4.8+ by thousands of happy commuters across Bengaluru.'
+    desc: 'Consistently rated 5 by thousands of happy commuters across Bengaluru.'
   },
   {
     icon: ShieldCheck,
