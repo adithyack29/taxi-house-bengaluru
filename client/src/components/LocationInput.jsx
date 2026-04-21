@@ -1,14 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Map, Crosshair } from 'lucide-react';
+import { MapPin, Map, Crosshair, Loader2 } from 'lucide-react';
 import MapModal from './MapModal';
+import { useJsApiLoader } from '@react-google-maps/api';
+import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+
+const libraries = ['places'];
 
 const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconColorClass = "text-gray-400", showCurrentLocation = true, disabled = false, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const wrapperRef = useRef(null);
-  const timeoutRef = useRef(null);
+
+  // Load Google Maps script
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
+
+  const {
+    ready,
+    value: inputValue,
+    suggestions: { status, data },
+    setValue: setInputValue,
+    clearSuggestions,
+    init
+  } = usePlacesAutocomplete({
+    requestOptions: {
+      componentRestrictions: { country: 'in' },
+      // Bias slightly to South India / Bengaluru area bounds explicitly if needed, but country is fine.
+    },
+    debounce: 400,
+    initOnMount: false, // We initialize it fully when ready becomes true based on API load context
+  });
+
+  useEffect(() => {
+    if (isLoaded) {
+      init();
+    }
+  }, [isLoaded, init]);
+
+  // Only clear the internal hook state if the parent clears the value completely.
+  // We don't sync continuously because it would override and cancel the user's active typing search.
+  useEffect(() => {
+    if (!value) {
+      setInputValue('', false);
+      clearSuggestions();
+    }
+  }, [value, setInputValue, clearSuggestions]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -21,54 +59,41 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Debounced search logic for Nominatim (restricted to India)
-  useEffect(() => {
-    if (!value || value.length < 3) {
-      setSuggestions([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const handleSelect = async (address, preCoords = null) => {
+    setInputValue(address, false);
+    clearSuggestions();
+    setIsOpen(false);
+
+    // If coordinates were passed (e.g. from map or current loc), use them
+    if (preCoords) {
+      setSelectedLocation({ address, coords: preCoords });
+      onChange({ target: { name, value: address, coords: preCoords } });
       return;
     }
 
-    // Don't search if the menu is explicitly closed
-    if (!isOpen) return;
-
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    
-    timeoutRef.current = setTimeout(async () => {
-      setLoading(true);
-      try {
-        // Restricted to South India (KT, TN, KL, AP, TS, PY) and Maharashtra
-        // Bounding box: 72.0,22.5 (North West) to 85.5,8.0 (South East)
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&countrycodes=in&viewbox=72.0,22.5,85.5,8.0&bounded=1&format=json&limit=5`);
-        const data = await res.json();
-        setSuggestions(data);
-      } catch (error) {
-        console.error('Geocoding error:', error);
-      } finally {
-        setLoading(false);
-      }
-    }, 600); // 600ms debounce
-
-  }, [value, isOpen]);
-
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-  const handleSelect = (address, coords = null) => {
-    setSelectedLocation({ address, coords });
-    onChange({ 
-      target: { 
-        name, 
-        value: address,
-        coords: coords 
-      } 
-    });
-    setIsOpen(false);
+    // Geocode via Google Maps natively
+    try {
+      if (!isLoaded) throw new Error("Google not loaded");
+      onChange({ target: { name, value: address, coords: null } }); // immediate UI update
+      
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      
+      const coords = { lat, lng };
+      setSelectedLocation({ address, coords });
+      onChange({ target: { name, value: address, coords } });
+    } catch (error) {
+      console.error("Geocoding Error: ", error);
+      onChange({ target: { name, value: address, coords: null } });
+    }
   };
 
   const handleBlur = () => {
-    // Small timeout to allow handleSelect to trigger first
     setTimeout(() => {
-      if (!selectedLocation || value !== selectedLocation.address) {
-        // If current value doesn't match a verified selection, clear it
+      // Validate empty field
+      if (!value) {
         onChange({ target: { name, value: '', coords: null } });
         setSelectedLocation(null);
       }
@@ -85,10 +110,16 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
         async (position) => {
           try {
             const { latitude, longitude } = position.coords;
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
-            const data = await res.json();
-            handleSelect(data.display_name || `${latitude}, ${longitude}`, { lat: latitude, lng: longitude });
+            
+            // Use Google Geocoder for reverse look up
+            const geocoder = new window.google.maps.Geocoder();
+            const response = await geocoder.geocode({ location: { lat: latitude, lng: longitude } });
+            
+            const address = response.results && response.results[0] ? response.results[0].formatted_address : `${latitude}, ${longitude}`;
+            handleSelect(address, { lat: latitude, lng: longitude });
+            
           } catch (error) {
+            console.error("Reverse Geocode Error:", error);
             onChange({ target: { name, value: "Error fetching address.", coords: null } });
           }
         }, 
@@ -100,13 +131,19 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
           
           onChange({ target: { name, value: msg, coords: null } });
           console.error("Geolocation Error:", error);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       onChange({ target: { name, value: "Geolocation not supported", coords: null } });
     }
   };
 
+  const handleChange = (e) => {
+    const val = e.target.value;
+    onChange({ target: { name, value: val, coords: null }});
+    setInputValue(val); // this triggers usePlacesAutocomplete fetching
+  };
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -117,12 +154,12 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
         placeholder={placeholder} 
         required 
         value={value} 
-        onChange={onChange}
+        onChange={handleChange}
         onFocus={() => setIsOpen(true)}
         onBlur={handleBlur}
         autoComplete="off"
         className={`w-full pl-9 pr-4 py-3 sm:py-4 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition text-sm sm:text-base ${className}`}
-        disabled={disabled}
+        disabled={disabled || !ready}
       />
 
       {isOpen && (
@@ -130,9 +167,9 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
           <ul className="py-2">
             
             {/* Action Item: Current Location */}
-            {showCurrentLocation && (
+            {showCurrentLocation && isLoaded && (
               <li 
-                className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50"
+                className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50 bg-blue-50/50"
                 onMouseDown={(e) => { e.preventDefault(); handleCurrentLocation(); }}
               >
                 <div className="bg-primary/20 p-2 rounded-full text-primary shrink-0">
@@ -144,43 +181,65 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
 
             {/* Action Item: Choose on Map */}
-            <li 
-              className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50"
-              onMouseDown={(e) => { e.preventDefault(); setIsOpen(false); setIsMapOpen(true); }}
-            >
-              <div className="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0">
-                <Map size={16} />
-              </div>
-              <span>Choose on Map</span>
-            </li>
+            {isLoaded && (
+              <li 
+                className="px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-secondary font-medium border-b border-gray-50 cursor-pointer bg-slate-50/50"
+                onMouseDown={(e) => { e.preventDefault(); setIsOpen(false); setIsMapOpen(true); }}
+              >
+                <div className="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0">
+                  <Map size={16} />
+                </div>
+                <span>Choose on Map</span>
+              </li>
+            )}
 
-            {/* Autocomplete Suggestions */}
-            {loading && value && value.length >= 3 && (
-              <li className="px-4 py-3 text-sm text-gray-500 text-center animate-pulse">
-                Searching South India & Maharashtra...
+            {/* Error States */}
+            {loadError && (
+              <li className="px-4 py-3 text-sm text-red-500 font-bold border-t border-gray-50 mt-1">
+                Google Maps API Error
               </li>
             )}
             
-            {!loading && suggestions.map((s, idx) => (
-              <li 
-                key={idx}
-                className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-start space-x-3 border-b border-gray-50 last:border-0"
-                onMouseDown={(e) => { e.preventDefault(); handleSelect(s.display_name, { lat: parseFloat(s.lat), lng: parseFloat(s.lon) }); }}
-              >
-                <MapPin size={16} className="text-gray-400 mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-700 leading-snug">{s.display_name}</span>
+            {/* Google Places Results */}
+            {status === "OK" && data.map((suggestion) => {
+              const {
+                place_id,
+                structured_formatting: { main_text, secondary_text },
+              } = suggestion;
+
+              return (
+                <li 
+                  key={place_id}
+                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-start space-x-3 border-b border-gray-50 last:border-0"
+                  onMouseDown={(e) => { e.preventDefault(); handleSelect(suggestion.description); }}
+                >
+                  <MapPin size={16} className="text-gray-400 mt-0.5 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-800 leading-snug">{main_text}</span>
+                    <span className="text-xs text-gray-500 mt-0.5">{secondary_text}</span>
+                  </div>
+                </li>
+              );
+            })}
+            
+            {!ready && !loadError && (
+              <li className="px-4 py-3 flex justify-center text-primary items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-xs font-semibold">Initializing Maps API...</span>
               </li>
-            ))}
+            )}
           </ul>
         </div>
       )}
 
       {/* Map Modal */}
-      <MapModal 
-        isOpen={isMapOpen} 
-        onClose={() => setIsMapOpen(false)}
-        onConfirm={(loc) => handleSelect(loc.address, { lat: loc.lat, lng: loc.lng })}
-      />
+      {isMapOpen && (
+        <MapModal 
+          isOpen={isMapOpen} 
+          onClose={() => setIsMapOpen(false)}
+          onConfirm={(loc) => handleSelect(loc.address, { lat: loc.lat, lng: loc.lng })}
+        />
+      )}
     </div>
   );
 };

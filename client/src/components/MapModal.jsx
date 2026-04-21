@@ -1,69 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { X, Check } from 'lucide-react';
-import L from 'leaflet';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { X, Check, Loader2 } from 'lucide-react';
 
-// Fix for leaflet marker icon in React
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// India center defaults
-const BENGALURU_CENTER = [12.9716, 77.5946];
-
-// Component to handle map clicks
-const LocationMarker = ({ position, setPosition }) => {
-  useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-    },
-  });
-
-  return position === null ? null : (
-    <Marker 
-      position={position} 
-      draggable={true}
-      eventHandlers={{
-        dragend: (e) => {
-          setPosition(e.target.getLatLng());
-        },
-      }}
-    />
-  );
-};
+const BENGALURU_CENTER = { lat: 12.9716, lng: 77.5946 };
+const LIBRARIES = ['places'];
 
 const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
-  const [position, setPosition] = useState(initialPosition || BENGALURU_CENTER);
+  // Ensure we consistently use objects { lat, lng } vs arrays
+  const [position, setPosition] = useState(
+    initialPosition && initialPosition.lat && initialPosition.lng
+      ? initialPosition
+      : (Array.isArray(initialPosition) && initialPosition.length === 2 
+          ? { lat: initialPosition[0], lng: initialPosition[1] } 
+          : BENGALURU_CENTER)
+  );
+  
   const [loading, setLoading] = useState(false);
+  const [map, setMap] = useState(null);
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: LIBRARIES,
+  });
 
   useEffect(() => {
-    if (initialPosition) setPosition(initialPosition);
-  }, [initialPosition]);
+    if (initialPosition) {
+      let newPos = initialPosition;
+      if (Array.isArray(initialPosition)) {
+        newPos = { lat: initialPosition[0], lng: initialPosition[1] };
+      }
+      setPosition(newPos);
+      if (map && newPos.lat) {
+        map.panTo(newPos);
+      }
+    }
+  }, [initialPosition, map]);
+
+  const onMapLoad = useCallback((map) => {
+    setMap(map);
+  }, []);
+
+  const onMapUnmount = useCallback((map) => {
+    setMap(null);
+  }, []);
+
+  const handleMapClick = (e) => {
+    if (e.latLng) {
+      setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    }
+  };
+
+  const handleMarkerDragEnd = (e) => {
+    if (e.latLng) {
+      setPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    }
+  };
 
   // Reverse geocode when they confirm
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      const { lat, lng } = position;
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-      const data = await res.json();
+      if (!window.google) throw new Error("Google API not loaded");
       
-      onConfirm({
-        lat,
-        lng,
-        address: data.display_name || 'Selected Location on Map'
-      });
+      const geocoder = new window.google.maps.Geocoder();
+      const response = await geocoder.geocode({ location: position });
+      
+      if (response.results && response.results[0]) {
+        onConfirm({
+          lat: position.lat,
+          lng: position.lng,
+          address: response.results[0].formatted_address
+        });
+      } else {
+        throw new Error("No results found");
+      }
       onClose();
     } catch (error) {
       console.error('Reverse geocoding failed:', error);
-      // Still confirm with coordinates if fetching address fails
+      // Fallback
       onConfirm({ lat: position.lat, lng: position.lng, address: `${position.lat.toFixed(4)}, ${position.lng.toFixed(4)}` });
       onClose();
     } finally {
@@ -94,20 +109,40 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
           </div>
 
           {/* Map Area */}
-          <div className="flex-1 relative bg-gray-100">
-            <MapContainer 
-              center={position} 
-              zoom={13} 
-              minZoom={6}
-              maxBounds={[[8.0, 72.0], [22.5, 85.5]]}
-              style={{ height: '100%', width: '100%', zIndex: 10 }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <LocationMarker position={position} setPosition={setPosition} />
-            </MapContainer>
+          <div className="flex-1 relative bg-gray-100 flex items-center justify-center">
+            {loadError && <div className="text-red-500 font-bold flex flex-col items-center"><X size={48} /><span>Error loading Maps. Check API Key.</span></div>}
+            {!isLoaded && !loadError && <Loader2 className="animate-spin text-primary" size={32} />}
+            {isLoaded && !loadError && (
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={position}
+                zoom={13}
+                onLoad={onMapLoad}
+                onUnmount={onMapUnmount}
+                onClick={handleMapClick}
+                options={{
+                  disableDefaultUI: false,
+                  zoomControl: true,
+                  streetViewControl: false,
+                  mapTypeControl: false,
+                  restriction: {
+                    latLngBounds: {
+                      north: 22.5,
+                      south: 8.0,
+                      east: 85.5,
+                      west: 72.0
+                    },
+                    strictBounds: false,
+                  }
+                }}
+              >
+                <Marker 
+                  position={position}
+                  draggable={true}
+                  onDragEnd={handleMarkerDragEnd}
+                />
+              </GoogleMap>
+            )}
           </div>
 
           {/* Footer Actions */}
@@ -120,7 +155,7 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
             </button>
             <button 
               onClick={handleConfirm}
-              disabled={loading}
+              disabled={loading || (!isLoaded && !loadError)}
               className="flex items-center space-x-2 bg-primary text-secondary px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-70"
             >
               {loading ? (

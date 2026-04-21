@@ -226,7 +226,7 @@ const SelectVehicle = () => {
                             <div className="flex items-center gap-1.5">
                               <Users size={12} className="text-slate-300" />
                               <span className="text-[10px] font-black text-slate-500 uppercase">
-                                {car.seats} Seats {car.seating_style ? `(${car.seating_style} Layout)` : ''}
+                                {car.seats} Seats
                               </span>
                             </div>
                             {tripDetails.type === 'local' && (
@@ -243,14 +243,23 @@ const SelectVehicle = () => {
                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                               {tripDetails.type === 'local' ? 'Package Price' : (tripDetails.trip === 'one-way' ? 'One Way Rate' : 'Round Trip Rate')}
                             </span>
-                            <div className="flex items-baseline justify-end gap-1">
-                              <span className="text-sm font-black text-secondary">₹</span>
-                              <span className="text-3xl sm:text-4xl font-black text-secondary tracking-tighter">
-                                {tripDetails.type === 'local' ? (car.base_fare || 0).toLocaleString() : (tripDetails.trip === 'one-way' ? (car.price_per_km_one_way || 0) : (car.price_per_km || 0))}
-                              </span>
-                              {tripDetails.type !== 'local' && (
-                                <span className="text-xs font-black text-slate-400 tracking-tight">/km</span>
-                              )}
+                            <div className="flex flex-col items-end">
+                              <div className="flex items-baseline justify-end gap-1">
+                                <span className="text-sm font-black text-secondary">₹</span>
+                                <span className="text-3xl sm:text-4xl font-black text-secondary tracking-tighter">
+                                  {tripDetails.type === 'local' ? (car.base_fare || 0).toLocaleString() : (tripDetails.trip === 'one-way' ? (car.price_per_km_one_way || 0) : (car.price_per_km || 0))}
+                                </span>
+                                {tripDetails.type !== 'local' && (
+                                  <span className="text-xs font-black text-slate-400 tracking-tight">/km</span>
+                                )}
+                              </div>
+                              <div className="relative flex items-baseline gap-0.5 opacity-70 -mt-1.5">
+                                <span className="text-[10px] font-black text-slate-400">₹</span>
+                                <span className="relative text-lg font-black text-slate-400 tracking-tighter">
+                                  {Math.round((tripDetails.type === 'local' ? (car.base_fare || 0) : (tripDetails.trip === 'one-way' ? (car.price_per_km_one_way || 0) : (car.price_per_km || 0))) + (tripDetails.type === 'local' ? 300 : 3)).toLocaleString()}
+                                  <span className="absolute inset-x-0 top-1/2 h-[1.5px] bg-red-600 -rotate-[15deg] origin-center shadow-sm"></span>
+                                </span>
+                              </div>
                             </div>
                           </div>
 

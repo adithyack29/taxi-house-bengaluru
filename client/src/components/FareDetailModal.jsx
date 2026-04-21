@@ -122,8 +122,12 @@ const FareDetailModal = ({
                   <span className="text-[10px] text-gray-500 font-bold italic">(Excl. Tolls/Entry)</span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex flex-col items-end">
                 <span className="text-2xl sm:text-3xl font-black text-primary  ">₹{(data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0))).toLocaleString()}</span>
+                <span className="relative text-sm font-black text-slate-400/70 -mt-1">
+                  ₹{((data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0))) + 300).toLocaleString()}
+                  <span className="absolute inset-x-0 top-1/2 h-[1px] bg-red-500 -rotate-[12deg] origin-center sm:h-[1.5px]"></span>
+                </span>
               </div>
             </div>
             <button 

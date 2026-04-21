@@ -16,6 +16,28 @@ import TripPlanModal from '../components/TripPlanModal';
 import FareDetailModal from '../components/FareDetailModal';
 import { generateTripSchedule } from '../utils/tripSchedule';
 
+const getVehicleCategory = (name) => {
+  if (!name) return null;
+  const lowerName = name.toLowerCase();
+  
+  if (lowerName.includes('sedan') || lowerName.includes('dzire') || lowerName.includes('etios') || lowerName.includes('amaze')) {
+    return 'Sedan';
+  }
+  if (lowerName.includes('suv') || lowerName.includes('muv') || lowerName.includes('innova') || lowerName.includes('crysta') || lowerName.includes('ertiga') || lowerName.includes('carens')) {
+    return 'SUV / MUV';
+  }
+  if (lowerName.includes('hatchback') || lowerName.includes('swift')) {
+    return 'Hatchback';
+  }
+  if (lowerName.includes('tempo') || lowerName.includes('traveller') || lowerName.match(/\btt\b/)) {
+    return 'Tempo Traveller';
+  }
+  if (lowerName.includes('bus')) {
+    return 'Bus';
+  }
+  return null;
+};
+
 const ConfirmBooking = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -521,9 +543,16 @@ const ConfirmBooking = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Vehicle</p>
-                    <p className="text-sm font-black text-secondary leading-tight">{car?.name}</p>
-                    <p className="text-[10px] font-bold text-primary mt-1">
-                      {car?.seats} pax {car?.seating_style ? `(${car.seating_style} Layout)` : ''}
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-black text-secondary leading-tight">{car?.name}</p>
+                      {getVehicleCategory(car?.name) && (
+                        <span className="text-[9px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 uppercase tracking-widest shadow-sm">
+                          {getVehicleCategory(car?.name)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-500 mt-1 flex items-center gap-1">
+                      <Users size={10} /> {car?.seats} pax
                     </p>
                   </div>
                 </div>
@@ -659,8 +688,12 @@ const ConfirmBooking = () => {
                     <p className="text-[10px] font-black text-primary  ">Estimated Total</p>
                     <p className="text-[10px] text-gray-400 font-bold max-w-[150px] leading-tight">Excluding State Permit & Tolls</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end">
                     <span className="text-3xl font-black text-secondary ">₹{(totalEstimated || 0).toLocaleString()}</span>
+                    <span className="relative text-sm font-black text-slate-400/70 -mt-1">
+                      ₹{((totalEstimated || 0) + 300).toLocaleString()}
+                      <span className="absolute inset-x-0 top-1/2 h-[1.5px] bg-red-500 -rotate-[12deg] origin-center sm:h-[2px]"></span>
+                    </span>
                   </div>
                 </div>
               </>
