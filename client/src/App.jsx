@@ -13,6 +13,7 @@ import ConfirmBooking from './pages/ConfirmBooking';
 import TermsAndConditions from './pages/TermsAndConditions';
 import RefundPolicy from './pages/RefundPolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Explore from './pages/Explore';
 import { useLocation } from 'react-router-dom';
 
 function AppContent() {
@@ -27,6 +28,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/select-vehicle" element={<SelectVehicle />} />
           <Route path="/confirm-booking" element={<ConfirmBooking />} />

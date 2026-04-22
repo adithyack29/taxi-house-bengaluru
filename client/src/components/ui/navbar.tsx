@@ -8,6 +8,7 @@ import { SOCIAL_LINKS } from '@/constants/socialLinks'
 
 const menuItems = [
     { name: 'Home', href: '/' },
+    { name: 'Explore', href: '/explore' },
     { name: 'About', href: '/about' },
     { name: 'Services', href: '/services' },
     { name: 'Contact', href: '/contact' },

@@ -37,8 +37,11 @@ const formatPhoneForWhatsApp = (phone) => {
 };
 
 const AdminDashboard = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('admin_authenticated') === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isInitializing, setIsInitializing] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ bookings: [], messages: [], cars: [] });
@@ -54,9 +57,18 @@ const AdminDashboard = () => {
   const [viewingFare, setViewingFare] = useState(null);
   const [formStep, setFormStep] = useState('category'); // 'category', 'details'
 
-  // Admin password (simple for trial as requested)
-  // In a real app, this should be an env variable or Supabase Auth
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setIsInitializing(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -120,19 +132,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem('admin_authenticated', 'true');
-    } else {
-      alert('Incorrect password');
+    setLoginError('');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Login error:', error.message);
+      setLoginError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   const toggleCarAvailability = async (id, currentStatus) => {
@@ -270,6 +289,14 @@ const AdminDashboard = () => {
     }
   };
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -283,10 +310,27 @@ const AdminDashboard = () => {
               <Lock className="text-primary" size={32} />
             </div>
             <h1 className="text-2xl font-bold text-slate-800">Admin Login</h1>
-            <p className="text-slate-500 text-center mt-2">Enter your password to access the trial dashboard</p>
+            <p className="text-slate-500 text-center mt-2">Sign in to access the dashboard</p>
           </div>
 
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+              {loginError}
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-lg"
+                placeholder="admin@example.com"
+                required
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
               <input
@@ -300,9 +344,14 @@ const AdminDashboard = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-primary text-secondary font-bold py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg"
+              disabled={loading}
+              className="w-full bg-primary text-secondary font-bold py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg flex justify-center items-center gap-2"
             >
-              Access Dashboard
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-secondary"></div>
+              ) : (
+                'Access Dashboard'
+              )}
             </button>
           </form>
         </motion.div>
