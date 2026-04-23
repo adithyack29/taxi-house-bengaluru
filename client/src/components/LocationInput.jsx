@@ -27,7 +27,13 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
   } = usePlacesAutocomplete({
     requestOptions: {
       componentRestrictions: { country: 'in' },
-      // Bias slightly to South India / Bengaluru area bounds explicitly if needed, but country is fine.
+      locationBias: {
+        // Bias results strongly to Bengaluru and surrounding areas
+        // This significantly improves typo-tolerance (fuzzy matching)
+        // because Google can contextualize the spelling mistake locally.
+        center: { lat: 12.9716, lng: 77.5946 },
+        radius: 100000, // 100km radius
+      },
     },
     debounce: 400,
     initOnMount: false, // We initialize it fully when ready becomes true based on API load context

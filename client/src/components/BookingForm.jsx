@@ -54,12 +54,13 @@ const BookingForm = () => {
   const isHoverable = useHoverQuery();
   const [searchParams] = useSearchParams();
 
-  const getTodayStr = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-  const [todayStr, setTodayStr] = useState(getTodayStr());
+  const getMinAllowedDateTime = () => new Date(Date.now() + 12 * 60 * 60 * 1000);
+  const getMinDateStr = () => getMinAllowedDateTime().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const [minDateStr, setMinDateStr] = useState(getMinDateStr());
 
-  // Update today indicator every minute
+  // Update min date indicator every minute
   useEffect(() => {
-    const timer = setInterval(() => setTodayStr(getTodayStr()), 60000);
+    const timer = setInterval(() => setMinDateStr(getMinDateStr()), 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -74,12 +75,11 @@ const BookingForm = () => {
   const maxReturnDate = formData.date ? addDays(formData.date, 7) : '';
 
   // Helper to get next available valid time slot with day rollover support
-  const getNextAvailableTime = (baseDate = new Date()) => {
+  const getNextAvailableTime = (baseDate = getMinAllowedDateTime()) => {
     const checkTime = new Date(baseDate);
     const originalDate = checkTime.getDate();
     
-    // Add 30m buffer
-    checkTime.setMinutes(checkTime.getMinutes() + 30);
+    // We strictly use the 12h buffer, no extra minutes needed here.
     
     const minutes = checkTime.getMinutes();
     let roundedMinutes;
@@ -104,7 +104,7 @@ const BookingForm = () => {
   useEffect(() => {
     // Set initial available time and check for mid-night rollover
     const { time, rolledOver } = getNextAvailableTime();
-    const initialDate = rolledOver ? addDays(todayStr, 1) : todayStr;
+    const initialDate = rolledOver ? addDays(minDateStr, 1) : minDateStr;
 
     setFormData(prev => ({ 
       ...prev, 
@@ -119,7 +119,7 @@ const BookingForm = () => {
         setFormData(prev => ({ ...prev, carType: decodedCar }));
       }
     }
-  }, [searchParams, todayStr]);
+  }, [searchParams, minDateStr]);
 
   const AIRPORT_NAME = "Kempegowda International Airport";
 
@@ -318,13 +318,13 @@ const BookingForm = () => {
           newData.returnDate = addDays(value, prev.daysRequired || 1);
         }
         
-        // Auto-set time: if today, use nearest available (considering rollover); if future, default to 10 AM (standard)
-        if (value === todayStr) {
+        // Auto-set time: if min date, use nearest available; if future, default to 10 AM (standard)
+        if (value === minDateStr) {
           const { time, rolledOver } = getNextAvailableTime();
           newData.time = time;
           if (rolledOver) {
             // Force tomorrow if today's booking window is closed
-            newData.date = addDays(todayStr, 1);
+            newData.date = addDays(minDateStr, 1);
           }
         } else {
           newData.time = '10:00';
@@ -585,7 +585,7 @@ const BookingForm = () => {
                     value={formData.date} 
                     onChange={handleChange} 
                     align="left" 
-                    minDate={todayStr}
+                    minDate={minDateStr}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -596,7 +596,7 @@ const BookingForm = () => {
                     value={formData.time} 
                     onChange={handleChange} 
                     align="center"
-                    isToday={formData.date === todayStr}
+                    isMinDate={formData.date === minDateStr}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -794,7 +794,7 @@ const BookingForm = () => {
                     value={formData.date} 
                     onChange={handleChange} 
                     align="left" 
-                    minDate={todayStr}
+                    minDate={minDateStr}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -805,7 +805,7 @@ const BookingForm = () => {
                     value={formData.time} 
                     onChange={handleChange} 
                     align="right" 
-                    isToday={formData.date === todayStr}
+                    isMinDate={formData.date === minDateStr}
                   />
                 </div>
               </div>
@@ -887,7 +887,7 @@ const BookingForm = () => {
                       value={formData.date} 
                       onChange={handleChange} 
                       align="left" 
-                      minDate={todayStr}
+                      minDate={minDateStr}
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -898,7 +898,7 @@ const BookingForm = () => {
                       value={formData.time} 
                       onChange={handleChange} 
                       align="right" 
-                      isToday={formData.date === todayStr}
+                      isMinDate={formData.date === minDateStr}
                     />
                   </div>
                 </div>

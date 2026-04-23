@@ -10,7 +10,7 @@ const CustomTimePicker = ({
   required = false, 
   disabled = false,
   align = "center", // "left", "right", "center"
-  isToday = false
+  isMinDate = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -51,18 +51,17 @@ const CustomTimePicker = ({
   const { hour: selectedHour, minute: selectedMinute, ampm: selectedAMPM } = parseValue();
 
   const isTimeDisabled = (type, val) => {
-    if (!isToday) return false;
+    if (!isMinDate) return false;
 
-    const now = currentTime;
-    const currentHour24 = now.getHours();
-    const currentMinute = now.getMinutes();
+    // Use exact 12 hours from current time as limit
+    const limitDate = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const limitHour24 = limitDate.getHours();
+    const limitMinute = limitDate.getMinutes();
     
-    // Add 30 min buffer for booking
-    const bufferMinutes = 30;
-    const limitTotalMinutes = (currentHour24 * 60) + currentMinute + bufferMinutes;
+    const limitTotalMinutes = (limitHour24 * 60) + limitMinute;
 
-    // If buffer pushes us into the next day, ALL times for TODAY are disabled
-    if (limitTotalMinutes >= 1440) return true;
+    // The limitTotalMinutes will be between 0 and 1439 for that specific limit date.
+    // We only disable times on the minDate if they fall before this limit limitTotalMinutes.
 
     let { hour, minute, ampm } = parseValue();
     if (type === 'hour') hour = val;
@@ -110,10 +109,10 @@ const CustomTimePicker = ({
 
     // If the resulting selection is disabled (e.g. switching to an hour where 'minute' is in the past)
     // we snap the minute to the first available one in that hour.
-    const now = currentTime;
-    const limitTotalMinutes = (now.getHours() * 60) + now.getMinutes() + 30;
+    const limitDate = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const limitTotalMinutes = (limitDate.getHours() * 60) + limitDate.getMinutes();
 
-    if (isToday && get24h(hour, minute, ampm) < limitTotalMinutes) {
+    if (isMinDate && get24h(hour, minute, ampm) < limitTotalMinutes) {
       // Find first valid minute
       const validMinute = minutes.find(m => get24h(hour, m, ampm) >= limitTotalMinutes);
       if (validMinute) {
@@ -255,9 +254,9 @@ const CustomTimePicker = ({
               {/* Footer Indicator */}
               <div className="mt-6 pt-4 border-t border-gray-50 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${isToday ? 'bg-orange-400 animate-pulse' : 'bg-green-400'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full ${isMinDate ? 'bg-orange-400 animate-pulse' : 'bg-green-400'}`} />
                   <p className="text-[10px] font-bold text-gray-400">
-                    {isToday ? 'Booking with 30m buffer' : 'Advance booking active'}
+                    {isMinDate ? 'Booking with 12h advance notice' : 'Advance booking active'}
                   </p>
                 </div>
                 <button 
