@@ -915,6 +915,16 @@ const BookingForm = () => {
             </div>
           )}
 
+          {/* Urgent Booking Note */}
+          <div className="mt-4 p-3 sm:p-4 bg-orange-50/80 border border-orange-100 rounded-xl flex items-start gap-2.5 sm:gap-3">
+            <div className="bg-orange-100 p-1.5 rounded-full text-orange-600 shrink-0 mt-0.5">
+              <Phone size={14} className="sm:w-4 sm:h-4" />
+            </div>
+            <p className="text-[10px] sm:text-xs text-orange-800 font-medium leading-snug pt-0.5">
+              <strong className="font-black text-orange-900">Urgent Booking?</strong> For bookings within <span className="font-black underline decoration-orange-300 underline-offset-2">1-2 hours ,</span> Please contact our customer support directly.
+            </p>
+          </div>
+
         </form>
       </div>
 
