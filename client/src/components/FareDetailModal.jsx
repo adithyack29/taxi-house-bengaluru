@@ -20,7 +20,8 @@ const FareDetailModal = ({
     bataDays,
     totalNights,
     nightBata,
-    minKm
+    minKm,
+    petFee
   } = data;
 
   return (
@@ -101,6 +102,16 @@ const FareDetailModal = ({
                     <p className="text-[10px] text-gray-400 font-medium italic">Logic: {Math.round(totalNights || 0)} Nights × ₹{nightBata}/Night</p>
                   </div>
                 )}
+
+                {petFee > 0 && (
+                  <div className="space-y-1 pt-2 border-t border-gray-50">
+                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                      <span>Pet Accompanied Fee</span>
+                      <span>₹{petFee?.toLocaleString()}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 font-medium italic">Standard pet cleaning & handling fee</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -123,11 +134,14 @@ const FareDetailModal = ({
                 </div>
               </div>
               <div className="text-right flex flex-col items-end">
-                <span className="text-2xl sm:text-3xl font-black text-primary  ">₹{(data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0))).toLocaleString()}</span>
-                <span className="relative text-sm font-black text-slate-400/70 -mt-1">
-                  ₹{((data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0))) + 300).toLocaleString()}
-                  <span className="absolute inset-x-0 top-1/2 h-[1px] bg-red-500 -rotate-[12deg] origin-center sm:h-[1.5px]"></span>
-                </span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-primary text-secondary text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">15% OFF</span>
+                  <span className="relative text-xs font-black text-slate-400/70">
+                    ₹{Math.round(((data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0) + Number(petFee||0))) * 1.15) / 10) * 10}
+                    <span className="absolute inset-x-0 top-1/2 h-[1px] bg-red-500 -rotate-[12deg] origin-center sm:h-[1.5px]"></span>
+                  </span>
+                </div>
+                <span className="text-2xl sm:text-3xl font-black text-primary  ">₹{(data.totalFare || (Number(baseFare||0) + Number(totalDayBata||0) + Number(totalNightBata||0) + Number(petFee||0))).toLocaleString()}</span>
               </div>
             </div>
             <button 

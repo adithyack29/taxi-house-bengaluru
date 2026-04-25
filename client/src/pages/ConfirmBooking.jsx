@@ -53,6 +53,7 @@ const ConfirmBooking = () => {
   const [selectedScenario, setSelectedScenario] = useState(searchParams.get('strategy') || 'day-only');
   const [refinedPickup, setRefinedPickup] = useState('');
   const [refinedPickupCoords, setRefinedPickupCoords] = useState(null);
+  const [hasPet, setHasPet] = useState(false);
 
   // Trip details from URL
   const tripDetails = useMemo(() => {
@@ -94,8 +95,8 @@ const ConfirmBooking = () => {
       ? new Date(`${tripDetails.returnDate}T${tripDetails.returnTime}:00`) 
       : pickupD;
     const userHours = (returnD - pickupD) / (1000 * 60 * 60);
-    const userDays = Math.max(1, Math.ceil((userHours - 2) / 24) + (tripDetails.returnDate ? 1 : 0)); 
-    // ^ +1 logic for return trips is common, but with a 2h grace period for the return leg.
+    const userDays = Math.max(1, Math.ceil((userHours - 2) / 24)); 
+    // ^ 2h grace period for the return leg.
 
     const distanceVal = roadDistance || minKm;
     const distanceDays = Math.ceil(distanceVal / 300);
@@ -112,7 +113,7 @@ const ConfirmBooking = () => {
         strategy,
         tripDetails.trip
       );
-      if (sched.length < 2) return { days: 1, nights: 0 };
+      if (sched.length < 2) return { days: 1, nights: 0, schedHours: 0 };
       
       const start = new Date(sched[0].time);
       const end = new Date(sched[sched.length - 1].time);
@@ -148,35 +149,54 @@ const ConfirmBooking = () => {
       }
       
       nights = nightWindowsTouched.size;
+      const schedHours = (end - start) / (1000 * 60 * 60);
 
-      return { days, nights };
+      return { days, nights, schedHours };
     };
 
-    // Day Only Calculation
+    const isSameDay = tripDetails.date === tripDetails.returnDate;
     const dayOnlySched = getChronoDays('day-only');
-    const dayOnlyDays = Math.max(userDays, (dayOnlySched?.days) || 1);
+    let dayOnlyDays = Math.max(userDays, (dayOnlySched?.days) || 1);
+    if (isSameDay) dayOnlyDays = 1;
+    
     const dayOnlyNights = (dayOnlySched?.nights) || 0;
     
-    const dayOnlyMinKmValue = 300 * dayOnlyDays;
+    let dayOnlyBataDays = dayOnlyDays;
+    let dayOnlyBataNights = dayOnlyNights;
+    if (dayOnlySched && Math.max(userHours, dayOnlySched.schedHours) <= 12) {
+      dayOnlyBataDays = 1;
+      dayOnlyBataNights = 0;
+    }
+    
+    const dayOnlyMinKmValue = tripDetails.trip === 'one-way' ? 0 : 300 * dayOnlyDays;
     const dayOnlyBillingKm = Math.max(distanceVal, dayOnlyMinKmValue);
     const dayOnlyBaseValue = Math.round(dayOnlyBillingKm * pricePerKm);
     const dayOnlyNightBataValue = 0; // Standard mode never pays Night Allowance (handled by Driver Bata)
-    const dayOnlyDayBataValue = dayOnlyDays * driverBata;
+    const dayOnlyDayBataValue = dayOnlyBataDays * driverBata;
 
     // Expedited Calculation
     const expeditedSched = getChronoDays('expedited');
-    const expeditedDays = Math.max(userDays, (expeditedSched?.days) || 1);
-    const expeditedNights = (expeditedSched?.nights) || 0;
+    let expeditedDays = Math.max(userDays, (expeditedSched?.days) || 1);
+    if (isSameDay) expeditedDays = 1;
     
-    const expeditedMinKmValue = 300 * expeditedDays;
+    const expeditedNights = (expeditedSched?.nights) || 0;
+
+    let expeditedBataDays = expeditedDays;
+    let expeditedBataNights = expeditedNights;
+    if (expeditedSched && Math.max(userHours, expeditedSched.schedHours) <= 12) {
+      expeditedBataDays = 1;
+      expeditedBataNights = 0;
+    }
+    
+    const expeditedMinKmValue = tripDetails.trip === 'one-way' ? 0 : 300 * expeditedDays;
     const expeditedBillingKm = Math.max(distanceVal, expeditedMinKmValue);
     const expeditedBaseValue = Math.round(expeditedBillingKm * pricePerKm);
-    const expeditedDayBataValue = expeditedDays * driverBata;
-    const expeditedNightBataValue = expeditedNights * nightBata;
+    const expeditedDayBataValue = expeditedBataDays * driverBata;
+    const expeditedNightBataValue = expeditedBataNights * nightBata;
 
     return {
       'day-only': {
-        days: dayOnlyDays,
+        days: dayOnlyBataDays,
         nights: 0, // Standard mode count is 0 for Night Allowance purposes
         billingKm: dayOnlyBillingKm,
         baseFare: dayOnlyBaseValue,
@@ -188,8 +208,8 @@ const ConfirmBooking = () => {
         icon: Sun
       },
       'expedited': {
-        days: expeditedDays,
-        nights: expeditedNights,
+        days: expeditedBataDays,
+        nights: expeditedBataNights,
         billingKm: expeditedBillingKm,
         baseFare: expeditedBaseValue,
         dayBata: expeditedDayBataValue,
@@ -227,6 +247,9 @@ const ConfirmBooking = () => {
     tripDetails.totalNightBata = current.nightBataValue;
     tripDetails.totalFare = current.total;
   }
+
+  const petFee = hasPet ? 500 : 0;
+  totalEstimated += petFee;
 
   const calculatedToken = Math.floor((totalEstimated * 0.15) / 100) * 100;
   const baseTokenAmount = calculatedToken > 0 ? calculatedToken : Math.max(1, Math.round(totalEstimated * 0.15));
@@ -336,7 +359,9 @@ const ConfirmBooking = () => {
         nightBata,
         minKm,
         routeLegs,
-        selectedScenario
+        selectedScenario,
+        hasPet,
+        petFee
       };
 
       setBookingStatus({ type: 'loading', msg: 'Recording booking...' });
@@ -391,13 +416,22 @@ const ConfirmBooking = () => {
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
           {/* Back Button */}
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center text-gray-400 hover:text-secondary transition-all hover:-translate-x-1 font-black text-[10px] uppercase tracking-widest bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0"
-          >
-            <ChevronLeft size={16} className="mr-1" />
-            <span>Back to Vehicles</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(`/?${searchParams.toString()}`)}
+              className="flex items-center text-primary hover:text-primary/80 transition-all font-black text-[10px] uppercase tracking-widest bg-white px-6 py-3 rounded-2xl shadow-sm border border-primary/20 flex-shrink-0"
+            >
+              <RotateCcw size={16} className="mr-1" />
+              <span>Modify Search</span>
+            </button>
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center text-gray-400 hover:text-secondary transition-all hover:-translate-x-1 font-black text-[10px] uppercase tracking-widest bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0"
+            >
+              <ChevronLeft size={16} className="mr-1" />
+              <span>Back to Vehicles</span>
+            </button>
+          </div>
 
           {/* Any Queries? Buttons */}
           <div className="flex items-center gap-3">
@@ -688,12 +722,15 @@ const ConfirmBooking = () => {
                     <p className="text-[10px] font-black text-primary  ">Estimated Total</p>
                     <p className="text-[10px] text-gray-400 font-bold max-w-[150px] leading-tight">Excluding State Permit & Tolls</p>
                   </div>
-                  <div className="text-right flex flex-col items-end">
+                   <div className="text-right flex flex-col items-end">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="bg-green-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">15% OFF</span>
+                      <span className="relative text-sm font-black text-slate-400/70">
+                        ₹{Math.round(((totalEstimated || 0) * 1.15) / 10) * 10}
+                        <span className="absolute inset-x-0 top-1/2 h-[1.5px] bg-red-500 -rotate-[12deg] origin-center sm:h-[2px]"></span>
+                      </span>
+                    </div>
                     <span className="text-3xl font-black text-secondary ">₹{(totalEstimated || 0).toLocaleString()}</span>
-                    <span className="relative text-sm font-black text-slate-400/70 -mt-1">
-                      ₹{((totalEstimated || 0) + 300).toLocaleString()}
-                      <span className="absolute inset-x-0 top-1/2 h-[1.5px] bg-red-500 -rotate-[12deg] origin-center sm:h-[2px]"></span>
-                    </span>
                   </div>
                 </div>
               </>
@@ -923,6 +960,27 @@ const ConfirmBooking = () => {
                   )}
 
                   <div className="flex flex-col gap-4">
+                    <label className="flex items-center gap-3 cursor-pointer group bg-orange-50 p-4 rounded-2xl border border-orange-100 hover:bg-orange-100 hover:border-orange-200 transition-all">
+                      <div className="relative">
+                        <input 
+                          type="checkbox" 
+                          checked={hasPet}
+                          onChange={(e) => setHasPet(e.target.checked)}
+                          className="peer sr-only"
+                        />
+                        <div className="w-5 h-5 border-2 border-orange-300 rounded-md bg-white peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-all flex items-center justify-center">
+                          <CheckCircle size={14} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-black text-orange-900 leading-tight flex items-center gap-1.5">
+                          Accompanied by a Pet?
+                          <span className="bg-orange-500 text-white text-[8px] px-1.5 py-0.5 rounded-sm">₹500 EXTRA</span>
+                        </span>
+                        <span className="text-[9px] font-bold text-orange-700/70 mt-0.5">Please ensure pet is in a carrier.</span>
+                      </div>
+                    </label>
+
                     <label className="flex items-center gap-3 cursor-pointer group bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:bg-primary/5 hover:border-primary/20 transition-all">
                       <div className="relative">
                         <input 
@@ -993,7 +1051,9 @@ const ConfirmBooking = () => {
           bataDays: tripDetails.bataDays,
           totalNights: tripDetails.totalNights,
           nightBata,
-          minKm
+          minKm,
+          petFee,
+          totalFare: totalEstimated
         }}
       />
 

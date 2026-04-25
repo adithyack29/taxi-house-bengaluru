@@ -53,6 +53,7 @@ const BookingForm = () => {
 
   const isHoverable = useHoverQuery();
   const [searchParams] = useSearchParams();
+  const hasInitializedFromUrl = useRef(false);
 
   const getMinAllowedDateTime = () => new Date(Date.now() + 12 * 60 * 60 * 1000);
   const getMinDateStr = () => getMinAllowedDateTime().toLocaleDateString('en-CA'); // YYYY-MM-DD
@@ -102,16 +103,48 @@ const BookingForm = () => {
   };
 
   useEffect(() => {
-    // Set initial available time and check for mid-night rollover
-    const { time, rolledOver } = getNextAvailableTime();
-    const initialDate = rolledOver ? addDays(minDateStr, 1) : minDateStr;
+    if (hasInitializedFromUrl.current) return;
 
-    setFormData(prev => ({ 
-      ...prev, 
-      time,
-      date: initialDate
+    // 1. Initial Defaults
+    const { time: defaultTime, rolledOver } = getNextAvailableTime();
+    const defaultDate = rolledOver ? addDays(minDateStr, 1) : minDateStr;
+
+    // 2. Parse URL Params
+    const parseCoord = (str) => {
+      if (!str) return null;
+      const [lat, lng] = str.split(',').map(Number);
+      return (lat && lng) ? { lat, lng } : null;
+    };
+
+    const type = searchParams.get('type');
+    if (type) setActiveTab(type);
+
+    const stopsParam = searchParams.get('stops');
+    const stopCoordsParam = searchParams.get('stopCoords');
+    const stopDurationsParam = searchParams.get('stopDurations');
+
+    setFormData(prev => ({
+      ...prev,
+      pickup: searchParams.get('pickup') || prev.pickup,
+      pickupCoords: parseCoord(searchParams.get('pickupCoord')) || prev.pickupCoords,
+      drop: searchParams.get('drop') || prev.drop,
+      dropCoords: parseCoord(searchParams.get('dropCoord')) || prev.dropCoords,
+      date: searchParams.get('date') || defaultDate,
+      time: searchParams.get('time') || defaultTime,
+      tripType: searchParams.get('trip') || prev.tripType,
+      localPackage: searchParams.get('package') || prev.localPackage,
+      airportType: searchParams.get('airport') || prev.airportType,
+      returnDate: searchParams.get('returnDate') || prev.returnDate,
+      returnTime: searchParams.get('returnTime') || prev.returnTime,
+      stops: stopsParam ? JSON.parse(stopsParam) : prev.stops,
+      stopCoords: stopCoordsParam ? JSON.parse(stopCoordsParam).map(parseCoord) : prev.stopCoords,
+      stopDurations: stopDurationsParam ? JSON.parse(stopDurationsParam) : prev.stopDurations
     }));
-    
+
+    if (searchParams.get('strategy')) {
+      setActiveStrategy(searchParams.get('strategy'));
+    }
+
     const carParam = searchParams.get('car');
     if (carParam) {
       const decodedCar = decodeURIComponent(carParam);
@@ -119,6 +152,8 @@ const BookingForm = () => {
         setFormData(prev => ({ ...prev, carType: decodedCar }));
       }
     }
+
+    hasInitializedFromUrl.current = true;
   }, [searchParams, minDateStr]);
 
   const AIRPORT_NAME = "Kempegowda International Airport";
@@ -127,6 +162,8 @@ const BookingForm = () => {
 
   // Reset/Sync fields when trip context changes (e.g. one-way to two-way, or switching tabs)
   useEffect(() => {
+    if (!hasInitializedFromUrl.current) return;
+
     const isTabChanged = prevContextRef.current.tab !== activeTab;
     const isTripChanged = prevContextRef.current.trip !== formData.tripType;
     const isAirportTypeChanged = prevContextRef.current.airport !== formData.airportType;
@@ -283,9 +320,10 @@ const BookingForm = () => {
       userDays = Math.max(1, Math.ceil((userDurationHours - 2) / 24));
     }
 
-    const finalCalendarDays = Math.max(chronoDays, userDays);
+    const isSameDay = formData.tripType === 'two-way' && formData.date && formData.date === formData.returnDate;
+    const finalCalendarDays = isSameDay ? 1 : Math.max(chronoDays, userDays);
     const totalDistance = formData.tripType === 'two-way' ? formData.estimatedDistance * 2 : formData.estimatedDistance;
-    const minBillableKm = Math.max(totalDistance, finalCalendarDays * 300);
+    const minBillableKm = formData.tripType === 'one-way' ? totalDistance : Math.max(totalDistance, finalCalendarDays * 300);
 
     return {
       calendarDays: finalCalendarDays,
@@ -657,7 +695,9 @@ const BookingForm = () => {
                       <p className="text-xs sm:text-sm font-black text-primary">
                         {practicalDaysInfo.minKm} KM
                       </p>
-                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 leading-tight tracking-tight">(300km/day standard)</p>
+                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 leading-tight tracking-tight">
+                        {formData.tripType === 'one-way' ? '(Actual Distance)' : '(300km/day standard)'}
+                      </p>
                     </div>
                   </div>
                   {/* Phase 3 UX: Warn the user if they stretched calendar arbitrarily beyond distance limits */}

@@ -70,7 +70,7 @@ const SelectVehicle = () => {
       <main className="flex-grow container mx-auto px-4 py-4 max-w-7xl">
         {/* Back Button */}
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/?${searchParams.toString()}`)}
           className="flex items-center text-gray-500 hover:text-secondary mb-6 transition-colors font-bold text-sm"
         >
           <ChevronLeft size={18} />
