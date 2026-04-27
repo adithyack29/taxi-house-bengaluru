@@ -248,7 +248,7 @@ const ConfirmBooking = () => {
     tripDetails.totalFare = current.total;
   }
 
-  const petFee = hasPet ? 500 : 0;
+  const petFee = hasPet ? 750 : 0;
   totalEstimated += petFee;
 
   const calculatedToken = Math.floor((totalEstimated * 0.15) / 100) * 100;
@@ -975,9 +975,9 @@ const ConfirmBooking = () => {
                       <div className="flex flex-col">
                         <span className="text-[11px] font-black text-orange-900 leading-tight flex items-center gap-1.5">
                           Accompanied by a Pet?
-                          <span className="bg-orange-500 text-white text-[8px] px-1.5 py-0.5 rounded-sm">₹500 EXTRA</span>
+                          <span className="bg-orange-500 text-white text-[8px] px-1.5 py-0.5 rounded-sm">₹750 EXTRA</span>
                         </span>
-                        <span className="text-[9px] font-bold text-orange-700/70 mt-0.5">Please ensure pet is in a carrier.</span>
+                        <span className="text-[9px] font-bold text-orange-700/70 mt-0.5">Pets are welcome! Please note that an additional charge applies for travelling with pets.</span>
                       </div>
                     </label>
 

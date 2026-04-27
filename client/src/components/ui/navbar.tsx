@@ -77,8 +77,8 @@ export const Header = () => {
                         <Link to="/" className="flex items-center group">
                             <img src="/logo.png" alt="Taxi House" className="h-11 lg:h-12 w-auto object-contain transition-transform" />
                             <div className="ml-2 lg:ml-3 flex flex-col items-start w-fit">
-                                <span className="text-lg lg:text-2xl adlam-display-regular tracking-tighter uppercase text-secondary leading-none whitespace-nowrap font-medium">TAXI HOUSE</span>
-                                <div className="flex justify-between w-full text-[10px] lg:text-xs font-bold text-primary uppercase leading-none mt-1 px-[2px]">
+                                <span className="text-base lg:text-xl adlam-display-regular tracking-tighter uppercase text-secondary leading-none whitespace-nowrap font-medium">TAXI HOUSE</span>
+                                <div className="flex justify-between w-full text-[8px] lg:text-[10px] font-bold text-primary uppercase leading-none mt-1 px-[2px]">
                                     <span>B</span><span>E</span><span>N</span><span>G</span><span>A</span><span>L</span><span>U</span><span>R</span><span>U</span>
                                 </div>
                             </div>
@@ -152,8 +152,8 @@ export const Header = () => {
                                 <div className="flex items-center">
                                      <img src="/logo.png" alt="Taxi House" className="h-10 w-auto object-contain" />
                                     <div className="ml-2 flex flex-col items-start w-fit">
-                                        <span className="text-sm adlam-display-regular tracking-tighter uppercase text-secondary leading-none whitespace-nowrap font-medium">TAXI HOUSE</span>
-                                        <div className="flex justify-between w-full text-[8px] font-bold text-primary uppercase leading-none mt-0 px-[1px]">
+                                        <span className="text-xs adlam-display-regular tracking-tighter uppercase text-secondary leading-none whitespace-nowrap font-medium">TAXI HOUSE</span>
+                                        <div className="flex justify-between w-full text-[7px] font-bold text-primary uppercase leading-none mt-0 px-[1px]">
                                             <span>B</span><span>E</span><span>N</span><span>G</span><span>A</span><span>L</span><span>U</span><span>R</span><span>U</span>
                                         </div>
                                     </div>
