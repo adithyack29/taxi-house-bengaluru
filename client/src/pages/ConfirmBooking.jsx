@@ -73,7 +73,7 @@ const ConfirmBooking = () => {
       package: searchParams.get('package'),
       airport: searchParams.get('airport'),
       returnDate: searchParams.get('returnDate'),
-      returnTime: searchParams.get('returnTime') || '12:00',
+      returnTime: searchParams.get('returnTime') || '21:30',
       stops: safeParseArr(searchParams.get('stops')),
       stopCoords: safeParseArr(searchParams.get('stopCoords')),
       stopDurations: safeParseArr(searchParams.get('stopDurations'))

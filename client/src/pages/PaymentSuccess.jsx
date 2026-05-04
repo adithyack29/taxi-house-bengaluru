@@ -47,18 +47,15 @@ const PaymentSuccess = () => {
         console.log('[Verify] verifyData:', verifyData);
 
         if (verifyData.status === 'SUCCESS') {
-          // 2. Update Supabase status
+          // 2. Fetch booking details from Supabase
+          // The status update was handled by the backend /api/cashfree-verify
           const { data, error } = await supabase
             .from('bookings')
-            .update({ 
-              status: 'confirmed', 
-              payment_status: 'paid'
-            })
-            .eq('cashfree_order_id', orderId)
-            .select();
+            .select('*')
+            .eq('cashfree_order_id', orderId);
 
           if (error) {
-            console.error('[Verify] Supabase update error:', error);
+            console.error('[Verify] Supabase fetch error:', error);
             setErrorMessage(`Database Error: ${error.message}`);
             throw error;
           }

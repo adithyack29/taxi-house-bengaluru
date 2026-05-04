@@ -35,7 +35,7 @@ const BookingForm = () => {
     stopDurations: [], // Durations for multi-stop in hours (0 = drive through, -1 = overnight)
     localPackage: '8 Hours / 80 KM',
     airportType: 'to-airport',
-    returnTime: '12:00', // Default return time
+    returnTime: '21:30', // Default return time
     estimatedDistance: null,
     daysRequired: 1
   });
@@ -299,7 +299,7 @@ const BookingForm = () => {
       formData.date,
       formData.time || '10:00',
       formData.returnDate || formData.date,
-      formData.returnTime || '12:00',
+      formData.returnTime || '21:30',
       formData.routeLegs,
       activeStrategy,
       formData.tripType
@@ -315,7 +315,7 @@ const BookingForm = () => {
     // Duration based on User selected Return parameters (for two-way)
     let userDays = 1;
     if (formData.tripType === 'two-way' && formData.returnDate) {
-      const returnTimeFull = new Date(`${formData.returnDate}T${formData.returnTime || '12:00'}${formData.returnTime?.split(':').length === 2 ? ':00' : ''}`);
+      const returnTimeFull = new Date(`${formData.returnDate}T${formData.returnTime || '21:30'}${formData.returnTime?.split(':').length === 2 ? ':00' : ''}`);
       const userDurationHours = (returnTimeFull - startTimeFull) / (1000 * 60 * 60);
       userDays = Math.max(1, Math.ceil((userDurationHours - 2) / 24));
     }
