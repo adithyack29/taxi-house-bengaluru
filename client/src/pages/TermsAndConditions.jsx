@@ -60,10 +60,14 @@ const TermsAndConditions = () => {
               <li>You understand that upon initiating a transaction for availing the Services you are entering into a
               legally binding and enforceable contract with the us for the Services.</li>
               
+              <li><strong>48-Hour Cancellation & Refund Policy:</strong> Cancellations made at least 48 hours before the scheduled trip start time will receive a 100% full refund of the advance payment. Last-minute cancellations made within 48 hours of the scheduled trip start time are strictly non-refundable, as vehicles and driver schedules are committed in advance.</li>
+
+              <li><strong>Driver Operational Duty Hours:</strong> Driver standard duty hours are between 6:00 AM and 10:00 PM. Bookings with pickup scheduled before 6:00 AM or after 10:00 PM, or trip completion/drop occurring after 10:00 PM or before 6:00 AM, will incur +1 extra day Driver Bata per occurrence.</li>
+
               <li>You shall be entitled to claim a refund of the payment made by you in case we are not able to
               provide the Service. The timelines for such return and refund will be according to the specific
               Service you have availed or within the time period provided in our policies (as applicable). In case
-              you do not raise a refund claim within the stipulated time, than this would make you ineligible for
+              you do not raise a refund claim within the stipulated time, then this would make you ineligible for
               a refund.</li>
               
               <li>Notwithstanding anything contained in these Terms, the parties shall not be liable for any failure to

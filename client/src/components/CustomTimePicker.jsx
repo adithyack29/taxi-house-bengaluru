@@ -53,8 +53,8 @@ const CustomTimePicker = ({
   const isTimeDisabled = (type, val) => {
     if (!isMinDate) return false;
 
-    // Use exact 12 hours from current time as limit
-    const limitDate = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    // Use exact 48 hours from current time as limit
+    const limitDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
     const limitHour24 = limitDate.getHours();
     const limitMinute = limitDate.getMinutes();
     
@@ -109,7 +109,7 @@ const CustomTimePicker = ({
 
     // If the resulting selection is disabled (e.g. switching to an hour where 'minute' is in the past)
     // we snap the minute to the first available one in that hour.
-    const limitDate = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const limitDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
     const limitTotalMinutes = (limitDate.getHours() * 60) + limitDate.getMinutes();
 
     if (isMinDate && get24h(hour, minute, ampm) < limitTotalMinutes) {
@@ -256,7 +256,7 @@ const CustomTimePicker = ({
                 <div className="flex items-center gap-2">
                   <div className={`w-1.5 h-1.5 rounded-full ${isMinDate ? 'bg-orange-400 animate-pulse' : 'bg-green-400'}`} />
                   <p className="text-[10px] font-bold text-gray-400">
-                    {isMinDate ? 'Booking with 12h advance notice' : 'Advance booking active'}
+                    {isMinDate ? 'Booking with 48h advance notice' : 'Advance booking active'}
                   </p>
                 </div>
                 <button 

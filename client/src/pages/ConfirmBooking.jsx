@@ -54,6 +54,8 @@ const ConfirmBooking = () => {
   const [refinedPickup, setRefinedPickup] = useState('');
   const [refinedPickupCoords, setRefinedPickupCoords] = useState(null);
   const [hasPet, setHasPet] = useState(false);
+  const agreementCardRef = React.useRef(null);
+  const [agreementError, setAgreementError] = useState(false);
 
   // Trip details from URL
   const tripDetails = useMemo(() => {
@@ -73,12 +75,16 @@ const ConfirmBooking = () => {
       package: searchParams.get('package'),
       airport: searchParams.get('airport'),
       returnDate: searchParams.get('returnDate'),
-      returnTime: searchParams.get('returnTime') || '21:30',
+      returnTime: searchParams.get('returnTime') || null,
       stops: safeParseArr(searchParams.get('stops')),
       stopCoords: safeParseArr(searchParams.get('stopCoords')),
       stopDurations: safeParseArr(searchParams.get('stopDurations'))
     };
   }, [searchParams]);
+
+  const isWhatsAppBooking = tripDetails.type === 'local' || 
+                            tripDetails.type === 'airport' || 
+                            (tripDetails.type === 'outstation' && tripDetails.trip === 'one-way');
 
   // Pricing Helpers
   const minKm = car?.min_km || 300;
@@ -86,13 +92,80 @@ const ConfirmBooking = () => {
   const driverBata = car?.driver_bata || 300;
   const nightBata = car?.night_bata || driverBata; // Fallback to driver bata if missing
 
+  // Driver Operational Duty Hours (6:00 AM – 10:00 PM) evaluation
+  const dutyInfo = useMemo(() => {
+    let extraBataDays = 0;
+    const reasons = [];
+
+    // Check Pickup Time (< 6 AM or > 10 PM)
+    if (tripDetails.time) {
+      const [pH, pM] = tripDetails.time.split(':').map(Number);
+      if (pH < 6) {
+        extraBataDays += 1;
+        reasons.push('Early pickup before 6:00 AM');
+      } else if (pH > 22 || (pH === 22 && pM > 0)) {
+        extraBataDays += 1;
+        reasons.push('Late pickup after 10:00 PM');
+      }
+    }
+
+    // Check Drop Time (> 10 PM or < 6 AM)
+    let dropDate = null;
+    if (routeLegs && routeLegs.length > 0) {
+      const sched = generateTripSchedule(
+        tripDetails.date,
+        tripDetails.time,
+        tripDetails.returnDate,
+        tripDetails.time || '10:00',
+        routeLegs,
+        selectedScenario || 'day-only',
+        tripDetails.trip
+      );
+      if (sched.length > 0) {
+        dropDate = new Date(sched[sched.length - 1].time);
+      }
+    } else if (tripDetails.date && tripDetails.time) {
+      const pDate = new Date(`${tripDetails.date}T${tripDetails.time}:00`);
+      if (tripDetails.type === 'local') {
+        dropDate = new Date(pDate.getTime() + 8 * 60 * 60 * 1000);
+      } else if (tripDetails.type === 'airport') {
+        dropDate = new Date(pDate.getTime() + 2 * 60 * 60 * 1000);
+      } else {
+        const estDist = roadDistance || minKm;
+        const estHours = Math.ceil(estDist / 45);
+        dropDate = new Date(pDate.getTime() + estHours * 60 * 60 * 1000);
+      }
+    }
+
+    if (dropDate && !isNaN(dropDate.getTime())) {
+      const dH = dropDate.getHours();
+      const dM = dropDate.getMinutes();
+      if (dH < 6) {
+        extraBataDays += 1;
+        reasons.push('Early drop before 6:00 AM');
+      } else if (dH > 22 || (dH === 22 && dM > 0)) {
+        extraBataDays += 1;
+        reasons.push('Late drop after 10:00 PM');
+      }
+    }
+
+    const extraBataAmount = extraBataDays * driverBata;
+
+    return {
+      extraBataDays,
+      extraBataAmount,
+      reasons,
+      dropDate
+    };
+  }, [tripDetails.date, tripDetails.time, tripDetails.returnDate, tripDetails.type, tripDetails.trip, routeLegs, selectedScenario, roadDistance, minKm, driverBata]);
+
   // 1. Scenario Calculation Logic (HOOK - MUST BE AT TOP)
   const scenarios = useMemo(() => {
     if (!car || (tripDetails.type !== 'outstation')) return null;
 
     const pickupD = new Date(`${tripDetails.date}T${tripDetails.time}:00`);
     const returnD = tripDetails.returnDate 
-      ? new Date(`${tripDetails.returnDate}T${tripDetails.returnTime}:00`) 
+      ? new Date(`${tripDetails.returnDate}T${tripDetails.time || '10:00'}:00`) 
       : pickupD;
     const userHours = (returnD - pickupD) / (1000 * 60 * 60);
     const userDays = Math.max(1, Math.ceil((userHours - 2) / 24)); 
@@ -108,7 +181,7 @@ const ConfirmBooking = () => {
         tripDetails.date,
         tripDetails.time,
         tripDetails.returnDate,
-        tripDetails.returnTime,
+        tripDetails.time || '10:00',
         routeLegs,
         strategy,
         tripDetails.trip
@@ -167,6 +240,9 @@ const ConfirmBooking = () => {
       dayOnlyBataDays = 1;
       dayOnlyBataNights = 0;
     }
+
+    // Incorporate Duty Hours extra day Bata
+    dayOnlyBataDays += dutyInfo.extraBataDays;
     
     const dayOnlyMinKmValue = tripDetails.trip === 'one-way' ? 0 : 300 * dayOnlyDays;
     const dayOnlyBillingKm = Math.max(distanceVal, dayOnlyMinKmValue);
@@ -187,6 +263,9 @@ const ConfirmBooking = () => {
       expeditedBataDays = 1;
       expeditedBataNights = 0;
     }
+
+    // Incorporate Duty Hours extra day Bata
+    expeditedBataDays += dutyInfo.extraBataDays;
     
     const expeditedMinKmValue = tripDetails.trip === 'one-way' ? 0 : 300 * expeditedDays;
     const expeditedBillingKm = Math.max(distanceVal, expeditedMinKmValue);
@@ -220,7 +299,7 @@ const ConfirmBooking = () => {
         icon: Moon
       }
     };
-  }, [car, roadDistance, tripDetails, pricePerKm, minKm, driverBata, nightBata, routeLegs]);
+  }, [car, roadDistance, tripDetails, pricePerKm, minKm, driverBata, nightBata, routeLegs, dutyInfo.extraBataDays]);
 
   // Main Fare Setup Logic
   let effectiveKm = minKm;
@@ -229,11 +308,15 @@ const ConfirmBooking = () => {
 
   if (tripDetails.type === 'local') {
     baseFare = car?.base_fare || 2100;
-    totalEstimated = baseFare;
+    totalEstimated = baseFare + dutyInfo.extraBataAmount;
+    tripDetails.totalDayBata = dutyInfo.extraBataAmount;
+    tripDetails.bataDays = dutyInfo.extraBataDays;
   } else if (tripDetails.type === 'airport') {
     effectiveKm = 40;
     baseFare = Math.round(40 * pricePerKm);
-    totalEstimated = baseFare;
+    totalEstimated = baseFare + dutyInfo.extraBataAmount;
+    tripDetails.totalDayBata = dutyInfo.extraBataAmount;
+    tripDetails.bataDays = dutyInfo.extraBataDays;
   } else if (scenarios) {
     const current = scenarios[selectedScenario] || scenarios['day-only'];
     effectiveKm = current.billingKm;
@@ -247,6 +330,10 @@ const ConfirmBooking = () => {
     tripDetails.totalNightBata = current.nightBataValue;
     tripDetails.totalFare = current.total;
   }
+
+  tripDetails.extraBataDays = dutyInfo.extraBataDays;
+  tripDetails.extraBataAmount = dutyInfo.extraBataAmount;
+  tripDetails.extraBataReasons = dutyInfo.reasons;
 
   const petFee = hasPet ? 750 : 0;
   totalEstimated += petFee;
@@ -332,10 +419,97 @@ const ConfirmBooking = () => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    setBookingStatus({ type: 'loading', msg: 'Preparing payment...' });
+
+    if (!acceptTerms) {
+      setAgreementError(true);
+      if (agreementCardRef.current) {
+        agreementCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    setAgreementError(false);
+
     const tripCategory = tripDetails.type;
     const subType = tripDetails.type === 'airport' ? tripDetails.airport : tripDetails.trip;
     const amount = tokenAmount;
+
+    const audit_data = {
+      roadDistance,
+      effectiveKm,
+      pricePerKm,
+      baseFare,
+      totalDayBata: tripDetails.totalDayBata,
+      totalNightBata: tripDetails.totalNightBata,
+      bataDays: tripDetails.bataDays,
+      totalNights: tripDetails.totalNights,
+      nightBata,
+      minKm,
+      routeLegs,
+      selectedScenario,
+      hasPet,
+      petFee,
+      extraBataDays: dutyInfo.extraBataDays,
+      extraBataAmount: dutyInfo.extraBataAmount,
+      extraBataReasons: dutyInfo.reasons,
+      dutyWindowPolicy: 'Standard driver duty hours: 6:00 AM – 10:00 PM. +1 extra day Driver Bata applies if pickup or drop exceeds duty hours.'
+    };
+
+    // If Local, Airport, or Outstation One-Way: Redirect to WhatsApp checkout
+    if (isWhatsAppBooking) {
+      setBookingStatus({ type: 'loading', msg: 'Preparing WhatsApp confirmation...' });
+      try {
+        const { error: supabaseError } = await supabase.from('bookings').insert([{
+          user_name: formData.name, 
+          phone: formData.phone, 
+          pickup: refinedPickup || tripDetails.pickup,
+          drop_off: tripDetails.drop, 
+          booking_date: tripDetails.date, 
+          booking_time: tripDetails.time,
+          car_type: car?.name || 'Vehicle', 
+          trip_category: tripCategory, 
+          sub_type: subType,
+          return_date: tripDetails.returnDate || null, 
+          return_time: null,
+          local_package: tripDetails.package || null,
+          stops: tripDetails.stops, 
+          status: 'pending', 
+          amount: totalEstimated,
+          travel_strategy: scenarios ? selectedScenario : null,
+          payment_status: 'booked_via_whatsapp', 
+          cashfree_order_id: null,
+          audit_data
+        }]);
+
+        if (supabaseError) throw supabaseError;
+
+        const stopsText = tripDetails.stops && tripDetails.stops.length > 0 ? `\n*Stops:* ${tripDetails.stops.join(' ➔ ')}` : '';
+        const dutyNoticeText = dutyInfo.extraBataDays > 0 ? `\n*Driver Duty Notice:* +${dutyInfo.extraBataDays} extra day Driver Bata (₹${dutyInfo.extraBataAmount.toLocaleString()}) included (${dutyInfo.reasons.join(', ')})` : '';
+
+        const waText = 
+`*NEW BOOKING ENQUIRY - TAXI HOUSE*
+--------------------------------
+*Passenger Name:* ${formData.name}
+*Phone Number:* ${formData.phone}
+*Trip Type:* ${tripCategory === 'outstation' ? 'Outstation One Way' : tripCategory === 'local' ? `Local Rental (${tripDetails.package || '8h/80km'})` : `Airport Transfer (${tripDetails.airport === 'to-airport' ? 'To Airport' : 'From Airport'})`}
+*Vehicle:* ${car?.name || 'Vehicle'}
+*Pickup Location:* ${refinedPickup || tripDetails.pickup}
+*Drop Location:* ${tripDetails.drop}${stopsText}
+*Pickup Date & Time:* ${formatDate(tripDetails.date)} at ${formatTime(tripDetails.time)}
+*Pet Status:* ${hasPet ? 'Yes (₹750 extra fee included)' : 'No'}
+*Estimated Fare:* ₹${totalEstimated.toLocaleString()}${dutyNoticeText}
+--------------------------------
+Please confirm this booking with me. Thank you!`;
+
+        setBookingStatus({ type: 'success' });
+        window.location.href = `https://wa.me/917795965640?text=${encodeURIComponent(waText)}`;
+      } catch (err) {
+        setBookingStatus({ type: 'error', msg: err.message || 'Failed to submit booking.' });
+      }
+      return;
+    }
+
+    // Outstation Round Trip: Cashfree 15% Token Payment
+    setBookingStatus({ type: 'loading', msg: 'Preparing payment...' });
 
     try {
       const res = await loadCashfree();
@@ -347,22 +521,6 @@ const ConfirmBooking = () => {
       });
       if (!orderResponse.ok) throw new Error('Failed to initialize payment.');
       const orderData = await orderResponse.json();
-      const audit_data = {
-        roadDistance,
-        effectiveKm,
-        pricePerKm,
-        baseFare,
-        totalDayBata: tripDetails.totalDayBata,
-        totalNightBata: tripDetails.totalNightBata,
-        bataDays: tripDetails.bataDays,
-        totalNights: tripDetails.totalNights,
-        nightBata,
-        minKm,
-        routeLegs,
-        selectedScenario,
-        hasPet,
-        petFee
-      };
 
       setBookingStatus({ type: 'loading', msg: 'Recording booking...' });
       const { error: supabaseError } = await supabase.from('bookings').insert([{
@@ -372,7 +530,7 @@ const ConfirmBooking = () => {
         booking_date: tripDetails.date, booking_time: tripDetails.time,
         car_type: car?.name || 'Vehicle', trip_category: tripCategory, sub_type: subType,
         return_date: tripDetails.returnDate || null, 
-        return_time: tripDetails.returnTime || null,
+        return_time: null,
         local_package: tripDetails.package || null,
         stops: tripDetails.stops, status: 'pending', amount,
         travel_strategy: scenarios ? selectedScenario : null,
@@ -487,10 +645,6 @@ const ConfirmBooking = () => {
                     <div className="space-y-1">
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Return Date</p>
                       <p className="text-xl font-black text-secondary leading-none">{formatDate(tripDetails.returnDate)}</p>
-                    </div>
-                    <div className="space-y-1 text-right">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Return Time</p>
-                      <p className="text-xl font-black text-secondary leading-none">{formatTime(tripDetails.returnTime)}</p>
                     </div>
                   </div>
                 )}
@@ -686,7 +840,16 @@ const ConfirmBooking = () => {
                 </div>
                 {!!tripDetails.totalDayBata && (
                   <div className="flex justify-between items-center">
-                    <p className="text-xs font-bold text-gray-500">Driver Bata <span className="text-[10px] text-gray-400 font-medium">(day)</span></p>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500">
+                        Driver Bata <span className="text-[10px] text-gray-400 font-medium">({tripDetails.bataDays} Days)</span>
+                      </p>
+                      {dutyInfo.extraBataDays > 0 && (
+                        <p className="text-[9px] text-amber-600 font-bold">
+                          Includes +{dutyInfo.extraBataDays} extra day Bata for operating outside 6 AM – 10 PM
+                        </p>
+                      )}
+                    </div>
                     <p className="text-sm font-black text-secondary">₹{tripDetails.totalDayBata.toLocaleString()}</p>
                   </div>
                 )}
@@ -981,52 +1144,140 @@ const ConfirmBooking = () => {
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-3 cursor-pointer group bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:bg-primary/5 hover:border-primary/20 transition-all">
-                      <div className="relative">
-                        <input 
-                          type="checkbox" 
-                          checked={acceptTerms}
-                          onChange={(e) => setAcceptTerms(e.target.checked)}
-                          className="peer sr-only"
-                        />
-                        <div className="w-5 h-5 border-2 border-slate-200 rounded-md bg-white peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
-                          <CheckCircle size={14} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                        </div>
+                    {/* Mandatory Pre-Payment Terms & Extra Bata Agreement Card */}
+                    <div 
+                      ref={agreementCardRef}
+                      className={`p-5 rounded-2xl border-2 transition-all duration-300 ${
+                        agreementError 
+                          ? 'border-red-500 bg-red-50/40 ring-4 ring-red-500/20' 
+                          : 'border-slate-200 bg-slate-50/80 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <ShieldCheck size={18} className="text-primary shrink-0" />
+                        <h4 className="text-xs font-black text-secondary uppercase tracking-wider">
+                          Booking Policies & Duty Hours Agreement
+                        </h4>
                       </div>
-                      <span className="text-[11px] font-black text-slate-500 group-hover:text-secondary transition-colors leading-tight">
-                        I have read and agree to all the <span className="text-primary underline">Terms & Conditions</span> and <span className="text-primary underline">Refund Policy</span>
-                      </span>
-                    </label>
+
+                      <ul className="space-y-2.5 text-xs text-slate-600 mb-4 pl-1">
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary font-bold text-sm leading-none">•</span>
+                          <p className="leading-snug">
+                            <strong>48-Hour Cancellation Rule:</strong> Cancellations made at least 48 hours before scheduled trip start receive a 100% full refund. Last-minute cancellations (within 48 hours of trip start) are strictly non-refundable. Read full{' '}
+                            <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-primary underline font-bold">Terms</a> &amp;{' '}
+                            <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="text-primary underline font-bold">Refund Policy</a>.
+                          </p>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary font-bold text-sm leading-none">•</span>
+                          <p className="leading-snug">
+                            <strong>Driver Operational Duty Hours:</strong> Driver standard duty hours are between 6:00 AM and 10:00 PM. Departures before 6:00 AM or after 10:00 PM, or arrivals after 10:00 PM or before 6:00 AM, incur +1 extra day Driver Bata (₹{driverBata}/day) per occurrence.
+                          </p>
+                        </li>
+                      </ul>
+
+                      {/* Dynamic Duty Badge */}
+                      <div className="mb-4">
+                        {dutyInfo.extraBataDays > 0 ? (
+                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-amber-900">
+                            <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                            <div className="text-[11px] font-bold leading-snug">
+                              <span className="font-black text-amber-950 uppercase tracking-wide block">
+                                +{dutyInfo.extraBataDays} Day Extra Driver Bata (₹{dutyInfo.extraBataAmount.toLocaleString()}) Included
+                              </span>
+                              <span className="text-amber-800">
+                                Journey operates outside standard 6:00 AM – 10:00 PM duty hours: {dutyInfo.reasons.join(' & ')}.
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2.5 text-green-800">
+                            <CheckCircle size={16} className="text-green-600 shrink-0" />
+                            <p className="text-[11px] font-bold">
+                              <strong className="text-green-950">Standard Duty Hours:</strong> Trip schedule falls cleanly within 6:00 AM – 10:00 PM. No extra driver bata applied.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Error Banner when attempting submit without checking */}
+                      {agreementError && (
+                        <div className="mb-3 p-2.5 bg-red-100/90 border border-red-300 rounded-xl text-red-700 text-xs font-black flex items-center gap-2 animate-pulse">
+                          <AlertCircle size={16} className="shrink-0" />
+                          <span>Please check the agreement box below to accept the 48-Hour Cancellation Policy and Driver Duty Hours to proceed.</span>
+                        </div>
+                      )}
+
+                      {/* Agreement Checkbox */}
+                      <label className="flex items-center gap-3 cursor-pointer group pt-1">
+                        <div className="relative">
+                          <input 
+                            type="checkbox" 
+                            checked={acceptTerms}
+                            onChange={(e) => {
+                              setAcceptTerms(e.target.checked);
+                              if (e.target.checked) setAgreementError(false);
+                            }}
+                            className="peer sr-only"
+                          />
+                          <div className={`w-5 h-5 border-2 rounded-md bg-white transition-all flex items-center justify-center ${
+                            agreementError ? 'border-red-400' : 'border-slate-300 peer-checked:bg-primary peer-checked:border-primary'
+                          }`}>
+                            <CheckCircle size={14} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                        <span className="text-xs font-bold text-slate-700 group-hover:text-secondary transition-colors leading-tight">
+                          I have read, understood, and agree to the <span className="text-primary underline">48-Hour Cancellation Rule</span> and <span className="text-primary underline">Driver Duty Hours (6 AM – 10 PM)</span>.
+                        </span>
+                      </label>
+                    </div>
 
                     <div className="flex flex-col gap-2">
                       <div className="flex justify-center">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                          pay 15% now & rest to driver
+                          {isWhatsAppBooking ? 'instant booking • pay driver directly' : 'pay 15% now & rest to driver'}
                         </p>
                       </div>
 
-                      <button
-                        type="submit"
-                        disabled={bookingStatus?.type === 'loading' || !acceptTerms}
-                        className={`w-full font-black py-5 rounded-[1.5rem] shadow-xl transition-all text-base flex items-center justify-center gap-3 relative overflow-hidden group ${
-                          acceptTerms 
-                            ? 'bg-black text-white shadow-black/20 hover:bg-black/90 hover:-translate-y-1 active:translate-y-0' 
-                            : 'bg-slate-100 text-slate-400 shadow-none cursor-not-allowed'
-                        }`}
-                      >
-                        {acceptTerms && <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />}
-                        {bookingStatus?.type === 'loading' ? (
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="animate-spin" size={20} />
-                            <span>Processing...</span>
-                          </div>
-                        ) : (
-                          <>
-                            <CreditCard size={20} />
-                            Pay ₹{tokenAmount.toLocaleString()} & Confirm
-                          </>
-                        )}
-                      </button>
+                      {isWhatsAppBooking ? (
+                        <button
+                          type="submit"
+                          disabled={bookingStatus?.type === 'loading'}
+                          className="w-full font-black py-5 rounded-[1.5rem] shadow-xl transition-all text-base flex items-center justify-center gap-3 relative overflow-hidden group bg-[#25D366] text-white shadow-[#25D366]/20 hover:bg-[#20ba59] hover:-translate-y-1 active:translate-y-0"
+                        >
+                          {bookingStatus?.type === 'loading' ? (
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="animate-spin" size={20} />
+                              <span>Connecting to WhatsApp...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <MessageCircle size={22} />
+                              Book &amp; Confirm on WhatsApp
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={bookingStatus?.type === 'loading'}
+                          className="w-full font-black py-5 rounded-[1.5rem] shadow-xl transition-all text-base flex items-center justify-center gap-3 relative overflow-hidden group bg-black text-white shadow-black/20 hover:bg-black/90 hover:-translate-y-1 active:translate-y-0"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                          {bookingStatus?.type === 'loading' ? (
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="animate-spin" size={20} />
+                              <span>Processing...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <CreditCard size={20} />
+                              Pay ₹{tokenAmount.toLocaleString()} &amp; Confirm
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1053,6 +1304,9 @@ const ConfirmBooking = () => {
           nightBata,
           minKm,
           petFee,
+          extraBataDays: dutyInfo.extraBataDays,
+          extraBataAmount: dutyInfo.extraBataAmount,
+          extraBataReasons: dutyInfo.reasons,
           totalFare: totalEstimated
         }}
       />
@@ -1068,7 +1322,7 @@ const ConfirmBooking = () => {
           tripDetails.date,
           tripDetails.time,
           tripDetails.returnDate,
-          tripDetails.returnTime,
+          tripDetails.time || '10:00',
           routeLegs,
           selectedScenario,
           tripDetails.trip

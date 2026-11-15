@@ -3,6 +3,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
 
+// Timezone-safe date parser
+const parseDateSafe = (val) => {
+  if (!val) return null;
+  if (val instanceof Date) return new Date(val.getFullYear(), val.getMonth(), val.getDate());
+  if (typeof val === 'string') {
+    const parts = val.split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return new Date(y, m, d);
+      }
+    }
+  }
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+
 const CustomDatePicker = ({ 
   value, 
   onChange, 
@@ -15,8 +34,28 @@ const CustomDatePicker = ({
   maxDate
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const containerRef = useRef(null);
+
+  // Compute effective min date (at least 48 hours in advance if minDate is not provided or earlier)
+  const default48hDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
+  const effectiveMinDate = minDate ? parseDateSafe(minDate) : parseDateSafe(default48hDate);
+
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const initialTarget = value ? parseDateSafe(value) : effectiveMinDate;
+    return initialTarget ? new Date(initialTarget.getFullYear(), initialTarget.getMonth(), 1) : new Date();
+  });
+
+  // When calendar opens, ensure it opens on earliest selectable date (or current value if valid)
+  useEffect(() => {
+    if (isOpen) {
+      const valDate = value ? parseDateSafe(value) : null;
+      if (valDate && (!effectiveMinDate || valDate >= effectiveMinDate)) {
+        setCurrentMonth(new Date(valDate.getFullYear(), valDate.getMonth(), 1));
+      } else if (effectiveMinDate) {
+        setCurrentMonth(new Date(effectiveMinDate.getFullYear(), effectiveMinDate.getMonth(), 1));
+      }
+    }
+  }, [isOpen, value, minDate]);
 
   // Close when clicking outside
   useEffect(() => {
@@ -33,27 +72,29 @@ const CustomDatePicker = ({
   const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
   const handlePrevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
   const isDateDisabled = (day) => {
     const dateToCheck = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     dateToCheck.setHours(0, 0, 0, 0);
 
-    if (minDate) {
-      const min = new Date(minDate);
+    if (effectiveMinDate) {
+      const min = new Date(effectiveMinDate);
       min.setHours(0, 0, 0, 0);
       if (dateToCheck < min) return true;
     }
 
     if (maxDate) {
-      const max = new Date(maxDate);
-      max.setHours(0, 0, 0, 0);
-      if (dateToCheck > max) return true;
+      const max = parseDateSafe(maxDate);
+      if (max) {
+        max.setHours(0, 0, 0, 0);
+        if (dateToCheck > max) return true;
+      }
     }
 
     return false;
@@ -218,15 +259,20 @@ const CustomDatePicker = ({
                 <button 
                   type="button"
                   onClick={() => {
-                    const today = new Date();
-                    if (!isDateDisabled(today.getDate())) {
-                      handleDateSelect(today.getDate());
-                      setCurrentMonth(today);
+                    const target = effectiveMinDate || new Date(Date.now() + 48 * 60 * 60 * 1000);
+                    if (target) {
+                      const year = target.getFullYear();
+                      const month = String(target.getMonth() + 1).padStart(2, '0');
+                      const d = String(target.getDate()).padStart(2, '0');
+                      const formattedDate = `${year}-${month}-${d}`;
+                      onChange({ target: { name, value: formattedDate } });
+                      setCurrentMonth(new Date(year, target.getMonth(), 1));
+                      setIsOpen(false);
                     }
                   }}
-                  className={`transition-colors ${isDateDisabled(new Date().getDate()) ? 'text-gray-300 cursor-not-allowed' : 'hover:text-primary'}`}
+                  className="hover:text-primary transition-colors text-primary font-black"
                 >
-                  Today
+                  Earliest Date
                 </button>
                 <button 
                   type="button" 

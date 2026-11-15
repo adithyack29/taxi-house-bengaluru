@@ -35,7 +35,6 @@ const BookingForm = () => {
     stopDurations: [], // Durations for multi-stop in hours (0 = drive through, -1 = overnight)
     localPackage: '8 Hours / 80 KM',
     airportType: 'to-airport',
-    returnTime: '21:30', // Default return time
     estimatedDistance: null,
     daysRequired: 1
   });
@@ -55,8 +54,14 @@ const BookingForm = () => {
   const [searchParams] = useSearchParams();
   const hasInitializedFromUrl = useRef(false);
 
-  const getMinAllowedDateTime = () => new Date(Date.now() + 12 * 60 * 60 * 1000);
-  const getMinDateStr = () => getMinAllowedDateTime().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const getMinAllowedDateTime = () => new Date(Date.now() + 48 * 60 * 60 * 1000);
+  const getMinDateStr = () => {
+    const d = getMinAllowedDateTime();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
   const [minDateStr, setMinDateStr] = useState(getMinDateStr());
 
   // Update min date indicator every minute
@@ -65,13 +70,25 @@ const BookingForm = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Helper to add days to a date string
+  // Helper to add days to a date string (timezone safe)
   const addDays = (dateStr, days) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
     date.setDate(date.getDate() + days);
-    return date.toISOString().split('T')[0];
+    const resY = date.getFullYear();
+    const resM = String(date.getMonth() + 1).padStart(2, '0');
+    const resD = String(date.getDate()).padStart(2, '0');
+    return `${resY}-${resM}-${resD}`;
   };
+
+  const isLongDistanceRoundTrip = activeTab === 'outstation' && 
+    formData.tripType === 'two-way' && 
+    ((formData.estimatedDistance && formData.estimatedDistance > 150) || (formData.daysRequired && formData.daysRequired > 1));
+
+  const minReturnDate = formData.date 
+    ? (isLongDistanceRoundTrip ? addDays(formData.date, 1) : formData.date) 
+    : '';
 
   const maxReturnDate = formData.date ? addDays(formData.date, 7) : '';
 
@@ -80,7 +97,7 @@ const BookingForm = () => {
     const checkTime = new Date(baseDate);
     const originalDate = checkTime.getDate();
     
-    // We strictly use the 12h buffer, no extra minutes needed here.
+    // We strictly use the 48h buffer, no extra minutes needed here.
     
     const minutes = checkTime.getMinutes();
     let roundedMinutes;
@@ -135,7 +152,6 @@ const BookingForm = () => {
       localPackage: searchParams.get('package') || prev.localPackage,
       airportType: searchParams.get('airport') || prev.airportType,
       returnDate: searchParams.get('returnDate') || prev.returnDate,
-      returnTime: searchParams.get('returnTime') || prev.returnTime,
       stops: stopsParam ? JSON.parse(stopsParam) : prev.stops,
       stopCoords: stopCoordsParam ? JSON.parse(stopCoordsParam).map(parseCoord) : prev.stopCoords,
       stopDurations: stopDurationsParam ? JSON.parse(stopDurationsParam) : prev.stopDurations
@@ -283,12 +299,22 @@ const BookingForm = () => {
     }
   }, [formData.estimatedDistance, formData.date, formData.time, formData.tripType, activeTab]);
 
+  // Auto-adjust return date for long-distance round trips
+  useEffect(() => {
+    if (activeTab === 'outstation' && formData.tripType === 'two-way') {
+      const isLongDist = (formData.estimatedDistance && formData.estimatedDistance > 150) || (formData.daysRequired && formData.daysRequired > 1);
+      if (isLongDist && formData.date && formData.returnDate && formData.returnDate <= formData.date) {
+        setFormData(prev => ({ ...prev, returnDate: addDays(prev.date, 1) }));
+      }
+    }
+  }, [formData.estimatedDistance, formData.daysRequired, formData.date, formData.tripType, activeTab]);
+
   const selectedCar = VEHICLE_OPTIONS.find(c => c.name === formData.carType) || VEHICLE_OPTIONS[0];
 
   // Calculate practical days based on strategy and distance
   const practicalDaysInfo = React.useMemo(() => {
     if (activeTab !== 'outstation' || !formData.estimatedDistance || !formData.routeLegs) {
-      return { calendarDays: 1, minKm: 300 };
+      return { calendarDays: 1, minKm: 300, extraBataDays: 0, totalBataDays: 1, bataReasons: [] };
     }
 
     // Capture precise start time
@@ -299,13 +325,13 @@ const BookingForm = () => {
       formData.date,
       formData.time || '10:00',
       formData.returnDate || formData.date,
-      formData.returnTime || '21:30',
+      formData.time || '10:00',
       formData.routeLegs,
       activeStrategy,
       formData.tripType
     );
 
-    if (schedule.length === 0) return { calendarDays: 1, minKm: 300 };
+    if (schedule.length === 0) return { calendarDays: 1, minKm: 300, extraBataDays: 0, totalBataDays: 1, bataReasons: [] };
 
     // Duration based on AI driving schedule (Halt-based)
     // Days = 1 + number of overnight halts
@@ -315,7 +341,7 @@ const BookingForm = () => {
     // Duration based on User selected Return parameters (for two-way)
     let userDays = 1;
     if (formData.tripType === 'two-way' && formData.returnDate) {
-      const returnTimeFull = new Date(`${formData.returnDate}T${formData.returnTime || '21:30'}${formData.returnTime?.split(':').length === 2 ? ':00' : ''}`);
+      const returnTimeFull = new Date(`${formData.returnDate}T${formData.time || '10:00'}${formData.time?.split(':').length === 2 ? ':00' : ''}`);
       const userDurationHours = (returnTimeFull - startTimeFull) / (1000 * 60 * 60);
       userDays = Math.max(1, Math.ceil((userDurationHours - 2) / 24));
     }
@@ -325,11 +351,47 @@ const BookingForm = () => {
     const totalDistance = formData.tripType === 'two-way' ? formData.estimatedDistance * 2 : formData.estimatedDistance;
     const minBillableKm = formData.tripType === 'one-way' ? totalDistance : Math.max(totalDistance, finalCalendarDays * 300);
 
+    // Driver duty hours (6:00 AM – 10:00 PM) evaluation
+    let extraBataDays = 0;
+    const bataReasons = [];
+    if (formData.time) {
+      const [pH, pM] = formData.time.split(':').map(Number);
+      if (pH < 6) {
+        extraBataDays += 1;
+        bataReasons.push('Early pickup before 6:00 AM');
+      } else if (pH > 22 || (pH === 22 && pM > 0)) {
+        extraBataDays += 1;
+        bataReasons.push('Late pickup after 10:00 PM');
+      }
+    }
+
+    // Check drop time from schedule
+    if (schedule && schedule.length > 0) {
+      const lastEvent = schedule[schedule.length - 1];
+      if (lastEvent && lastEvent.time) {
+        const dropDate = new Date(lastEvent.time);
+        const dH = dropDate.getHours();
+        const dM = dropDate.getMinutes();
+        if (dH < 6) {
+          extraBataDays += 1;
+          bataReasons.push('Early drop before 6:00 AM');
+        } else if (dH > 22 || (dH === 22 && dM > 0)) {
+          extraBataDays += 1;
+          bataReasons.push('Late drop after 10:00 PM');
+        }
+      }
+    }
+
+    const totalBataDays = finalCalendarDays + extraBataDays;
+
     return {
       calendarDays: finalCalendarDays,
-      minKm: Math.round(minBillableKm)
+      minKm: Math.round(minBillableKm),
+      extraBataDays,
+      totalBataDays,
+      bataReasons
     };
-  }, [activeTab, formData.estimatedDistance, formData.routeLegs, formData.date, formData.time, formData.returnDate, formData.returnTime, activeStrategy, formData.tripType]);
+  }, [activeTab, formData.estimatedDistance, formData.routeLegs, formData.date, formData.time, formData.returnDate, activeStrategy, formData.tripType]);
 
   const handleChange = (e) => {
     const { name, value, coords } = e.target;
@@ -406,11 +468,28 @@ const BookingForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validation: Return date is mandatory for Round Trips
-    if (activeTab === 'outstation' && formData.tripType === 'two-way' && !formData.returnDate) {
-      setStatus({ type: 'error', msg: 'Please select a Return Date for Round Trip.' });
-      setTimeout(() => setStatus(null), 3000);
+    // 48-Hour Advance Booking Validation
+    const pickupDateTime = new Date(`${formData.date}T${formData.time || '00:00'}:00`);
+    const minCutoff = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    if (isNaN(pickupDateTime.getTime()) || pickupDateTime < minCutoff) {
+      setStatus({ type: 'error', msg: 'Bookings must be scheduled at least 48 hours (2 full days) in advance.' });
+      setTimeout(() => setStatus(null), 4000);
       return;
+    }
+
+    // Validation: Return date is mandatory for Round Trips
+    if (activeTab === 'outstation' && formData.tripType === 'two-way') {
+      if (!formData.returnDate) {
+        setStatus({ type: 'error', msg: 'Please select a Return Date for Round Trip.' });
+        setTimeout(() => setStatus(null), 3000);
+        return;
+      }
+      const isLongDistance = (formData.estimatedDistance && formData.estimatedDistance > 150) || (formData.daysRequired && formData.daysRequired > 1);
+      if (isLongDistance && formData.returnDate <= formData.date) {
+        setStatus({ type: 'error', msg: 'Same-day return is prohibited for long-distance round trips (>300 KM). Please select a later return date.' });
+        setTimeout(() => setStatus(null), 4000);
+        return;
+      }
     }
 
     // Redirect to car selection page with query params
@@ -431,7 +510,6 @@ const BookingForm = () => {
     if (activeTab === 'outstation') {
       params.set('trip', formData.tripType);
       params.set('returnDate', formData.returnDate || '');
-      params.set('returnTime', formData.returnTime || '');
       params.set('strategy', activeStrategy);
     } else if (activeTab === 'local') {
       params.set('package', formData.localPackage);
@@ -613,55 +691,75 @@ const BookingForm = () => {
                 </div>
               )}
 
-              {/* Row 2: Date/Time/Return */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Date</label>
-                  <CustomDatePicker 
-                    name="date" 
-                    required 
-                    value={formData.date} 
-                    onChange={handleChange} 
-                    align="left" 
-                    minDate={minDateStr}
-                  />
+              {/* Row 2: Date & Time (Clean columns, no drop/return time input) */}
+              {formData.tripType === 'two-way' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Date</label>
+                    <CustomDatePicker 
+                      name="date" 
+                      required 
+                      value={formData.date} 
+                      onChange={handleChange} 
+                      align="left" 
+                      minDate={minDateStr}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Time *</label>
+                    <CustomTimePicker 
+                      name="time" 
+                      required 
+                      value={formData.time} 
+                      onChange={handleChange} 
+                      align="center"
+                      isMinDate={formData.date === minDateStr}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center ml-1">
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Return Date</label>
+                      {isLongDistanceRoundTrip && (
+                        <span className="text-[9px] text-orange-600 font-bold">Min +1 day (&gt;300 KM)</span>
+                      )}
+                    </div>
+                    <CustomDatePicker 
+                      name="returnDate" 
+                      required
+                      value={formData.returnDate || ''} 
+                      onChange={handleChange} 
+                      align="right"
+                      minDate={minReturnDate}
+                      maxDate={maxReturnDate}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Time *</label>
-                  <CustomTimePicker 
-                    name="time" 
-                    required 
-                    value={formData.time} 
-                    onChange={handleChange} 
-                    align="center"
-                    isMinDate={formData.date === minDateStr}
-                  />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Date</label>
+                    <CustomDatePicker 
+                      name="date" 
+                      required 
+                      value={formData.date} 
+                      onChange={handleChange} 
+                      align="left" 
+                      minDate={minDateStr}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Pickup Time *</label>
+                    <CustomTimePicker 
+                      name="time" 
+                      required 
+                      value={formData.time} 
+                      onChange={handleChange} 
+                      align="right"
+                      isMinDate={formData.date === minDateStr}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Return Date</label>
-                  <CustomDatePicker 
-                    name="returnDate" 
-                    required={formData.tripType === 'two-way'}
-                    disabled={formData.tripType === 'one-way'}
-                    value={formData.returnDate || ''} 
-                    onChange={handleChange} 
-                    align="right"
-                    minDate={formData.date}
-                    maxDate={maxReturnDate}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-wider">Return Time</label>
-                  <CustomTimePicker 
-                    name="returnTime" 
-                    required={formData.tripType === 'two-way'}
-                    disabled={formData.tripType === 'one-way'}
-                    value={formData.returnTime || ''} 
-                    onChange={handleChange} 
-                    align="right"
-                  />
-                </div>
-              </div>
+              )}
 
               {formData.estimatedDistance && (
                 <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 mt-6 mb-2 animate-in fade-in duration-300 shadow-inner">
@@ -685,10 +783,19 @@ const BookingForm = () => {
                       <p className="text-xs sm:text-sm font-black text-secondary">{formData.tripType === 'two-way' ? (formData.estimatedDistance * 2).toFixed(0) : formData.estimatedDistance.toFixed(0)} KM</p>
                     </div>
                     <div className="flex flex-col items-center justify-center p-2">
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mb-1">Calendar Days</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mb-1">Driver Bata</p>
                       <p className="text-xs sm:text-sm font-black text-secondary">
-                        {practicalDaysInfo.calendarDays} Days
+                        {practicalDaysInfo.totalBataDays || practicalDaysInfo.calendarDays} Days
                       </p>
+                      {practicalDaysInfo.extraBataDays > 0 ? (
+                        <p className="text-[8px] text-orange-600 font-bold mt-0.5 leading-tight">
+                          ({practicalDaysInfo.calendarDays} base + {practicalDaysInfo.extraBataDays} duty extra)
+                        </p>
+                      ) : (
+                        <p className="text-[8px] text-slate-400 font-bold mt-0.5 leading-tight">
+                          (Standard 6 AM - 10 PM)
+                        </p>
+                      )}
                     </div>
                     <div className="flex flex-col items-center justify-center p-2">
                       <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mb-1">Billing Min.</p>
@@ -700,6 +807,16 @@ const BookingForm = () => {
                       </p>
                     </div>
                   </div>
+
+                  {practicalDaysInfo.extraBataDays > 0 && (
+                    <div className="mt-3 p-2.5 bg-amber-50 rounded-xl text-[9px] sm:text-[10px] font-bold text-amber-800 flex items-start gap-2 border border-amber-200">
+                      <Clock size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                      <p>
+                        <strong>Duty Window Notice:</strong> Includes +{practicalDaysInfo.extraBataDays} extra day Driver Bata for travel outside 6:00 AM – 10:00 PM standard operating hours ({practicalDaysInfo.bataReasons.join(', ')}).
+                      </p>
+                    </div>
+                  )}
+
                   {/* Phase 3 UX: Warn the user if they stretched calendar arbitrarily beyond distance limits */}
                   {(formData.tripType === 'two-way' && formData.returnDate) && (
                      Math.max(1, Math.ceil((new Date(formData.returnDate) - new Date(formData.date)) / (1000 * 60 * 60 * 24)) + 1) > (Math.ceil((formData.estimatedDistance * 2) / 300) || 1)
@@ -961,7 +1078,7 @@ const BookingForm = () => {
               <Phone size={14} className="sm:w-4 sm:h-4" />
             </div>
             <p className="text-[10px] sm:text-xs text-orange-800 font-medium leading-snug pt-0.5">
-              <strong className="font-black text-orange-900">Urgent Booking?</strong> For bookings within <span className="font-black underline decoration-orange-300 underline-offset-2">1-2 hours ,</span> Please contact our customer support directly.
+              <strong className="font-black text-orange-900">Urgent Booking?</strong> For bookings within <span className="font-black underline decoration-orange-300 underline-offset-2">48 hours,</span> please contact our customer support directly.
             </p>
           </div>
 

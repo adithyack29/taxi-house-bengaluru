@@ -112,8 +112,8 @@ const TripPlanModal = ({
               <div className="flex items-start gap-2 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
                 <Sun size={14} className="text-orange-400 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] sm:text-xs font-bold text-secondary">Standard Driver Bata</p>
-                  <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium">Applied strictly per Calendar Day. Secures the vehicle from 6 AM to 10 PM.</p>
+                  <p className="text-[10px] sm:text-xs font-bold text-secondary">Driver Duty Hours Window (6:00 AM – 10:00 PM)</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium">Standard duty hours are 6:00 AM to 10:00 PM. If pickup is scheduled before 6:00 AM or after 10:00 PM, or if drop occurs after 10:00 PM or before 6:00 AM, +1 extra day Driver Bata is added per occurrence.</p>
                 </div>
               </div>
 

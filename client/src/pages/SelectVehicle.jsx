@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Car, ChevronLeft, ArrowRight, Loader2, Info, Users, Zap, ShieldCheck, AlertCircle, Calculator } from 'lucide-react';
+import { Car, ChevronLeft, ArrowRight, Loader2, Info, Users, Zap, ShieldCheck, AlertCircle, Calculator, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatDate, formatTime } from '../utils/formatters';
 import { LOCAL_VEHICLES } from '../constants/localVehicles';
@@ -27,6 +27,10 @@ const SelectVehicle = () => {
     stopDurations: searchParams.get('stopDurations'),
     returnDate: searchParams.get('returnDate')
   };
+
+  const isWhatsAppBooking = tripDetails.type === 'local' || 
+                            tripDetails.type === 'airport' || 
+                            (tripDetails.type === 'outstation' && tripDetails.trip === 'one-way');
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -102,6 +106,11 @@ const SelectVehicle = () => {
                             tripDetails.trip === 'one-way' ? 'One Way' : 
                             'Transfer')}
                         </span>
+                        {isWhatsAppBooking && (
+                          <span className="px-3 py-1.5 bg-[#25D366]/10 text-[#25D366] text-[10px] font-black rounded-xl border border-[#25D366]/20 text-center flex items-center justify-center gap-1.5">
+                            <MessageCircle size={12} /> WhatsApp Booking
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -216,7 +225,14 @@ const SelectVehicle = () => {
                       <div className="flex-grow flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-2">
                           <div>
-                            <h4 className="text-xl sm:text-2xl font-black text-secondary leading-none">{car.name}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xl sm:text-2xl font-black text-secondary leading-none">{car.name}</h4>
+                              {isWhatsAppBooking && (
+                                <span className="text-[9px] font-black text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-md border border-[#25D366]/20 uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                                  <MessageCircle size={10} /> WhatsApp
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1.5 opacity-60">
                               {tripDetails.type === 'outstation' ? 'Outstation Fleet' : tripDetails.type === 'airport' ? 'Airport Elite' : 'City Package'}
                             </p>
@@ -264,8 +280,16 @@ const SelectVehicle = () => {
                           </div>
 
                           {/* Action Button */}
-                          <div className="w-12 h-12 bg-secondary text-white rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-secondary transition-all shadow-xl shadow-secondary/10 group-hover:shadow-primary/30">
-                            <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-xl ${
+                            isWhatsAppBooking 
+                              ? 'bg-[#25D366] text-white shadow-[#25D366]/20 group-hover:bg-[#20ba59] group-hover:scale-105' 
+                              : 'bg-secondary text-white shadow-secondary/10 group-hover:bg-primary group-hover:text-secondary group-hover:shadow-primary/30'
+                          }`}>
+                            {isWhatsAppBooking ? (
+                              <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
+                            ) : (
+                              <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                            )}
                           </div>
                         </div>
                       </div>

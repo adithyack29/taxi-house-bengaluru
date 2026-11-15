@@ -11,11 +11,11 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
   const [position, setPosition] = useState(
     initialPosition && initialPosition.lat && initialPosition.lng
       ? initialPosition
-      : (Array.isArray(initialPosition) && initialPosition.length === 2 
-          ? { lat: initialPosition[0], lng: initialPosition[1] } 
-          : BENGALURU_CENTER)
+      : (Array.isArray(initialPosition) && initialPosition.length === 2
+        ? { lat: initialPosition[0], lng: initialPosition[1] }
+        : BENGALURU_CENTER)
   );
-  
+
   const [loading, setLoading] = useState(false);
   const [map, setMap] = useState(null);
 
@@ -62,10 +62,10 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
     setLoading(true);
     try {
       if (!window.google) throw new Error("Google API not loaded");
-      
+
       const geocoder = new window.google.maps.Geocoder();
       const response = await geocoder.geocode({ location: position });
-      
+
       if (response.results && response.results[0]) {
         onConfirm({
           lat: position.lat,
@@ -91,7 +91,7 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -136,7 +136,7 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
                   }
                 }}
               >
-                <Marker 
+                <Marker
                   position={position}
                   draggable={true}
                   onDragEnd={handleMarkerDragEnd}
@@ -147,13 +147,13 @@ const MapModal = ({ isOpen, onClose, onConfirm, initialPosition }) => {
 
           {/* Footer Actions */}
           <div className="p-4 bg-white border-t border-gray-100 flex justify-end space-x-4">
-            <button 
+            <button
               onClick={onClose}
               className="px-6 py-3 font-semibold text-gray-600 hover:text-gray-800 transition-colors"
             >
               Cancel
             </button>
-            <button 
+            <button
               onClick={handleConfirm}
               disabled={loading || (!isLoaded && !loadError)}
               className="flex items-center space-x-2 bg-primary text-secondary px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-70"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calculator, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { MapPin, Calculator, AlertCircle, CheckCircle, X, Clock } from 'lucide-react';
 
 const FareDetailModal = ({ 
   isOpen, 
@@ -21,7 +21,10 @@ const FareDetailModal = ({
     totalNights,
     nightBata,
     minKm,
-    petFee
+    petFee,
+    extraBataDays = 0,
+    extraBataAmount = 0,
+    extraBataReasons = []
   } = data;
 
   return (
@@ -90,7 +93,21 @@ const FareDetailModal = ({
                     <span>Driver Bata (Day)</span>
                     <span>₹{totalDayBata?.toLocaleString()}</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 font-medium italic">Logic: {Math.round(bataDays || 0)} Days × ₹{car?.driver_bata || 300}/Day</p>
+                  <p className="text-[10px] text-gray-400 font-medium italic">
+                    Logic: {Math.round(bataDays || 0)} Days × ₹{car?.driver_bata || 300}/Day
+                    {extraBataDays > 0 && ` (${Math.round((bataDays || 0) - extraBataDays)} base + ${extraBataDays} extra day Bata)`}
+                  </p>
+                  {extraBataDays > 0 && (
+                    <div className="mt-1.5 p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-[10px] text-amber-900 font-bold space-y-0.5">
+                      <div className="flex items-center gap-1.5 text-amber-700">
+                        <Clock size={12} className="shrink-0" />
+                        <span>Duty Hours Window (6:00 AM – 10:00 PM) Exceeded:</span>
+                      </div>
+                      <p className="text-[9px] text-amber-800 font-medium pl-4">
+                        +{extraBataDays} Day Driver Bata (₹{(extraBataAmount || extraBataDays * (car?.driver_bata || 300)).toLocaleString()}) added: {extraBataReasons?.join(', ')}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {totalNightBata > 0 && (

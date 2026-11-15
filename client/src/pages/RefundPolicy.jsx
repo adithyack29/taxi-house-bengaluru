@@ -19,22 +19,13 @@ const RefundPolicy = () => {
 
           <ul className="list-disc pl-5 space-y-4">
             <li>
-              <strong>Cancellation Requests</strong><br />
-              Cancellations will be considered only if the request is made well in advance before the scheduled
-              pickup time. Once the booking is confirmed and the vehicle has been assigned or the trip has
-              started, cancellation may not be entertained.
+              <strong>48-Hour Cancellation Rule (Full Refund)</strong><br />
+              Cancellations made at least 48 hours before the scheduled trip start time are eligible for a 100% full refund of the advance payment.
             </li>
 
             <li>
-              <strong>Advance Payment Refund</strong><br />
-              If a booking is cancelled prior to vehicle assignment, a 100% refund of the advance amount will be
-              processed.
-            </li>
-
-            <li>
-              <strong>Last-Minute Cancellations</strong><br />
-              For cancellations made close to the pickup time or after driver/vehicle allocation, a cancellation
-              charge may apply.
+              <strong>Last-Minute Cancellations (Strictly Non-Refundable)</strong><br />
+              Cancellations made within 48 hours of the scheduled trip start time are strictly non-refundable, as vehicles and driver schedules are locked and committed exclusively for your reservation.
             </li>
 
             <li>

@@ -83,10 +83,10 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
     try {
       if (!isLoaded) throw new Error("Google not loaded");
       onChange({ target: { name, value: address, coords: null } }); // immediate UI update
-      
+
       const results = await getGeocode({ address });
       const { lat, lng } = await getLatLng(results[0]);
-      
+
       const coords = { lat, lng };
       setSelectedLocation({ address, coords });
       onChange({ target: { name, value: address, coords } });
@@ -109,32 +109,32 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
   const handleCurrentLocation = () => {
     setIsOpen(false);
-    onChange({ target: { name, value: 'Locating...', coords: null } }); 
-    
+    onChange({ target: { name, value: 'Locating...', coords: null } });
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
             const { latitude, longitude } = position.coords;
-            
+
             // Use Google Geocoder for reverse look up
             const geocoder = new window.google.maps.Geocoder();
             const response = await geocoder.geocode({ location: { lat: latitude, lng: longitude } });
-            
+
             const address = response.results && response.results[0] ? response.results[0].formatted_address : `${latitude}, ${longitude}`;
             handleSelect(address, { lat: latitude, lng: longitude });
-            
+
           } catch (error) {
             console.error("Reverse Geocode Error:", error);
             onChange({ target: { name, value: "Error fetching address.", coords: null } });
           }
-        }, 
+        },
         (error) => {
           let msg = "Location unavailable";
           if (error.code === 1) msg = "Permission Denied. Please reset location permissions in your browser.";
           else if (error.code === 2) msg = "Position Unavailable.";
           else if (error.code === 3) msg = "Timeout. Please try again.";
-          
+
           onChange({ target: { name, value: msg, coords: null } });
           console.error("Geolocation Error:", error);
         },
@@ -147,19 +147,19 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
   const handleChange = (e) => {
     const val = e.target.value;
-    onChange({ target: { name, value: val, coords: null }});
+    onChange({ target: { name, value: val, coords: null } });
     setInputValue(val); // this triggers usePlacesAutocomplete fetching
   };
 
   return (
     <div className="relative" ref={wrapperRef}>
       <Icon className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconColorClass}`} size={18} />
-      <input 
-        type="text" 
-        name={name} 
-        placeholder={placeholder} 
-        required 
-        value={value} 
+      <input
+        type="text"
+        name={name}
+        placeholder={placeholder}
+        required
+        value={value}
         onChange={handleChange}
         onFocus={() => setIsOpen(true)}
         onBlur={handleBlur}
@@ -171,10 +171,10 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
       {isOpen && (
         <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 max-h-72 overflow-y-auto">
           <ul className="py-2">
-            
+
             {/* Action Item: Current Location */}
             {showCurrentLocation && isLoaded && (
-              <li 
+              <li
                 className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-secondary font-medium border-b border-gray-50 bg-blue-50/50"
                 onMouseDown={(e) => { e.preventDefault(); handleCurrentLocation(); }}
               >
@@ -188,7 +188,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
             {/* Action Item: Choose on Map */}
             {isLoaded && (
-              <li 
+              <li
                 className="px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 text-secondary font-medium border-b border-gray-50 cursor-pointer bg-slate-50/50"
                 onMouseDown={(e) => { e.preventDefault(); setIsOpen(false); setIsMapOpen(true); }}
               >
@@ -205,7 +205,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
                 Google Maps API Error
               </li>
             )}
-            
+
             {/* Google Places Results */}
             {status === "OK" && data.map((suggestion) => {
               const {
@@ -214,7 +214,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
               } = suggestion;
 
               return (
-                <li 
+                <li
                   key={place_id}
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-start space-x-3 border-b border-gray-50 last:border-0"
                   onMouseDown={(e) => { e.preventDefault(); handleSelect(suggestion.description); }}
@@ -227,7 +227,7 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
                 </li>
               );
             })}
-            
+
             {!ready && !loadError && (
               <li className="px-4 py-3 flex justify-center text-primary items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
@@ -240,8 +240,8 @@ const LocationInput = ({ icon: Icon, placeholder, value, onChange, name, iconCol
 
       {/* Map Modal */}
       {isMapOpen && (
-        <MapModal 
-          isOpen={isMapOpen} 
+        <MapModal
+          isOpen={isMapOpen}
           onClose={() => setIsMapOpen(false)}
           onConfirm={(loc) => handleSelect(loc.address, { lat: loc.lat, lng: loc.lng })}
         />
