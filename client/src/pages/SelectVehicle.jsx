@@ -186,7 +186,7 @@ const SelectVehicle = () => {
                 <p className="text-gray-500 text-sm">Please try a different date or call us directly assistance.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-20">
                 {cars.map((car) => (
                   <motion.div
                     key={car.id}
@@ -198,80 +198,80 @@ const SelectVehicle = () => {
                       navigate(`/confirm-booking?${params.toString()}`);
                     }}
                   >
-                    <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-6">
+                    <div className="p-3.5 sm:p-4 lg:p-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 lg:gap-5">
                       {/* Vehicle Image Area */}
-                      <div className="w-full sm:w-48 h-32 bg-white rounded-2xl flex items-center justify-center p-1 relative overflow-hidden group/img shrink-0 border border-slate-100/50">
+                      <div className="w-full sm:w-28 md:w-28 lg:w-32 xl:w-36 h-24 sm:h-28 bg-white rounded-2xl flex items-center justify-center p-1 relative overflow-hidden group/img shrink-0 border border-slate-100/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
                         {car.image_url ? (
                           <img 
                             src={car.image_url} 
                             alt={car.name}
                             className={`w-full h-full object-contain group-hover/img:scale-110 transition-transform duration-700 ${
                               car.name?.toLowerCase().includes('swift') || car.name?.toLowerCase().includes('etios') 
-                                ? 'scale-[1.5]' 
+                                ? 'scale-[1.35]' 
                                 : 'scale-100'
                             }`} 
                           />
                         ) : (
-                          <Car size={48} className="text-slate-200 group-hover/img:scale-110 transition-transform duration-500" />
+                          <Car size={40} className="text-slate-200 group-hover/img:scale-110 transition-transform duration-500" />
                         )}
                         <div className="absolute top-2 left-2">
-                          <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-wider shadow-sm ${car.is_ac ? 'bg-blue-600 text-white' : 'bg-slate-400 text-white'}`}>
+                          <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider shadow-sm ${car.is_ac ? 'bg-blue-600 text-white' : 'bg-slate-400 text-white'}`}>
                             {car.is_ac ? 'AC' : 'Non-AC'}
                           </span>
                         </div>
                       </div>
                       
                       {/* Vehicle Details & Pricing */}
-                      <div className="flex-grow flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-2">
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-2.5 sm:gap-3">
+                        <div className="min-w-0 flex-1 space-y-1">
                           <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-xl sm:text-2xl font-black text-secondary leading-none">{car.name}</h4>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4 className="text-base sm:text-lg lg:text-xl font-black text-secondary leading-tight whitespace-nowrap">{car.name}</h4>
                               {isWhatsAppBooking && (
-                                <span className="text-[9px] font-black text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-md border border-[#25D366]/20 uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                                  <MessageCircle size={10} /> WhatsApp
+                                <span className="text-[8px] sm:text-[9px] font-black text-[#25D366] bg-[#25D366]/10 px-1.5 py-0.5 rounded border border-[#25D366]/20 uppercase tracking-wider inline-flex items-center gap-0.5 shadow-sm shrink-0 whitespace-nowrap">
+                                  <MessageCircle size={9} /> WhatsApp
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1.5 opacity-60">
+                            <p className="text-[9px] sm:text-[10px] font-black text-primary uppercase tracking-widest mt-0.5 opacity-60">
                               {tripDetails.type === 'outstation' ? 'Outstation Fleet' : tripDetails.type === 'airport' ? 'Airport Elite' : 'City Package'}
                             </p>
                           </div>
                           
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                              <Users size={12} className="text-slate-300" />
-                              <span className="text-[10px] font-black text-slate-500 uppercase">
+                          <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="flex items-center gap-1">
+                              <Users size={11} className="text-slate-300" />
+                              <span className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase whitespace-nowrap">
                                 {car.seats} Seats
                               </span>
                             </div>
                             {tripDetails.type === 'local' && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                <span className="text-[10px] font-black text-primary uppercase">{car.local_package || '8h / 80km'}</span>
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                                <span className="text-[9px] sm:text-[10px] font-black text-primary uppercase whitespace-nowrap">{car.local_package || '8h / 80km'}</span>
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-6 sm:gap-10">
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                           <div className="text-right">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                            <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-0.5 whitespace-nowrap">
                               {tripDetails.type === 'local' ? 'Package Price' : (tripDetails.trip === 'one-way' ? 'One Way Rate' : 'Round Trip Rate')}
                             </span>
                             <div className="flex flex-col items-end">
-                              <div className="flex items-baseline justify-end gap-1">
-                                <span className="text-sm font-black text-secondary">₹</span>
-                                <span className="text-3xl sm:text-4xl font-black text-secondary tracking-tighter">
+                              <div className="flex items-baseline justify-end gap-0.5">
+                                <span className="text-xs sm:text-sm font-black text-secondary">₹</span>
+                                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-secondary tracking-tight">
                                   {tripDetails.type === 'local' ? (car.base_fare || 0).toLocaleString() : (tripDetails.trip === 'one-way' ? (car.price_per_km_one_way || 0) : (car.price_per_km || 0))}
                                 </span>
                                 {tripDetails.type !== 'local' && (
-                                  <span className="text-xs font-black text-slate-400 tracking-tight">/km</span>
+                                  <span className="text-[9px] sm:text-xs font-black text-slate-400 tracking-tight">/km</span>
                                 )}
                               </div>
-                              <div className="relative flex items-baseline gap-0.5 opacity-70 -mt-1.5">
-                                <span className="text-[10px] font-black text-slate-400">₹</span>
-                                <span className="relative text-lg font-black text-slate-400 tracking-tighter">
+                              <div className="relative flex items-baseline gap-0.5 opacity-70 -mt-1">
+                                <span className="text-[8px] sm:text-[9px] font-black text-slate-400">₹</span>
+                                <span className="relative text-xs sm:text-sm lg:text-base font-black text-slate-400 tracking-tight">
                                   {Math.round((tripDetails.type === 'local' ? (car.base_fare || 0) : (tripDetails.trip === 'one-way' ? (car.price_per_km_one_way || 0) : (car.price_per_km || 0))) + (tripDetails.type === 'local' ? 300 : 3)).toLocaleString()}
                                   <span className="absolute inset-x-0 top-1/2 h-[1.5px] bg-red-600 -rotate-[15deg] origin-center shadow-sm"></span>
                                 </span>
@@ -280,15 +280,15 @@ const SelectVehicle = () => {
                           </div>
 
                           {/* Action Button */}
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-xl ${
+                          <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-lg shrink-0 ${
                             isWhatsAppBooking 
                               ? 'bg-[#25D366] text-white shadow-[#25D366]/20 group-hover:bg-[#20ba59] group-hover:scale-105' 
                               : 'bg-secondary text-white shadow-secondary/10 group-hover:bg-primary group-hover:text-secondary group-hover:shadow-primary/30'
                           }`}>
                             {isWhatsAppBooking ? (
-                              <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
+                              <MessageCircle size={20} className="group-hover:scale-110 transition-transform" />
                             ) : (
-                              <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                              <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                             )}
                           </div>
                         </div>
@@ -297,9 +297,9 @@ const SelectVehicle = () => {
 
                     {/* High-Transparency Footer Row (The "Mandatory" Info) */}
                     {(tripDetails.type === 'outstation') && (
-                      <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center gap-8">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-200">
+                      <div className="px-3.5 sm:px-4 lg:px-5 py-2.5 sm:py-3 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center gap-3 sm:gap-6">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-200 shrink-0">
                             <Zap size={12} className="text-primary fill-primary/20" />
                           </div>
                           <div>
@@ -308,8 +308,8 @@ const SelectVehicle = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-200 shrink-0">
                             <Calculator size={12} className="text-secondary opacity-60" />
                           </div>
                           <div>
@@ -318,9 +318,9 @@ const SelectVehicle = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5 ml-auto">
-                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Available Now</span>
+                        <div className="flex items-center gap-2 ml-auto">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+                          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest whitespace-nowrap">Available Now</span>
                         </div>
                       </div>
                     )}
