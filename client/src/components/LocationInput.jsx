@@ -11,7 +11,7 @@ const MapModal = lazy(() => import('./MapModal'));
  */
 export default function LocationInput({
   id, name, value, onChange, placeholder, required = true, disabled = false,
-  showCurrentLocation = true, describedBy,
+  showCurrentLocation = true, describedBy, autoLocate = false,
 }) {
   const autoId = useId();
   const inputId = id || `loc-${autoId}`;
@@ -23,6 +23,24 @@ export default function LocationInput({
   const [mapOpen, setMapOpen] = useState(false);
   const engine = useRef(null);
   const wrapper = useRef(null);
+  // Auto-detect current location (pickup): silently if permission is already granted,
+  // otherwise on first focus of the empty field — never on page load with a prompt.
+  const [autoReq, setAutoReq] = useState(false);
+  const askedRef = useRef(false);
+  const valueRef = useRef(value);
+  useEffect(() => { valueRef.current = value; }, [value]);
+  const canAutoFill = useCallback(() => !valueRef.current, []);
+
+  useEffect(() => {
+    if (!autoLocate || !navigator.permissions?.query) return;
+    let alive = true;
+    navigator.permissions.query({ name: 'geolocation' })
+      .then((st) => {
+        if (alive && st.state === 'granted' && !valueRef.current) { askedRef.current = true; setActive(true); setAutoReq(true); }
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [autoLocate]);
 
   const emit = useCallback((val, coords = null) => onChange({ target: { name, value: val, coords } }), [name, onChange]);
 
@@ -69,7 +87,10 @@ export default function LocationInput({
         aria-controls={listId}
         aria-activedescendant={activeOpt}
         aria-describedby={describedBy}
-        onFocus={() => { setActive(true); setOpen(true); }}
+        onFocus={() => {
+          setActive(true); setOpen(true);
+          if (autoLocate && !value && !askedRef.current) { askedRef.current = true; setAutoReq(true); }
+        }}
         onBlur={() => setTimeout(() => { if (!value) emit('', null); }, 200)}
         onKeyDown={onKeyDown}
         onChange={(e) => {
@@ -88,6 +109,8 @@ export default function LocationInput({
           showCurrentLocation={showCurrentLocation}
           onOptions={setOptions}
           onPick={emit}
+          autoLocate={autoReq}
+          canAutoFill={canAutoFill}
         />
         </Suspense>
       )}

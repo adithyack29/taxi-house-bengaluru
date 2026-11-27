@@ -187,7 +187,7 @@ export default function BookingCard() {
 
         <div className="fld">
           <label className="fld__label" htmlFor="bk-pickup">{pickupLabel}</label>
-          <LocationInput id="bk-pickup" name="pickup" value={f.pickup} onChange={onLoc} placeholder="Area, landmark or address" />
+          <LocationInput id="bk-pickup" name="pickup" value={f.pickup} onChange={onLoc} placeholder="Area, landmark or address" autoLocate />
         </div>
 
         {isOutstation && f.stops.map((stop, i) => (
