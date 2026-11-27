@@ -1,0 +1,332 @@
+{
+  "_readme": "Single source for fares, routes and policies used by every page. LIVE car rates come from the Supabase `cars` table (edited in /admin) via src/hooks/useCars.js; `fallbackCars` is only used when Supabase is unreachable. Outstation fallback = client/scripts/migrate_outstation_v3.js; local fallback = old constants/localVehicles.js. Route distances/times = OSRM road routing from Bengaluru city centre (12.9716,77.5946), computed 2026-11-27.",
+  "policies": {
+    "advanceBookingHours": 48,
+    "minKmPerDayRoundTrip": 300,
+    "airportBillableKm": 40,
+    "petFee": 750,
+    "advancePercentRoundTrip": 15,
+    "dutyHours": {
+      "start": 6,
+      "end": 22
+    },
+    "freeCancellationHours": 48,
+    "localPackage": "8 Hours / 80 KM",
+    "driverDetailsLeadHours": 2
+  },
+  "routes": [
+    {
+      "slug": "mysuru",
+      "name": "Mysuru",
+      "note": "",
+      "drop": "Mysuru, Karnataka",
+      "coord": "12.2958,76.6394",
+      "km": 143,
+      "minutes": 119
+    },
+    {
+      "slug": "coorg",
+      "name": "Coorg",
+      "note": "Madikeri",
+      "drop": "Madikeri, Karnataka",
+      "coord": "12.4244,75.7382",
+      "km": 254,
+      "minutes": 202
+    },
+    {
+      "slug": "ooty",
+      "name": "Ooty",
+      "note": "",
+      "drop": "Ooty, Tamil Nadu",
+      "coord": "11.4102,76.6950",
+      "km": 296,
+      "minutes": 243
+    },
+    {
+      "slug": "chikkamagaluru",
+      "name": "Chikkamagaluru",
+      "note": "",
+      "drop": "Chikkamagaluru, Karnataka",
+      "coord": "13.3161,75.7720",
+      "km": 250,
+      "minutes": 188
+    },
+    {
+      "slug": "tirupati",
+      "name": "Tirupati",
+      "note": "",
+      "drop": "Tirupati, Andhra Pradesh",
+      "coord": "13.6288,79.4192",
+      "km": 258,
+      "minutes": 194
+    },
+    {
+      "slug": "wayanad",
+      "name": "Wayanad",
+      "note": "Kalpetta",
+      "drop": "Kalpetta, Kerala",
+      "coord": "11.6085,76.0830",
+      "km": 278,
+      "minutes": 219
+    },
+    {
+      "slug": "chennai",
+      "name": "Chennai",
+      "note": "",
+      "drop": "Chennai, Tamil Nadu",
+      "coord": "13.0827,80.2707",
+      "km": 326,
+      "minutes": 242
+    },
+    {
+      "slug": "puducherry",
+      "name": "Puducherry",
+      "note": "",
+      "drop": "Puducherry",
+      "coord": "11.9416,79.8083",
+      "km": 334,
+      "minutes": 272
+    },
+    {
+      "slug": "hampi",
+      "name": "Hampi",
+      "note": "",
+      "drop": "Hampi, Karnataka",
+      "coord": "15.3350,76.4600",
+      "km": 338,
+      "minutes": 255
+    }
+  ],
+  "fallbackCars": [
+    {
+      "id": "fb-dzire",
+      "name": "Swift Dzire",
+      "seats": 4,
+      "is_ac": true,
+      "price_per_km_one_way": 15,
+      "price_per_km": 11,
+      "driver_bata": 300,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-etios",
+      "name": "Toyota Etios",
+      "seats": 4,
+      "is_ac": true,
+      "price_per_km_one_way": 15,
+      "price_per_km": 11,
+      "driver_bata": 300,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-ertiga",
+      "name": "Maruti Ertiga",
+      "seats": 6,
+      "is_ac": true,
+      "price_per_km_one_way": 18,
+      "price_per_km": 16,
+      "driver_bata": 400,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-carens",
+      "name": "Kia Carens",
+      "seats": 6,
+      "is_ac": true,
+      "price_per_km_one_way": 18,
+      "price_per_km": 16,
+      "driver_bata": 400,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-innova",
+      "name": "Innova",
+      "seats": 7,
+      "is_ac": true,
+      "price_per_km_one_way": 19,
+      "price_per_km": 16,
+      "driver_bata": 400,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-crysta",
+      "name": "Innova Crysta",
+      "seats": 7,
+      "is_ac": false,
+      "price_per_km_one_way": 24,
+      "price_per_km": 18,
+      "driver_bata": 500,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-crysta-ac",
+      "name": "Innova Crysta",
+      "seats": 7,
+      "is_ac": true,
+      "price_per_km_one_way": 26,
+      "price_per_km": 19,
+      "driver_bata": 500,
+      "min_km": 300,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-tt",
+      "name": "Tempo Traveller",
+      "seats": 12,
+      "is_ac": false,
+      "price_per_km_one_way": 0,
+      "price_per_km": 19.75,
+      "driver_bata": 500,
+      "min_km": 300,
+      "is_round_trip_only": true,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-tt-ac",
+      "name": "Tempo Traveller",
+      "seats": 12,
+      "is_ac": true,
+      "price_per_km_one_way": 0,
+      "price_per_km": 21.75,
+      "driver_bata": 500,
+      "min_km": 300,
+      "is_round_trip_only": true,
+      "available_categories": [
+        "outstation"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-dzire",
+      "name": "Swift Dzire",
+      "seats": 4,
+      "is_ac": true,
+      "base_fare": 2100,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-etios",
+      "name": "Toyota Etios",
+      "seats": 4,
+      "is_ac": true,
+      "base_fare": 2100,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-ertiga",
+      "name": "Maruti Ertiga",
+      "seats": 6,
+      "is_ac": true,
+      "base_fare": 2800,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-carens",
+      "name": "Kia Carens",
+      "seats": 6,
+      "is_ac": true,
+      "base_fare": 2800,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-innova",
+      "name": "Innova",
+      "seats": 7,
+      "is_ac": true,
+      "base_fare": 3000,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-crysta",
+      "name": "Crysta",
+      "seats": 7,
+      "is_ac": false,
+      "base_fare": 3300,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-crysta-ac",
+      "name": "Crysta AC",
+      "seats": 7,
+      "is_ac": true,
+      "base_fare": 3500,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-tt",
+      "name": "TT 12 Non AC",
+      "seats": 12,
+      "is_ac": false,
+      "base_fare": 3600,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    },
+    {
+      "id": "fb-l-tt-ac",
+      "name": "TT 12 AC",
+      "seats": 12,
+      "is_ac": true,
+      "base_fare": 3750,
+      "available_categories": [
+        "local"
+      ],
+      "is_available": true
+    }
+  ],
+  "_policyNotes": {
+    "driverDetailsLeadHours": "TODO: confirm with operations — taken from the redesign brief (chauffeur details on WhatsApp 2h before pickup); not stated anywhere on the previous site."
+  }
+}

@@ -1,6 +1,11 @@
 {
   "version": 2,
   "installCommand": "npm install",
+  "redirects": [
+    { "source": "/select-vehicle", "destination": "/book", "permanent": true },
+    { "source": "/confirm-booking", "destination": "/book", "permanent": true },
+    { "source": "/payment-success", "destination": "/booking-confirmed", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
