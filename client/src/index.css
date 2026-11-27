@@ -256,6 +256,7 @@ select.fld__input {
    ========================================================================== */
 .site-header { position: relative; z-index: 50; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink); }
 .site-header.on-ink { border-bottom-color: var(--line-on-ink); background: var(--ink); color: var(--paper); }
+.site-header.on-white { background: var(--field); }
 .site-header.on-accent { border-bottom-color: color-mix(in srgb, var(--ink) 12%, var(--accent)); background: var(--accent); }
 .site-header__bar { display: flex; align-items: center; gap: 20px; min-height: var(--header-h); }
 .site-header__nav { display: none; margin-inline: auto; }

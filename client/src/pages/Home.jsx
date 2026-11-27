@@ -74,7 +74,7 @@ export default function Home() {
         description="Chauffeur-driven cabs from Bengaluru: one-way and round-trip outstation, Kempegowda airport transfers and 8-hour local packages. All-in fares shown before you book."
         path="/"
       />
-      <SiteHeader tone="ink" />
+      <SiteHeader tone="white" />
       <main id="main">
         {/* Hero */}
         <section className="hero hero--light" aria-labelledby="hero-title">
