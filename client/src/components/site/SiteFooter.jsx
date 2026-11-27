@@ -3,7 +3,7 @@ import { BUSINESS, TEL_URL, MAPS_URL } from '../../data/business';
 import FARES from '../../data/fares.json';
 import { PHOTO_CREDITS } from './photos';
 
-const routeLink = (r) => `/?type=outstation&trip=one-way&drop=${encodeURIComponent(r.drop)}&dropCoord=${r.coord}#book`;
+const routeLink = (r) => `/bangalore-to-${r.slug}-cab`;
 
 export default function SiteFooter() {
   const year = new Date().getFullYear();
@@ -18,20 +18,27 @@ export default function SiteFooter() {
           <div>
             <h2>Services</h2>
             <ul>
-              <li><Link to="/?trip=one-way#book">Outstation one way</Link></li>
-              <li><Link to="/?trip=two-way#book">Round trips</Link></li>
-              <li><Link to="/airport">Airport transfers</Link></li>
-              <li><Link to="/?type=local#book">Local hourly</Link></li>
+              <li><Link to="/outstation-cabs-bangalore">Outstation cabs</Link></li>
+              <li><Link to="/one-way-taxi-bangalore">One way taxi</Link></li>
+              <li><Link to="/round-trip-cabs-bangalore">Round trips</Link></li>
+              <li><Link to="/airport">Airport taxi</Link></li>
+              <li><Link to="/local-taxi-bangalore">Local taxi with driver</Link></li>
+              <li><Link to="/tempo-traveller-rental-bangalore">Tempo Traveller rental</Link></li>
+              <li><Link to="/innova-crysta-rental-bangalore">Innova Crysta rental</Link></li>
+              <li><Link to="/corporate-cab-service-bangalore">Corporate cabs</Link></li>
+              <li><Link to="/wedding-car-rental-bangalore">Wedding cars</Link></li>
               <li><Link to="/tariff">Fleet &amp; tariff</Link></li>
-              <li><Link to="/areas">Areas we serve</Link></li>
             </ul>
           </div>
           <div>
             <h2>Routes</h2>
             <ul>
-              {FARES.routes.slice(0, 4).map((r) => (
-                <li key={r.slug}><Link to={routeLink(r)}>Bengaluru → {r.name}</Link></li>
+              {FARES.routes.map((r) => (
+                <li key={r.slug}><Link to={routeLink(r)}>Bangalore to {r.name} cab</Link></li>
               ))}
+              <li><Link to="/outstation-cabs-bangalore">All outstation routes</Link></li>
+              <li><Link to="/areas">Areas we serve</Link></li>
+              <li><Link to="/guides">Travel guides</Link></li>
             </ul>
           </div>
           <div>

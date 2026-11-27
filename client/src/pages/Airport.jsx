@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import Seo from '../components/site/Seo';
+import { AIRPORT_META } from '../lib/static-meta';
 import { useCars } from '../hooks/useCars';
 import { airportFare, formatINR, POLICIES, vehicleClass, CLASS_META } from '../lib/fares';
 import { BUSINESS, TEL_URL } from '../data/business';
@@ -25,11 +26,7 @@ export default function Airport() {
 
   return (
     <>
-      <Seo
-        title="Bengaluru Airport Taxi (KIA) — Fixed Fares | Taxi House Bengaluru"
-        description="Cabs to and from Kempegowda International Airport, Bengaluru. One fixed fare per car, shown before you book. Sedan, SUV, Innova Crysta and Tempo Traveller."
-        path="/airport"
-      />
+      <Seo {...AIRPORT_META} />
       <SiteHeader tone="accent" mobileTitle="TAXI HOUSE" showPhone={false} />
       <main id="main">
         <section className="ahero on-accent" aria-labelledby="air-title">

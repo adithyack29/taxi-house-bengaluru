@@ -12,8 +12,14 @@ const TYPES = [
   { value: 'Tour / group', short: 'Tour / group' },
 ];
 
+const PRESET = { corporate: 0, wedding: 1, group: 2 };
+const initialType = () => {
+  const key = new URLSearchParams(window.location.search).get('type');
+  return TYPES[PRESET[key] ?? 0].value;
+};
+
 export default function Contact() {
-  const [form, setForm] = useState({ type: TYPES[0].value, name: '', phone: '', details: '' });
+  const [form, setForm] = useState(() => ({ type: initialType(), name: '', phone: '', details: '' }));
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle');
   const statusRef = useRef(null);
