@@ -351,3 +351,18 @@
 .tariff-lower > *, .book__grid > *, .contact__grid > *, .hero__grid > *, .done__grid > *, .howfaq > * { min-width: 0; }
 .svc__media picture, .fleet__media picture, .car__media picture { display: block; height: 100%; }
 .svc__media, .fleet__media { flex: none; }
+
+/* Home hero on white. Yellow text fails contrast on white, so accents become
+   ink text with a yellow highlighter band; the eyebrow keeps its yellow dot. */
+.hero--light { background: var(--field); color: var(--ink); }
+.hero--light .eyebrow.accent-text { color: var(--ink); }
+.hero--light .hero__title .accent-text {
+  display: inline;
+  color: var(--ink);
+  background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.hero--light .hero__title .accent-text::before { content: '\A'; white-space: pre; }
+.hero--light .ticks li::before { color: var(--ink); }
+.hero--light .bcard { border: 1px solid var(--line); }
+.hero--light .eyebrow--dot::before { background: var(--accent); }
