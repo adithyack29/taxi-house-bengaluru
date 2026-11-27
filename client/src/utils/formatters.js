@@ -53,3 +53,12 @@ export const formatTime = (time) => {
 
   return `${String(displayHours).padStart(2, '0')}:${displayMinutes} ${ampm}`;
 };
+
+/** Display date like "Fri, 28 Nov" from 'YYYY-MM-DD' (no timezone shift). */
+export const prettyDate = (ymd) => {
+  if (!ymd) return '';
+  const [y, m, d] = String(ymd).split('T')[0].split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  if (isNaN(dt.getTime())) return String(ymd);
+  return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+};

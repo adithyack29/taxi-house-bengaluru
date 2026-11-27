@@ -69,7 +69,7 @@ const Explore = () => {
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-black text-secondary adlam-display-regular tracking-tight mb-4"
+            className="text-4xl md:text-5xl font-black text-secondary display tracking-tight mb-4"
           >
             Explore <span className="text-primary">Tours</span>
           </motion.h1>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /book
+Disallow: /booking-confirmed
+
+Sitemap: https://www.taxihousebengaluru.com/sitemap.xml
