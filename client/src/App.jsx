@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
+import SeoRoute from './pages/SeoRoute';
 import SiteHeader from './components/site/SiteHeader';
 import SiteFooter from './components/site/SiteFooter';
 
@@ -16,7 +17,7 @@ const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
 const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Areas = lazy(() => import('./pages/Areas'));
-const AreaRoute = lazy(() => import('./pages/AreaRoute'));
+
 
 /** Pre-redesign pages keep their content, framed by the new header/footer. */
 function Legacy({ children }) {
@@ -65,7 +66,7 @@ export function AppRoutes() {
           <Route path="/confirm-booking" element={<Redirect to="/book" />} />
           <Route path="/payment-success" element={<Redirect to="/booking-confirmed" />} />
           <Route path="/areas" element={<Areas />} />
-          <Route path="*" element={<AreaRoute />} />
+          <Route path="*" element={<SeoRoute />} />
         </Routes>
       </Suspense>
     </>

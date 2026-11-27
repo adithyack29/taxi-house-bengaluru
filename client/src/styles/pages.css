@@ -422,3 +422,43 @@
 .areas-list a { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid var(--line-soft); text-decoration: none; }
 .areas-list a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 ul.chips { list-style: none; }
+
+/* ==========================================================================
+   Route / service / guide landing pages
+   ========================================================================== */
+.t-small { font-size: 13px; }
+.dtable { border-top: 2px solid var(--ink); }
+.dtable__note { margin: 14px 0 0; max-width: 760px; }
+.dtable-gap { margin-top: 32px; }
+.dtable .tbl a { text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; font-weight: 600; }
+.dtable .tbl a:hover { text-decoration-color: var(--accent); }
+/* Under 768px each row becomes a labelled card: no sideways scrolling. */
+@media (max-width: 767.98px) {
+  .dtable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .dtable .tbl, .dtable tbody, .dtable tr, .dtable th, .dtable td { display: block; }
+  .dtable tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .dtable tbody th { padding: 0 0 6px; border: 0; font-size: 17px; }
+  .dtable td { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; border: 0; }
+  .dtable td::before { content: attr(data-label); color: var(--muted); font: 500 12px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+  .dtable td.num { font-family: var(--font-mono); }
+}
+.svc-points { gap: 12px; max-width: 760px; font-size: 16px; }
+.prose { max-width: 760px; }
+.prose p { font-size: 16.5px; line-height: 1.65; margin: 0 0 16px; }
+.prose .h2 { margin: 36px 0 14px; }
+.prose .h2:first-child { margin-top: 0; }
+.prose .ticks { margin: 0 0 18px; gap: 10px; font-size: 16px; }
+.area-nearby--wide { grid-template-columns: 1fr; }
+.area-nearby--wide li { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-bottom: 1px solid var(--line-soft); }
+.guide-zone { border-top: 1px solid var(--line); padding: 6px 0; }
+.guide-zone summary { cursor: pointer; display: flex; align-items: baseline; gap: 12px; min-height: 52px; align-items: center; }
+.guide-zone .areas-list { margin: 6px 0 18px; }
+.areas-list--km a { justify-content: space-between; gap: 12px; }
+.guide-group { margin-bottom: 44px; }
+.guide-group .h2 { margin: 0 0 18px; }
+.guide-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.guide-card { background: var(--field); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 6px; }
+.guide-card .h3 { margin: 0; }
+.guide-card .h3 a { text-decoration: none; }
+.guide-card p { margin: 0; }
+.guide-card .link-arrow { margin-top: auto; padding-top: 10px; align-self: flex-start; }

@@ -6,6 +6,8 @@ import { StaticRouter } from 'react-router-dom';
 import { prerenderToNodeStream } from 'react-dom/static';
 import { AppRoutes } from './App';
 import { allAreas, areaMeta, AREAS_META } from './lib/areas';
+import { allDestinations, destMeta, GUIDES, GUIDES_INDEX, SERVICES } from './lib/landing';
+import { STATIC_META } from './lib/static-meta';
 
 export async function render(url) {
   const { prelude } = await prerenderToNodeStream(
@@ -20,5 +22,8 @@ export async function render(url) {
 
 /** Pages to prerender, each with its own title / description / canonical path. */
 export function pages() {
-  return [AREAS_META, ...allAreas().map(areaMeta)];
+  return [
+    ...STATIC_META, ...SERVICES, ...allDestinations().map(destMeta), GUIDES_INDEX, ...GUIDES,
+    AREAS_META, ...allAreas().map(areaMeta),
+  ];
 }

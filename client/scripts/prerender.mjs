@@ -42,16 +42,18 @@ for (const page of list) {
   const body = await render(page.path);
   const html = setHead(template, page).replace('<div id="root"></div>', `<div id="root">${body}</div>`);
   // /taxi-service-in-x is served from taxi-service-in-x.html (vercel.json cleanUrls; vite preview does the same).
-  fs.writeFileSync(path.join(dist, `${page.path.replace(/^\//, '')}.html`), html);
+  const file = path.join(dist, `${page.path.replace(/^\//, '')}.html`);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, html);
   count += 1;
 }
 
 // Sitemap: public pages + every prerendered page.
 const STATIC = ['/', '/airport', '/tariff', '/contact', '/explore', '/services', '/about', '/terms-and-conditions', '/refund-policy'];
 const today = new Date().toISOString().slice(0, 10);
-const urls = [...STATIC, ...list.map((p) => p.path)]
+const urls = [...new Set([...STATIC, ...list.map((p) => p.path)])]
   .map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join('\n');
 fs.writeFileSync(path.join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
 
-console.log(`prerender: wrote ${count} pages + sitemap (${STATIC.length + list.length} URLs)`);
+console.log(`prerender: wrote ${count} pages + sitemap (${new Set([...STATIC, ...list.map((p) => p.path)]).size} URLs)`);

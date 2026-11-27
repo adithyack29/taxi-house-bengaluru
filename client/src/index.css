@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Metric-matched stand-in while Instrument Sans loads (measured: 2.2–2.7% wider than Arial / Roboto),
+   so text does not reflow when the web font swaps in. */
+@font-face { font-family: 'Instrument Sans Fallback'; src: local('Arial'), local('Helvetica'), local('Roboto'); size-adjust: 102.5%; }
+
 
 @config "../tailwind.config.js";
 
@@ -24,7 +28,7 @@
   --focus: var(--ink);
 
   --font-display: 'Archivo', 'Arial Black', system-ui, sans-serif;
-  --font-ui: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Instrument Sans', 'Instrument Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   --gutter: clamp(20px, 7.7px + 3.15vw, 48px);

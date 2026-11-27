@@ -3,15 +3,16 @@ import { Link } from 'react-router-dom';
 import SiteHeader from '../components/site/SiteHeader';
 import SiteFooter from '../components/site/SiteFooter';
 import Seo from '../components/site/Seo';
+import { TARIFF_META } from '../lib/static-meta';
 import { useCars } from '../hooks/useCars';
 import { airportFare, formatINR, groupByClass, minOf, POLICIES, vehicleClass, CLASS_META } from '../lib/fares';
 
 const rate = (v) => (v > 0 ? `₹${Number(v).toLocaleString('en-IN')}` : '—');
 
 export default function Tariff() {
-  const { cars: outstation, loading } = useCars('outstation');
+  const { cars: outstation, loading } = useCars('outstation', { fallbackFirst: true });
   const { cars: airport } = useCars('airport');
-  const { cars: local } = useCars('local');
+  const { cars: local } = useCars('local', { fallbackFirst: true });
 
   const rows = useMemo(() => [...outstation].sort((a, b) =>
     (CLASS_META[vehicleClass(a.name)].order - CLASS_META[vehicleClass(b.name)].order)
@@ -26,11 +27,7 @@ export default function Tariff() {
 
   return (
     <>
-      <Seo
-        title="Fleet & Tariff — Per-km Rates, Driver Allowance | Taxi House Bengaluru"
-        description="Every Taxi House rate on one page: one-way and round-trip per-km fares, driver allowance, minimum km, airport and 8-hour local package prices."
-        path="/tariff"
-      />
+      <Seo {...TARIFF_META} />
       <SiteHeader tone="paper" mobileTitle="Fleet & tariff" />
       <main id="main">
         <div className="wrap">
@@ -40,7 +37,7 @@ export default function Tariff() {
           </div>
 
           <h2 className="eyebrow muted label-eyebrow">Outstation</h2>
-          {loading ? <p className="muted" aria-live="polite">Loading rates…</p> : (
+          {loading && !outstation.length ? <p className="muted" aria-live="polite">Loading rates…</p> : (
             <>
               <div className="ink-tbl on-ink tbl-scroll">
                 <table className="tbl tbl--ink">

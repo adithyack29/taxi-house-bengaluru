@@ -112,7 +112,7 @@ export default function Home() {
                 <p className="eyebrow muted">Departures board</p>
                 <h2 id="routes-title" className="h2">Popular from Bengaluru</h2>
               </div>
-              <Link className="link-arrow" to="/explore">All outstation routes →</Link>
+              <Link className="link-arrow" to="/outstation-cabs-bangalore">All outstation routes →</Link>
             </div>
 
             <div className="board board--table">
@@ -131,7 +131,7 @@ export default function Home() {
                   {FARES.routes.map((r) => (
                     <tr key={r.slug}>
                       <th scope="row" className="board__dest">
-                        <span className="board__name">{r.name}</span>{r.note && <span className="board__note"> {r.note}</span>}
+                        <Link className="board__name" to={`/bangalore-to-${r.slug}-cab`}>{r.name}</Link>{r.note && <span className="board__note"> {r.note}</span>}
                       </th>
                       <td className="mono">{r.km} km</td>
                       <td className="mono">~{fmtDuration(r.minutes)}</td>
@@ -158,7 +158,7 @@ export default function Home() {
                   </Link>
                 </li>
               ))}
-              <li className="board__all"><Link className="link-arrow" to="/explore">All routes →</Link></li>
+              <li className="board__all"><Link className="link-arrow" to="/outstation-cabs-bangalore">All routes →</Link></li>
             </ul>
             <p className="fine board__fine">
               Indicative one-way sedan fares from central Bengaluru, including driver allowance. Your exact fare is calculated from your pickup point. Tolls, parking and permits at actuals.
