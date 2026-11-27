@@ -77,7 +77,7 @@ export default function Home() {
       <SiteHeader tone="ink" />
       <main id="main">
         {/* Hero */}
-        <section className="hero on-ink" aria-labelledby="hero-title">
+        <section className="hero hero--light" aria-labelledby="hero-title">
           <div className="wrap hero__grid">
             <div className="hero__copy">
               <p className="eyebrow eyebrow--dot accent-text">
