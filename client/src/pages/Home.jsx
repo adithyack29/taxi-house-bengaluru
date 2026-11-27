@@ -10,6 +10,7 @@ import BookingCard from '../components/BookingCard';
 import { useCars } from '../hooks/useCars';
 import FARES from '../data/fares.json';
 import { BUSINESS, TEL_URL, waUrl } from '../data/business';
+import { POPULAR_AREAS } from '../data/popular-areas';
 import {
   POLICIES, formatINR, fmtDuration, groupByClass, indicativeOneWay, airportFare, minOf, vehicleClass,
 } from '../lib/fares';
@@ -243,6 +244,22 @@ export default function Home() {
         </section>
 
         {/* How it works + FAQ */}
+        {/* Areas */}
+        <section className="section" aria-labelledby="areas-title">
+          <div className="wrap">
+            <div className="sec-head">
+              <div>
+                <p className="eyebrow muted">Pickup anywhere in the city</p>
+                <h2 id="areas-title" className="h2">Taxi service near you</h2>
+              </div>
+              <Link className="link-arrow" to="/areas">All areas we serve →</Link>
+            </div>
+            <ul className="areas-list">
+              {POPULAR_AREAS.map((a) => <li key={a.slug}><Link to={a.path}>Taxi in {a.name}</Link></li>)}
+            </ul>
+          </div>
+        </section>
+
         <section className="section" aria-label="How booking works and frequently asked questions">
           <div className="wrap howfaq">
             <div>

@@ -23,9 +23,16 @@ async function loadCars() {
   return inflight;
 }
 
-/** @param category optional 'outstation' | 'local' | 'airport' — filters on available_categories */
-export function useCars(category) {
-  const [state, setState] = useState(() => ({ loading: !cache, ...(cache || { cars: [], live: false }) }));
+/**
+ * @param category optional 'outstation' | 'local' | 'airport' — filters on available_categories
+ * @param opts.fallbackFirst start from the bundled fares instead of an empty list (used by prerendered
+ *   pages so the static HTML carries real numbers; live rates replace them once loaded).
+ */
+export function useCars(category, { fallbackFirst = false } = {}) {
+  const [state, setState] = useState(() => ({
+    loading: !cache,
+    ...(cache || { cars: fallbackFirst ? FARES.fallbackCars : [], live: false }),
+  }));
   useEffect(() => {
     let alive = true;
     loadCars().then((r) => alive && setState({ loading: false, ...r }));

@@ -15,6 +15,8 @@ const Explore = lazy(() => import('./pages/Explore'));
 const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
 const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Areas = lazy(() => import('./pages/Areas'));
+const AreaRoute = lazy(() => import('./pages/AreaRoute'));
 
 /** Pre-redesign pages keep their content, framed by the new header/footer. */
 function Legacy({ children }) {
@@ -39,9 +41,10 @@ function ScrollToTop() {
   return null;
 }
 
-function App() {
+/** Routes without a router, shared by the browser app and the prerender (StaticRouter). */
+export function AppRoutes() {
   return (
-    <Router>
+    <>
       <a className="skip-link" href="#main">Skip to content</a>
       <ScrollToTop />
       <Suspense fallback={<div style={{ minHeight: '100vh' }} aria-busy="true" />}>
@@ -61,9 +64,18 @@ function App() {
           <Route path="/select-vehicle" element={<Redirect to="/book" />} />
           <Route path="/confirm-booking" element={<Redirect to="/book" />} />
           <Route path="/payment-success" element={<Redirect to="/booking-confirmed" />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/areas" element={<Areas />} />
+          <Route path="*" element={<AreaRoute />} />
         </Routes>
       </Suspense>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }
