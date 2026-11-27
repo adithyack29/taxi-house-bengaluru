@@ -8,7 +8,7 @@ const routeLink = (r) => `/?type=outstation&trip=one-way&drop=${encodeURICompone
 export default function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="site-footer on-ink">
+    <footer className="site-footer">
       <div className="wrap">
         <div className="site-footer__grid">
           <div className="site-footer__brand">
