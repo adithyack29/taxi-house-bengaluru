@@ -6,7 +6,7 @@ import { NAV } from './nav';
 import { BUSINESS, TEL_URL, waUrl } from '../../data/business';
 
 /**
- * tone: 'ink' (home, contact) | 'accent' (airport) | 'paper' (tariff, legacy pages)
+ * tone: 'white' (home) | 'ink' (contact) | 'accent' (airport) | 'paper' (tariff, legacy pages)
  * mobileTitle: when set, mobile shows ← back + centred title (sub-pages), else logo.
  */
 export default function SiteHeader({ tone = 'paper', mobileTitle = null, showPhone = true }) {
@@ -15,7 +15,7 @@ export default function SiteHeader({ tone = 'paper', mobileTitle = null, showPho
   const [open, setOpen] = useState(false);
   const menuBtn = useRef(null);
   const closeBtn = useRef(null);
-  const toneClass = tone === 'ink' ? 'on-ink' : tone === 'accent' ? 'on-accent' : '';
+  const toneClass = tone === 'ink' ? 'on-ink' : tone === 'accent' ? 'on-accent' : tone === 'white' ? 'on-white' : '';
 
   useEffect(() => {
     if (!open) return undefined;
