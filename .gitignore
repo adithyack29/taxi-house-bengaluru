@@ -11,3 +11,4 @@ backend/.env
 client/.env
 .vercel
 .env*.local
+client/dist-ssr

@@ -23,6 +23,7 @@ export default function SiteFooter() {
               <li><Link to="/airport">Airport transfers</Link></li>
               <li><Link to="/?type=local#book">Local hourly</Link></li>
               <li><Link to="/tariff">Fleet &amp; tariff</Link></li>
+              <li><Link to="/areas">Areas we serve</Link></li>
             </ul>
           </div>
           <div>
